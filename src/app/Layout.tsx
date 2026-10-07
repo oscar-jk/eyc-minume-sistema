@@ -3,7 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { CieloEstrellado } from '@/components/CieloEstrellado'
 import { Cargando } from '@/components/Estados'
 import { Destello } from '@/components/Elementos'
-import { IcoComision, IcoComisiones, IcoConfig, IcoDecisiones, IcoLuna, IcoMas, IcoMonitoreo, IcoPersonas, IcoSalir, IcoSol } from '@/components/Iconos'
+import { IcoComision, IcoComisiones, IcoConfig, IcoDecisiones, IcoManual, IcoLuna, IcoMas, IcoMonitoreo, IcoPersonas, IcoSalir, IcoSol } from '@/components/Iconos'
 import { Marca } from '@/components/Marca'
 import { Modal } from '@/components/Modal'
 import { useSesion } from '@/features/auth/AuthProvider'
@@ -21,6 +21,7 @@ const NAV: { a: string; texto: string; corto: string; ico: Ico; roles: Rol[] }[]
   { a: '/comisiones', texto: 'Comisiones', corto: 'Comisiones', ico: IcoComisiones, roles: ['subsecretario', 'secretario', 'admin'] },
   { a: '/personas', texto: 'Personas', corto: 'Personas', ico: IcoPersonas, roles: ['subsecretario', 'admin'] },
   { a: '/configuracion', texto: 'Configuración', corto: 'Ajustes', ico: IcoConfig, roles: ['subsecretario', 'admin'] },
+  { a: '/manual', texto: 'Manual de usuario', corto: 'Manual', ico: IcoManual, roles: ['eyc', 'subsecretario', 'secretario', 'admin'] },
 ]
 
 /** Chip de estado de fase + día del evento; al tocarlo muestra todas las fases. */

@@ -20,3 +20,4 @@ export const IcoSol = base('M12 4V2M12 22v-2M4.9 4.9 3.5 3.5M20.5 20.5l-1.4-1.4M
 export const IcoLuna = base('M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z')
 export const IcoSalir = base('M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3')
 export const IcoFlecha = base('M9 18l6-6-6-6')
+export const IcoManual = base('M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z')

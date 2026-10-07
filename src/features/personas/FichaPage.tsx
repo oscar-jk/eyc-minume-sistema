@@ -12,6 +12,7 @@ import { TablaCortes } from '@/features/cortes/TablaCortes'
 import { useEvaluaciones } from '@/features/evaluacion/api'
 import { AMBITO, ESTATUS, MOTIVO, fecha, fechaHora, puntaje } from '@/lib/formato'
 import { usePersona } from './api'
+import { EditarPersona } from './EditarPersona'
 
 export function FichaPage() {
   const { id } = useParams()
@@ -23,13 +24,19 @@ export function FichaPage() {
   const evals = useEvaluaciones({ personaId: id })
   const [corteDetalle, setCorteDetalle] = useState<number | null>(null)
   const [sustituir, setSustituir] = useState(false)
+  const [editar, setEditar] = useState(false)
+  const gestiona = perfil?.rol === 'subsecretario' || perfil?.rol === 'admin'
 
   const puedeSustituir =
     persona.data?.activa && cont.data?.estatus === 'sustitucion' && ['subsecretario', 'secretario', 'admin'].includes(perfil?.rol ?? '')
   const vigente = asignaciones.data?.find((a) => !a.hasta)
 
   return (
-    <Consulta q={persona} esVacio={(p) => !p} vacio={<Aviso tono="peligro">No tienes acceso a esta persona o no existe.</Aviso>}>
+    <Consulta q={persona} esVacio={(p) => !p} vacio={
+        <Aviso tono="peligro" titulo="No encontramos a esta persona" accion={{ texto: 'Volver a mi inicio', a: '/' }}>
+          Puede que no tengas acceso a su ficha o que el enlace esté incompleto.
+        </Aviso>
+      }>
       {(p) => (
         <div className="flex flex-col gap-5">
           <Titulo
@@ -49,11 +56,18 @@ export function FichaPage() {
               </span>
             }
             accion={
-              puedeSustituir && (
-                <Boton variante="peligro" onClick={() => setSustituir(true)}>
-                  Registrar sustitución
-                </Boton>
-              )
+              <div className="flex flex-wrap gap-2">
+                {gestiona && (
+                  <Boton variante="claro" onClick={() => setEditar(true)}>
+                    Editar datos
+                  </Boton>
+                )}
+                {puedeSustituir && (
+                  <Boton variante="peligro" onClick={() => setSustituir(true)}>
+                    Registrar sustitución
+                  </Boton>
+                )}
+              </div>
             }
           >
             {p!.nombre}
@@ -159,6 +173,7 @@ export function FichaPage() {
               </Consulta>
             </Tarjeta>
           </div>
+          {editar && <EditarPersona persona={p!} onCerrar={() => setEditar(false)} />}
           <SustitucionModal abierto={sustituir} salienteId={p!.id} nombre={p!.nombre} onCerrar={() => setSustituir(false)} />
         </div>
       )}

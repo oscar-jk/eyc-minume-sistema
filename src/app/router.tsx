@@ -1,9 +1,10 @@
 /* eslint-disable react-refresh/only-export-components -- módulo de rutas, no de componentes */
-import { lazy } from 'react'
+import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Link } from 'react-router-dom'
 import { EstadoVacio } from '@/components/Estados'
 import { LoginPage, NuevaContrasenaPage, RecuperarPage } from '@/features/auth/paginas'
 import { Inicio, RequiereRol, RequiereSesion } from './guards'
+import { ErrorPagina } from './ErrorPagina'
 import { Layout } from './Layout'
 
 // Carga diferida por sección: el EyC en el teléfono solo descarga lo que usa.
@@ -15,6 +16,7 @@ const MonitoreoPage = lazy(() => import('@/features/monitoreo/MonitoreoPage').th
 const DecisionesPage = lazy(() => import('@/features/continuidad/DecisionesPage').then((m) => ({ default: m.DecisionesPage })))
 const FichaPage = lazy(() => import('@/features/personas/FichaPage').then((m) => ({ default: m.FichaPage })))
 const PersonasPage = lazy(() => import('@/features/personas/PersonasPage').then((m) => ({ default: m.PersonasPage })))
+const ManualPage = lazy(() => import('@/features/manual/ManualPage').then((m) => ({ default: m.ManualPage })))
 const ConfiguracionPage = lazy(() => import('@/features/configuracion/ConfiguracionPage').then((m) => ({ default: m.ConfiguracionPage })))
 
 const PRIV = ['subsecretario', 'secretario', 'admin'] as const
@@ -31,9 +33,13 @@ function NoEncontrada() {
 }
 
 export const router = createBrowserRouter([
+  {
+    errorElement: <ErrorPagina />,
+    children: [
   { path: '/login', element: <LoginPage /> },
   { path: '/recuperar', element: <RecuperarPage /> },
   { path: '/nueva-contrasena', element: <NuevaContrasenaPage /> },
+  { path: '/manual', element: <Suspense fallback={null}><ManualPage /></Suspense> },
   {
     element: <RequiereSesion />,
     children: [
@@ -54,6 +60,8 @@ export const router = createBrowserRouter([
           { path: '*', element: <NoEncontrada /> },
         ],
       },
+    ],
+  },
     ],
   },
 ])

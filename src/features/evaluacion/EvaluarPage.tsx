@@ -45,7 +45,11 @@ export function NuevaEvaluacionPage() {
     }
   }, [persona, actividad, fecha, nav])
 
-  if (!persona || (!actividad && !fecha)) return <Aviso tono="peligro">Falta indicar la persona y la actividad o jornada.</Aviso>
+  if (!persona || (!actividad && !fecha)) return (
+      <Aviso tono="peligro" titulo="Falta elegir a quién evaluar" accion={{ texto: 'Elegir desde mi comisión', a: '/' }}>
+        Entra a evaluar desde la lista de personas de la comisión.
+      </Aviso>
+    )
   if (error) return <EstadoError error={error} />
   if (!revisado) return <Cargando />
   return <Evaluar personaId={persona} actividadId={actividad} fechaJornada={fecha} />
@@ -84,7 +88,12 @@ function Evaluar({
     return <Cargando filas={5} />
   const err = persona.error ?? dims.error ?? criterios.error ?? actividad.error ?? existente.error
   if (err) return <EstadoError error={err} />
-  if (!persona.data) return <Aviso tono="peligro">No tienes acceso a esta persona o no existe.</Aviso>
+  if (!persona.data)
+    return (
+      <Aviso tono="peligro" titulo="No encontramos a esta persona" accion={{ texto: 'Volver a mi inicio', a: '/' }}>
+        Puede que ya no esté en tu comisión o que el enlace esté incompleto.
+      </Aviso>
+    )
 
   // Fase de la evaluación: la de la actividad, o la jornada del evento que contiene la fecha.
   const fase: Fase | undefined = actividad.data
@@ -138,7 +147,11 @@ function Evaluar({
         )}
         {cab && cab.pesos_validos === false && (
           <div className="mt-3">
-            <Aviso tono="alerta" titulo="Cálculo bloqueado">
+            <Aviso
+              tono="alerta"
+              titulo="El puntaje está en pausa"
+              accion={(perfil?.rol === 'subsecretario' || perfil?.rol === 'admin') && { texto: 'Corregir los pesos', a: '/configuracion?tab=pesos' }}
+            >
               Los pesos de las dimensiones de este ámbito no suman 100; el puntaje no se calcula hasta que se corrijan.
             </Aviso>
           </div>
@@ -210,6 +223,10 @@ function Formulario({
   const [comentario, setComentario] = useState(inicial.comentario)
   const [sucio, setSucio] = useState(false)
   const [abiertas, setAbiertas] = useState<Set<number>>(() => {
+    // Abiertas al entrar: las dimensiones con pendientes según la base (comentario faltante, criterio sin responder)
+    // y, si no hay, la primera sin terminar. Así lo que falta nunca queda oculto.
+    const conFaltantes = dimensiones.filter((d) => (existente?.faltantes ?? []).some((f) => f.dimension === d.clave)).map((d) => d.id)
+    if (conFaltantes.length) return new Set(conFaltantes)
     const primera = dimensiones.find((d) => criterios.some((c) => c.dimension_id === d.id && !inicial.resp[c.id]?.respuesta) && !inicial.noObs.has(d.id))
     return new Set(primera ? [primera.id] : [])
   })

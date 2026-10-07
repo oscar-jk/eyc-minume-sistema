@@ -31,17 +31,26 @@ function Marco({ titulo, children }: { titulo: ReactNode; children: ReactNode })
             Sistema de <span className="font-bold text-white">Evaluación y Control</span> del desempeño de las mesas directivas y del equipo de EyC.
           </p>
         </div>
-        <p className="relative mt-8 hidden text-sm text-white/60 lg:block">Modelo Internacional de las Naciones Unidas del Ministerio de Educación</p>
+        <p className="relative mt-8 hidden text-sm text-white/60 lg:block">
+          Modelo Internacional de las Naciones Unidas del Ministerio de Educación ·{' '}
+          <Link to="/manual" className="font-bold text-cian underline-offset-4 hover:underline">
+            Manual de usuario
+          </Link>
+        </p>
       </section>
 
       {/* Formulario */}
-      <section className="relative -mt-10 flex items-start justify-center px-4 pb-12 lg:mt-0 lg:items-center lg:bg-bg lg:px-10">
+      <section className="relative -mt-10 flex flex-col items-center justify-start px-4 pb-12 lg:mt-0 lg:justify-center lg:bg-bg lg:px-10">
         <div className="animar-entrada w-full max-w-md rounded-3xl border border-line bg-surface p-6 shadow-card sm:p-8 dark:bg-vidrio dark:backdrop-blur-xl">
           <p className="sobretitulo flex items-center gap-2 text-acento">
             <Estrella8 tono="azul" className="size-3.5" /> Evaluación y Control
           </p>
           <h1 className="mb-6 mt-2 text-[2rem] font-black leading-tight tracking-tight">{titulo}</h1>
           {children}
+        </div>
+        <div className="mt-8 flex flex-col items-center gap-2 lg:absolute lg:bottom-8 lg:left-1/2 lg:mt-0 lg:-translate-x-1/2">
+          <p className="font-cond text-[0.7rem] font-bold uppercase tracking-[0.16em] text-ink-3">Una iniciativa de</p>
+          <Marca tipo="footer" className="h-14 w-auto" />
         </div>
       </section>
     </main>
@@ -127,7 +136,9 @@ export function NuevaContrasenaPage() {
   if (!cargando && !sesion) {
     return (
       <Marco titulo="Enlace no válido">
-        <Aviso tono="alerta">El enlace expiró o ya se usó. Solicita uno nuevo.</Aviso>
+        <Aviso tono="alerta" titulo="Este enlace ya no sirve" accion={{ texto: 'Pedir un enlace nuevo', a: '/recuperar' }}>
+          Los enlaces son de un solo uso y caducan en una hora.
+        </Aviso>
         <Link to="/recuperar" className="mt-4 block text-center text-sm font-bold text-acento">
           Solicitar otro enlace
         </Link>

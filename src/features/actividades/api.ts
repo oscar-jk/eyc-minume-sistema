@@ -41,3 +41,15 @@ export function useCerrarActividad() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['actividades'] }),
   })
 }
+
+/** Edición de una actividad (solo mientras su fase esté abierta; lo valida la base). */
+export function useEditarActividad() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (p: { id: string; nombre: string; tipo: TipoActividad; fecha: string }) => {
+      const { id, ...cambios } = p
+      datos(await supabase.from('actividades').update(cambios).eq('id', id).select().single())
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['actividades'] }),
+  })
+}

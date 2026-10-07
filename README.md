@@ -14,6 +14,7 @@ Documentación:
 | [ARQUITECTURA.md](ARQUITECTURA.md) | Modelo de datos, reglas de cálculo y decisiones tomadas |
 | [SEGURIDAD.md](SEGURIDAD.md) | Matriz de permisos por rol y por fase |
 | [GUIA-INICIO.md](GUIA-INICIO.md) | Una página: cargar personas y abrir la primera fase |
+| [docs/Manual-de-usuario-EyC-MINUME-XVII.pdf](docs/Manual-de-usuario-EyC-MINUME-XVII.pdf) | Manual de usuario por rol (EyC, Subsecretaría, Secretaría General, Admin). También en la app: `/manual` |
 
 ## Arranque local
 
@@ -62,6 +63,7 @@ Las migraciones versionadas están en [`supabase/migrations/`](supabase/migratio
 | 008 | `endurecimiento` | RPC sensibles en el esquema interno `app`; políticas por comando |
 | 009 | `keepalive` | Función mínima para el workflow anti-pausa |
 | 010 | `vistas_ui` | Vistas y RPC de apoyo a la interfaz |
+| 011 | `edicion_catalogos` | Dimensiones editables por Subsecretaría y admin, con auditoría |
 
 Para aplicarlas en otro proyecto: `supabase link --project-ref <ref>` y `supabase db push`.
 
@@ -103,3 +105,21 @@ El SMTP por defecto de Supabase solo envía a los miembros del equipo del proyec
 
 - `.github/workflows/ci.yml`: lint, tipos, pruebas, build y verificación de que no haya llave de servicio en el bundle.
 - `.github/workflows/keepalive.yml`: cada 3 días llama a `rpc/keepalive` para que el plan gratuito no pause el proyecto, y se reactiva solo para que GitHub no lo apague tras 60 días sin commits.
+
+## Errores y soporte
+
+La interfaz nunca muestra errores técnicos: cada fallo se traduce a un mensaje claro con un **código de referencia**
+(`EYC-RED`, `EYC-SESION`, `EYC-FASE`, `EYC-PERM-42501`, `EYC-DUP-23505`, `EYC-SOLAPE`, `EYC-X-…`).
+El detalle técnico queda en la consola del navegador con ese mismo código. Ver `src/lib/errores.ts`.
+
+Los avisos de la interfaz llevan un botón que abre la pantalla donde se resuelven (por ejemplo, «Abrir o cambiar la fase»
+lleva a *Configuración › Fases*; «Corregir los pesos» a *Configuración › Pesos A–F*).
+
+## Plantilla de correo
+
+`supabase/templates/recuperacion.html`: pégala en *Authentication → Emails → Templates → Reset Password*
+(asunto: «Define tu contraseña · EyC MINUME XVII»).
+
+## Pruebas de punta a punta
+
+`tests/e2e/flujos.mjs`: 25 flujos por rol en el navegador real. Ver `tests/e2e/LEEME.md`.

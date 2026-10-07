@@ -255,3 +255,15 @@ export function useActualizarPerfil() {
     onSuccess: inv,
   })
 }
+
+/** Edición del nombre y las competencias de una dimensión (Subsecretaría y admin). */
+export function useEditarDimension() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (p: { id: number; nombre: string; competencias: string }) => {
+      const { id, ...cambios } = p
+      datos(await supabase.from('dimensiones').update(cambios).eq('id', id).select().single())
+    },
+    onSuccess: () => qc.invalidateQueries(),
+  })
+}

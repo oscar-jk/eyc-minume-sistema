@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { CieloEstrellado } from './CieloEstrellado'
 import { Bloques, Circulos, Damero, Destello, Estrella8, Flor } from './Elementos'
 
@@ -102,7 +103,14 @@ const tonos: Record<TonoAviso, { caja: string; chip: string; etiqueta: string; t
   exito: { caja: 'bg-verde-bg ring-verde/25', chip: 'bg-gradient-to-br from-[#14a34a] to-[#6ee7a0]', etiqueta: 'Listo', txt: 'text-verde' },
 }
 
-export function Aviso({ tono = 'info', titulo, children }: { tono?: TonoAviso; titulo?: ReactNode; children?: ReactNode }) {
+/** Acción que lleva a donde se resuelve el aviso (ruta o función). */
+export interface AccionAviso {
+  texto: string
+  a?: string
+  onClick?: () => void
+}
+
+export function Aviso({ tono = 'info', titulo, children, accion }: { tono?: TonoAviso; titulo?: ReactNode; children?: ReactNode; accion?: AccionAviso | false | null }) {
   const t = tonos[tono]
   const Icono = tono === 'peligro' ? Estrella8 : tono === 'exito' ? Destello : tono === 'alerta' ? Flor : Destello
   return (
@@ -114,10 +122,23 @@ export function Aviso({ tono = 'info', titulo, children }: { tono?: TonoAviso; t
         <p className={`font-cond text-[0.7rem] font-bold uppercase tracking-[0.14em] ${t.txt}`}>{t.etiqueta}</p>
         {titulo && <p className="text-[0.95rem] font-extrabold leading-snug">{titulo}</p>}
         {children && <div className="mt-0.5 text-ink-2">{children}</div>}
+        {accion &&
+          (accion.a ? (
+            <Link to={accion.a} className={claseAccion}>
+              {accion.texto} →
+            </Link>
+          ) : (
+            <button type="button" onClick={accion.onClick} className={claseAccion}>
+              {accion.texto} →
+            </button>
+          ))}
       </div>
     </div>
   )
 }
+
+const claseAccion =
+  'mt-2.5 inline-flex min-h-9 items-center rounded-xl bg-grad-primario px-3.5 text-sm font-bold text-white shadow-boton transition hover:-translate-y-px hover:brightness-110'
 
 type TonoInsignia = 'neutro' | 'acento' | 'alerta' | 'peligro' | 'exito'
 const tonosInsignia: Record<TonoInsignia, string> = {

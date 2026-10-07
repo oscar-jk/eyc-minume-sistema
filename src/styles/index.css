@@ -247,3 +247,23 @@
   background-size: 200% 100%;
   animation: brillo 1.4s linear infinite;
 }
+
+/* Impresión / PDF del manual: conserva degradados de marca y corta por capítulo. */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body {
+    background: #fff;
+  }
+  .animar-entrada {
+    animation: none !important;
+  }
+  body {
+    background-attachment: scroll;
+  }
+  @page {
+    margin: 14mm;
+  }
+}

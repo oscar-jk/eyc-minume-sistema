@@ -13,6 +13,7 @@ import { mensajeError } from '@/lib/errores'
 import { AMBITO, MOTIVO, fechaHora } from '@/lib/formato'
 import type { Ambito, Cargo, Comision, MotivoAsignacion } from '@/lib/tipos'
 import { useAltaPersonas, usePersonas, type AltaPersona } from './api'
+import { EditarPersona } from './EditarPersona'
 
 type Tab = 'asignaciones' | 'alta' | 'masiva'
 
@@ -47,6 +48,8 @@ function AsignacionesPanel() {
   const comisiones = useComisiones()
   const [comision, setComision] = useState('')
   const [mover, setMover] = useState<{ personaId: string; nombre: string } | null>(null)
+  const [editarId, setEditarId] = useState<string | null>(null)
+  const editando = personas.data?.find((p) => p.id === editarId)
 
   const asignadas = new Set((vigentes.data ?? []).map((v) => v.persona_id))
   const sinAsignar = (personas.data ?? []).filter((p) => p.activa && !asignadas.has(p.id))
@@ -116,6 +119,9 @@ function AsignacionesPanel() {
                       <td className="tabular">{fechaHora(f.desde)}</td>
                       <td>{f.motivo && MOTIVO[f.motivo]}</td>
                       <td className="text-right">
+                        <Boton variante="fantasma" onClick={() => setEditarId(f.persona_id!)}>
+                          Editar
+                        </Boton>
                         <Boton variante="fantasma" onClick={() => setMover({ personaId: f.persona_id!, nombre: f.persona_nombre! })}>
                           Mover
                         </Boton>
@@ -128,6 +134,7 @@ function AsignacionesPanel() {
         </Consulta>
       </Tarjeta>
       {mover && <MoverModal key={mover.personaId} {...mover} onCerrar={() => setMover(null)} />}
+      {editando && <EditarPersona key={editando.id} persona={editando} onCerrar={() => setEditarId(null)} />}
     </div>
   )
 }

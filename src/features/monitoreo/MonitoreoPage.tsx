@@ -53,7 +53,7 @@ function AvisoPesos() {
   if (!malos.length && q.data.cortes.valido) return null
   return (
     <div className="mb-4">
-      <Aviso tono="peligro" titulo="Cálculo bloqueado">
+      <Aviso tono="peligro" titulo="El cálculo de puntajes está detenido" accion={{ texto: 'Corregir los pesos', a: malos.length ? '/configuracion?tab=pesos' : '/configuracion?tab=cortes' }}>
         {malos.map((a) => (
           <span key={a.ambito} className="block">
             Pesos de {AMBITO[a.ambito!]}: suman {a.suma} ({Number(a.diferencia) > 0 ? `faltan ${a.diferencia}` : `sobran ${-Number(a.diferencia)}`}).

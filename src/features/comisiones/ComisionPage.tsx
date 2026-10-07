@@ -6,6 +6,7 @@ import { Selector } from '@/components/Campo'
 import { Consulta, EstadoVacio } from '@/components/Estados'
 import { Semaforo } from '@/components/Semaforo'
 import { Aviso, Insignia, Pestanas, Tabla, Tarjeta, Titulo } from '@/components/Ui'
+import { useAccionFase } from '@/app/guards'
 import { useSesion } from '@/features/auth/AuthProvider'
 import { ActividadesPanel } from '@/features/actividades/ActividadesPanel'
 import { useActividades } from '@/features/actividades/api'
@@ -14,6 +15,7 @@ import { RecomendacionModal, type FilaRecomendable } from '@/features/continuida
 import { useEvaluaciones } from '@/features/evaluacion/api'
 import { useMonitoreo } from '@/features/monitoreo/api'
 import { ESTATUS, MOTIVO, fecha, fechaHora, puntaje } from '@/lib/formato'
+import { EditarComision } from '@/features/configuracion/Catalogos'
 import { siglaDe, useComisiones } from './api'
 
 type Tab = 'evaluar' | 'mesa' | 'actividades' | 'historico'
@@ -26,12 +28,27 @@ export function ComisionPage() {
   const comisionId = id ? Number(id) : (perfil?.comision_id ?? undefined)
   const comision = comisiones.data?.find((c) => c.id === comisionId)
   const [tab, setTab] = useState<Tab>('evaluar')
+  const [editar, setEditar] = useState(false)
 
-  if (!comisionId) return <Aviso tono="alerta">Tu cuenta no tiene una comisión asignada.</Aviso>
+  if (!comisionId)
+    return (
+      <Aviso tono="alerta" titulo="Tu cuenta aún no tiene comisión" accion={{ texto: 'Ver el manual', a: '/manual#eyc' }}>
+        Pide a la administración que asigne tu comisión a tu cuenta.
+      </Aviso>
+    )
 
   return (
     <>
-      <Titulo sobre={id ? 'Comisión' : <>Mi <span className="acento normal-case tracking-normal">comisión</span></>} sub={comision?.nombre} adorno="bloques">
+      <Titulo sobre={id ? 'Comisión' : <>Mi <span className="acento normal-case tracking-normal">comisión</span></>} sub={comision?.nombre}
+        adorno="bloques"
+        accion={
+          perfil?.rol === 'admin' && comision && (
+            <Boton variante="claro" onClick={() => setEditar(true)}>
+              Editar comisión
+            </Boton>
+          )
+        }
+      >
         {comision ? siglaDe(comision) : 'Comisión'}
       </Titulo>
       <Pestanas
@@ -45,10 +62,11 @@ export function ComisionPage() {
           { valor: 'historico', etiqueta: 'Histórico' },
         ]}
       />
-      {tab === 'evaluar' && <EvaluarPanel comisionId={comisionId} />}
+      {tab === 'evaluar' && <EvaluarPanel comisionId={comisionId} onIrActividades={() => setTab('actividades')} onIrHistorico={() => setTab('historico')} />}
       {tab === 'mesa' && <MesaPanel comisionId={comisionId} />}
       {tab === 'actividades' && <ActividadesPanel comisionId={comisionId} />}
       {tab === 'historico' && <HistoricoPanel comisionId={comisionId} />}
+      {editar && comision && <EditarComision comision={comision} onCerrar={() => setEditar(false)} />}
     </>
   )
 }
@@ -60,15 +78,16 @@ function EstadoEval({ estado }: { estado: string | null | undefined }) {
 }
 
 /** Evento: quién está hoy (o en la jornada elegida). Antes del evento: por actividad. */
-function EvaluarPanel({ comisionId }: { comisionId: number }) {
+function EvaluarPanel({ comisionId, onIrActividades, onIrHistorico }: { comisionId: number; onIrActividades: () => void; onIrHistorico: () => void }) {
   const m = useMomento()
+  const f = useAccionFase()
   const faseEvento = m.abiertas.find((f) => f.es_evento && f.tipo === 'evaluacion')
   if (faseEvento) return <JornadaPanel comisionId={comisionId} fase={faseEvento} hoy={m.hoy} />
   const fasePrevia = m.abiertas.find((f) => !f.es_evento && f.tipo === 'evaluacion')
-  if (fasePrevia) return <PorActividad comisionId={comisionId} />
+  if (fasePrevia) return <PorActividad comisionId={comisionId} onIrActividades={onIrActividades} />
   return (
-    <Aviso tono="alerta" titulo="No hay una fase de evaluación abierta">
-      Cuando la Subsecretaría abra una fase podrás evaluar desde aquí. Mientras tanto puedes consultar el histórico.
+    <Aviso tono="alerta" titulo="No hay una fase de evaluación abierta" accion={f.accion ?? { texto: 'Ver el histórico', onClick: onIrHistorico }}>
+      Cuando se abra una fase podrás evaluar desde aquí.{f.quien}
     </Aviso>
   )
 }
@@ -138,7 +157,9 @@ function JornadaPanel({ comisionId, fase, hoy }: { comisionId: number; fase: { i
   )
 }
 
-function PorActividad({ comisionId }: { comisionId: number }) {
+function PorActividad({ comisionId, onIrActividades }: { comisionId: number; onIrActividades: () => void }) {
+  const { perfil } = useSesion()
+  const gestiona = perfil?.rol === 'subsecretario' || perfil?.rol === 'admin'
   const m = useMomento()
   const vigentes = useVigentes(comisionId)
   const [elegida, setActividad] = useState<string>('')
@@ -151,7 +172,11 @@ function PorActividad({ comisionId }: { comisionId: number }) {
     <Tarjeta titulo="Evaluar por actividad">
       <Consulta
         q={actividades}
-        vacio={<EstadoVacio titulo="No hay actividades abiertas">Crea la actividad en la pestaña «Actividades» y luego evalúa aquí.</EstadoVacio>}
+        vacio={
+          <EstadoVacio titulo="No hay actividades abiertas" accion={<Boton onClick={onIrActividades}>Crear una actividad</Boton>}>
+            Primero crea la actividad (taller, capacitación o reunión) y luego evalúa aquí.
+          </EstadoVacio>
+        }
       >
         {(acts) => (
           <div className="flex flex-col gap-4">
@@ -176,7 +201,23 @@ function PorActividad({ comisionId }: { comisionId: number }) {
               })}
             </div>
             {actividad && (
-              <Consulta q={vigentes} vacio={<EstadoVacio titulo="La mesa directiva aún no está cargada">La Subsecretaría registra a las personas y sus cargos.</EstadoVacio>}>
+              <Consulta
+                q={vigentes}
+                vacio={
+                  <EstadoVacio
+                    titulo="La mesa directiva aún no está cargada"
+                    accion={
+                      gestiona && (
+                        <Link to="/personas" className="inline-flex min-h-11 items-center rounded-xl bg-grad-primario px-5 font-bold text-white shadow-boton">
+                          Cargar personas
+                        </Link>
+                      )
+                    }
+                  >
+                    {gestiona ? 'Registra a las personas y sus cargos para poder evaluarlas.' : 'La Subsecretaría registra a las personas y sus cargos; pídele que cargue tu mesa directiva.'}
+                  </EstadoVacio>
+                }
+              >
                 {(personas) => (
                   <ul className="flex flex-col gap-2">
                     {personas

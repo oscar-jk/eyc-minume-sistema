@@ -8,8 +8,9 @@ import { Consulta, EstadoVacio } from '@/components/Estados'
 import { Aviso, Insignia, Tarjeta } from '@/components/Ui'
 import { mensajeError } from '@/lib/errores'
 import { TIPO_ACTIVIDAD, fecha } from '@/lib/formato'
-import type { Ambito, TipoActividad } from '@/lib/tipos'
+import type { Actividad, Ambito, TipoActividad } from '@/lib/tipos'
 import { useActividades, useCerrarActividad, useCrearActividad } from './api'
+import { EditarActividad } from './EditarActividad'
 
 /** Actividades previas al evento (taller, capacitación, reunión): crear, cerrar y reabrir. */
 export function ActividadesPanel({ comisionId, ambito = 'mesa' }: { comisionId: number | null; ambito?: Ambito }) {
@@ -19,6 +20,7 @@ export function ActividadesPanel({ comisionId, ambito = 'mesa' }: { comisionId: 
   const crear = useCrearActividad()
   const cerrar = useCerrarActividad()
   const fasePrevia = m.abiertas.find((f) => f.tipo === 'evaluacion' && !f.es_evento) ?? m.fases.find((f) => f.tipo === 'evaluacion' && !f.es_evento)
+  const [editar, setEditar] = useState<Actividad | null>(null)
   const [form, setForm] = useState({ nombre: '', tipo: 'taller' as TipoActividad, fecha: m.hoy ?? '' })
 
   return (
@@ -78,6 +80,11 @@ export function ActividadesPanel({ comisionId, ambito = 'mesa' }: { comisionId: 
                     </div>
                     {a.cerrada ? <Insignia>Cerrada</Insignia> : <Insignia tono="exito">Abierta</Insignia>}
                     {editable && (
+                      <Boton variante="fantasma" onClick={() => setEditar(a)}>
+                        Editar
+                      </Boton>
+                    )}
+                    {editable && (
                       <Boton
                         variante="secundario"
                         cargando={cerrar.isPending && cerrar.variables?.id === a.id}
@@ -98,6 +105,7 @@ export function ActividadesPanel({ comisionId, ambito = 'mesa' }: { comisionId: 
           )}
         </Consulta>
       </Tarjeta>
+      {editar && <EditarActividad key={editar.id} actividad={editar} max={m.hoy ?? undefined} onCerrar={() => setEditar(null)} />}
     </div>
   )
 }

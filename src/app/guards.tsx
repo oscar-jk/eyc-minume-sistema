@@ -47,7 +47,7 @@ export function RequiereRol({ roles, children }: { roles: Rol[]; children?: Reac
   const { perfil } = useSesion()
   if (!perfil?.rol || !roles.includes(perfil.rol)) {
     return (
-      <Aviso tono="peligro" titulo="Sin permiso">
+      <Aviso tono="peligro" titulo="Esta sección no es para tu rol" accion={{ texto: 'Ir a mi inicio', a: '/' }}>
         Esta sección no está disponible para tu rol.
       </Aviso>
     )
@@ -60,11 +60,12 @@ export function RequiereRol({ roles, children }: { roles: Rol[]; children?: Reac
  * Con la fase pendiente o cerrada se muestra el aviso (y opcionalmente una vista de solo lectura).
  */
 export function SiFaseAbierta({ fase, children, soloLectura }: { fase: Fase | null | undefined; children: ReactNode; soloLectura?: ReactNode }) {
+  const f = useAccionFase()
   if (fase?.estado === 'abierta') return <>{children}</>
   return (
     <div className="flex flex-col gap-4">
-      <Aviso tono="alerta" titulo={fase ? `Fase "${fase.nombre}": ${ESTADO_FASE[fase.estado].toLowerCase()}` : 'Sin fase abierta'}>
-        No se puede escribir en este período. {soloLectura ? 'Se muestra en modo de solo lectura.' : ''}
+      <Aviso tono="alerta" accion={f.accion} titulo={fase ? `Fase "${fase.nombre}": ${ESTADO_FASE[fase.estado].toLowerCase()}` : 'Sin fase abierta'}>
+        No se puede escribir en este período.{f.quien} {soloLectura ? 'Abajo puedes consultar lo registrado.' : ''}
       </Aviso>
       {soloLectura}
     </div>
@@ -81,4 +82,16 @@ export function Inicio() {
     admin: '/monitoreo',
   }
   return <Navigate to={perfil?.rol ? destino[perfil.rol] : '/login'} replace />
+}
+
+/** Acción para resolver un aviso de fase: quien gestiona va a Fases; el resto recibe a quién pedirlo. */
+// eslint-disable-next-line react-refresh/only-export-components
+export function useAccionFase() {
+  const { perfil } = useSesion()
+  const gestiona = perfil?.rol === 'subsecretario' || perfil?.rol === 'admin'
+  return {
+    accion: gestiona ? { texto: 'Abrir o cambiar la fase', a: '/configuracion?tab=fases' } : null,
+    quien: gestiona ? '' : ' Pide a la Subsecretaría de Planificación y Desarrollo que la abra.',
+    gestiona,
+  }
 }

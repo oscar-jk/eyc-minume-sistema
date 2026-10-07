@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { UseQueryResult } from '@tanstack/react-query'
-import { mensajeError } from '@/lib/errores'
+import { reportarError } from '@/lib/errores'
 import { Boton } from './Boton'
 import { Estrella8 } from './Elementos'
 
@@ -27,15 +27,20 @@ export function EstadoVacio({ titulo, children, accion }: { titulo: string; chil
 }
 
 export function EstadoError({ error, onReintentar }: { error: unknown; onReintentar?: () => void }) {
+  const a = reportarError(error, 'carga')
   return (
-    <div role="alert" className="flex flex-col items-start gap-2 rounded-2xl border border-danger bg-danger-soft px-4 py-3 text-ink">
-      <p className="font-semibold text-danger">No se pudo cargar</p>
-      <p className="text-sm">{mensajeError(error)}</p>
-      {onReintentar && (
-        <Boton variante="secundario" onClick={onReintentar}>
-          Reintentar
-        </Boton>
-      )}
+    <div role="alert" className="flex gap-3 rounded-2xl rounded-tl-[6px] bg-danger-soft p-4 text-ink ring-1 ring-danger/25">
+      <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-xl rounded-tl-sm bg-grad-rosa text-white">
+        <Estrella8 className="size-5" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="font-extrabold">{a.mensaje}</p>
+        {a.sugerencia && <p className="text-sm text-ink-2">{a.sugerencia}</p>}
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          {onReintentar && <Boton onClick={onReintentar}>Reintentar</Boton>}
+          <span className="font-cond text-xs font-bold uppercase tracking-wider text-ink-3">Código de referencia: {a.codigo}</span>
+        </div>
+      </div>
     </div>
   )
 }

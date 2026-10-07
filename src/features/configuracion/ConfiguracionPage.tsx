@@ -1,16 +1,19 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Acento, Pestanas, Titulo } from '@/components/Ui'
 import { useSesion } from '@/features/auth/AuthProvider'
 import { AuditoriaPanel, CuentasPanel } from './Cuentas'
 import { CortesPanel, PesosPanel } from './Pesos'
+import { CatalogosPanel } from './Catalogos'
 import { CriteriosPanel } from './Criterios'
 import { FasesPanel } from './Fases'
 
-type Tab = 'pesos' | 'cortes' | 'criterios' | 'fases' | 'cuentas' | 'auditoria'
+type Tab = 'catalogos' | 'pesos' | 'cortes' | 'criterios' | 'fases' | 'cuentas' | 'auditoria'
 
 export function ConfiguracionPage() {
   const { perfil } = useSesion()
-  const [tab, setTab] = useState<Tab>('fases')
+  const [sp] = useSearchParams()
+  const [tab, setTab] = useState<Tab>(() => (sp.get('tab') as Tab) || 'fases')
   const admin = perfil?.rol === 'admin'
   return (
     <>
@@ -26,6 +29,7 @@ export function ConfiguracionPage() {
           { valor: 'pesos', etiqueta: 'Pesos A–F' },
           { valor: 'cortes', etiqueta: 'Cortes y umbrales' },
           { valor: 'criterios', etiqueta: 'Criterios' },
+          { valor: 'catalogos', etiqueta: 'Comisiones y catálogos' },
           ...(admin ? [{ valor: 'cuentas' as const, etiqueta: 'Cuentas' }] : []),
           { valor: 'auditoria', etiqueta: 'Auditoría' },
         ]}
@@ -34,6 +38,7 @@ export function ConfiguracionPage() {
       {tab === 'pesos' && <PesosPanel />}
       {tab === 'cortes' && <CortesPanel />}
       {tab === 'criterios' && <CriteriosPanel />}
+      {tab === 'catalogos' && <CatalogosPanel />}
       {tab === 'cuentas' && admin && <CuentasPanel />}
       {tab === 'auditoria' && <AuditoriaPanel />}
     </>
