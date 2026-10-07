@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Pestanas, Titulo } from '@/components/Ui'
+import { Acento, Pestanas, Titulo } from '@/components/Ui'
 import { useSesion } from '@/features/auth/AuthProvider'
 import { AuditoriaPanel, CuentasPanel } from './Cuentas'
 import { CortesPanel, PesosPanel } from './Pesos'
@@ -14,7 +14,9 @@ export function ConfiguracionPage() {
   const admin = perfil?.rol === 'admin'
   return (
     <>
-      <Titulo sub="Todo cambio queda auditado. Lo que afecta cálculos pide confirmación.">Configuración</Titulo>
+      <Titulo sobre="Secretaría" adorno="bloques" sub="Todo cambio queda auditado. Lo que afecta cálculos pide confirmación.">
+        Configuración <Acento>del</Acento> sistema
+      </Titulo>
       <Pestanas
         etiqueta="Secciones de configuración"
         valor={tab}

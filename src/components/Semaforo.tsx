@@ -2,10 +2,10 @@ import { SEMAFORO, plural, puntaje as fmtPuntaje } from '@/lib/formato'
 import type { Semaforo as TSemaforo } from '@/lib/tipos'
 
 const estilos: Record<TSemaforo, { punto: string; caja: string }> = {
-  verde: { punto: 'bg-verde', caja: 'bg-verde-bg text-verde' },
-  amarillo: { punto: 'bg-amarillo', caja: 'bg-amarillo-bg text-amarillo' },
-  rojo: { punto: 'bg-rojo', caja: 'bg-rojo-bg text-rojo' },
-  gris: { punto: 'bg-gris', caja: 'bg-gris-bg text-gris' },
+  verde: { punto: 'bg-verde shadow-[0_0_10px_var(--sem-verde)]', caja: 'bg-verde-bg text-verde ring-verde/30' },
+  amarillo: { punto: 'bg-amarillo shadow-[0_0_10px_var(--sem-amarillo)]', caja: 'bg-amarillo-bg text-amarillo ring-amarillo/30' },
+  rojo: { punto: 'bg-rojo shadow-[0_0_10px_var(--sem-rojo)]', caja: 'bg-rojo-bg text-rojo ring-rojo/30' },
+  gris: { punto: 'bg-gris', caja: 'bg-gris-bg text-gris ring-gris/20' },
 }
 
 /**
@@ -29,12 +29,12 @@ export function Semaforo({
   const detalle = plural(cuantas, 'evaluación', 'evaluaciones')
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 font-cond text-sm font-semibold ${e.caja}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1 font-cond text-sm font-bold ring-1 ${e.caja}`}
       title={`${SEMAFORO[s].significado} · ${detalle}`}
     >
       <span aria-hidden className={`size-2.5 shrink-0 rounded-full ${e.punto}`} />
       <span>{SEMAFORO[s].etiqueta}</span>
-      {s !== 'gris' && <span className="tabular">{fmtPuntaje(puntaje)}</span>}
+      {s !== 'gris' && <span className="tabular text-[1.05em] font-extrabold">{fmtPuntaje(puntaje)}</span>}
       {compacto ? (
         <span className="tabular font-medium opacity-90">
           <span aria-hidden>({cuantas})</span>

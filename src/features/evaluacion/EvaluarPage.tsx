@@ -113,13 +113,13 @@ function Evaluar({
   return (
     <div className="mx-auto max-w-3xl">
       <nav className="mb-2 text-sm">
-        <Link to={perfil?.rol === 'eyc' ? '/comision' : '/monitoreo'} className="font-semibold text-accent">
+        <Link to={perfil?.rol === 'eyc' ? '/comision' : '/monitoreo'} className="font-bold text-acento">
           ← Volver
         </Link>
       </nav>
       <header className="mb-4">
-        <p className="font-cond text-sm font-semibold uppercase tracking-wide text-accent">Evaluar · {contexto}</p>
-        <h1 className="text-2xl font-bold leading-tight">
+        <p className="sobretitulo text-acento">Evaluar · {contexto}</p>
+        <h1 className="text-[clamp(1.8rem,6vw,2.6rem)] font-black leading-tight tracking-tight">
           <Link to={`/personas/${personaId}`} className="hover:underline">
             {persona.data.nombre}
           </Link>
@@ -303,7 +303,7 @@ function Formulario({
         </span>
       </div>
       <div className="mt-1 h-2 overflow-hidden rounded-full bg-surface-2" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label="Progreso de la evaluación">
-        <div className="h-full rounded-full bg-accent transition-[width]" style={{ width: `${pct}%` }} />
+        <div className="h-full rounded-full bg-grad-celeste transition-[width]" style={{ width: `${pct}%` }} />
       </div>
     </div>
   )
@@ -398,7 +398,7 @@ function Formulario({
       />
 
       {!soloLectura && (
-        <div className="sticky bottom-0 z-20 -mx-4 mt-2 flex flex-col gap-2 border-t border-line bg-surface/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur sm:mx-0 sm:rounded-xl sm:border">
+        <div className="sticky bottom-[calc(64px+env(safe-area-inset-bottom))] z-20 -mx-4 mt-2 flex flex-col gap-2 border-t border-line bg-surface/95 px-4 pb-3 pt-3 shadow-card backdrop-blur-xl sm:mx-0 sm:rounded-2xl sm:border lg:bottom-4 dark:bg-[#0b1a6b]/95">
           {progreso}
           <div className="flex gap-2">
           {!esCompleta && (

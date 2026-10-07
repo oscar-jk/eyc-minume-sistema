@@ -268,7 +268,7 @@ export function AuditoriaPanel() {
         {(filas) => (
           <ul className="flex flex-col gap-2">
             {filas.map((a) => (
-              <li key={a.id} className="rounded-xl border border-line p-3 text-sm">
+              <li key={a.id} className="rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04] text-sm">
                 <p>
                   <strong>{ACCION[a.accion] ?? a.accion}</strong> en <code className="font-cond">{a.tabla}</code> · {nombre(a.autor)} · {fechaHora(a.fecha)}
                 </p>

@@ -33,6 +33,8 @@ export function FichaPage() {
       {(p) => (
         <div className="flex flex-col gap-5">
           <Titulo
+            sobre="Ficha de persona"
+            adorno="flor"
             sub={
               <span className="flex flex-wrap items-center gap-2">
                 <Insignia>{AMBITO[p!.ambito]}</Insignia>
@@ -92,7 +94,7 @@ export function FichaPage() {
                         <tr key={e.evaluacion_id}>
                           <td className="tabular">{fecha(e.fecha)}</td>
                           <td>
-                            <Link to={`/evaluaciones/${e.evaluacion_id}`} className="font-semibold text-accent hover:underline">
+                            <Link to={`/evaluaciones/${e.evaluacion_id}`} className="font-bold text-acento hover:underline">
                               {e.actividad_nombre ?? 'Jornada'}
                             </Link>
                             {e.observacion_rotacion && <span className="block text-xs text-ink-3">{e.observacion_rotacion}</span>}
@@ -116,7 +118,7 @@ export function FichaPage() {
                 {(filas) => (
                   <ol className="flex flex-col gap-2">
                     {filas.map((a) => (
-                      <li key={a.id} className="rounded-xl border border-line p-3">
+                      <li key={a.id} className="rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04]">
                         <p className="font-semibold">
                           {siglaDe(a.comision)} · {a.cargo?.nombre}
                         </p>
@@ -136,7 +138,7 @@ export function FichaPage() {
                 {(filas) => (
                   <ol className="flex flex-col gap-2">
                     {filas.map((c) => (
-                      <li key={c.recomendacion_id} className="rounded-xl border border-line p-3 text-sm">
+                      <li key={c.recomendacion_id} className="rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04] text-sm">
                         <p className="font-semibold">{c.corte_nombre}</p>
                         <p>
                           Recomendación: <strong>{c.recomendacion && ESTATUS[c.recomendacion]}</strong> · {c.recomendacion_autor_nombre} · {fechaHora(c.recomendacion_fecha)}

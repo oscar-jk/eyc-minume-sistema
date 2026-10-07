@@ -4,7 +4,7 @@ import { Boton } from '@/components/Boton'
 import { Selector } from '@/components/Campo'
 import { Consulta, EstadoVacio } from '@/components/Estados'
 import { Semaforo } from '@/components/Semaforo'
-import { Aviso, Insignia, Titulo } from '@/components/Ui'
+import { Acento, Aviso, Insignia, Titulo } from '@/components/Ui'
 import { useSesion } from '@/features/auth/AuthProvider'
 import { TablaCortes } from '@/features/cortes/TablaCortes'
 import { ESTATUS, fechaHora } from '@/lib/formato'
@@ -36,7 +36,9 @@ export function DecisionesPage() {
 
   return (
     <>
-      <Titulo sub={esSG && !esSub ? 'Casos elevados: rojo o recomendación de sustitución' : 'Recomendaciones por cerrar y casos elevados'}>Decisiones</Titulo>
+      <Titulo sobre="Continuidad" adorno="flor" sub={esSG && !esSub ? 'Casos elevados: rojo o recomendación de sustitución' : 'Recomendaciones por cerrar y casos elevados'}>
+        Decisiones <Acento>de</Acento> continuidad
+      </Titulo>
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
         <Selector etiqueta="Estado" value={estado} onChange={(e) => setEstado(e.target.value as typeof estado)}>
           <option value="pendientes">Pendientes</option>

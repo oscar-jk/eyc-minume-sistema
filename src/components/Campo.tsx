@@ -1,7 +1,7 @@
 import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 
 const control =
-  'w-full rounded-lg border border-line-strong bg-surface px-3 py-2.5 text-base text-ink placeholder:text-ink-3 aria-[invalid=true]:border-danger min-h-11'
+  'w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-base text-ink placeholder:text-ink-3 min-h-12 shadow-[inset_0_1px_2px_rgb(0_0_0/0.04)] transition-colors hover:border-line-strong focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/20 aria-[invalid=true]:border-danger dark:bg-white/[0.06]'
 
 interface Envoltura {
   etiqueta: ReactNode
@@ -14,7 +14,7 @@ interface Envoltura {
 function Marco({ id, etiqueta, ayuda, error, requerido, className = '', children }: Envoltura & { id: string; children: ReactNode }) {
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
-      <label htmlFor={id} className="text-sm font-semibold text-ink">
+      <label htmlFor={id} className="text-sm font-bold text-ink">
         {etiqueta}
         {requerido && <span className="text-danger"> *</span>}
       </label>

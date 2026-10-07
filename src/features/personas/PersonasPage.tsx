@@ -6,7 +6,7 @@ import { Boton } from '@/components/Boton'
 import { AreaTexto, Campo, Selector } from '@/components/Campo'
 import { Consulta, EstadoVacio } from '@/components/Estados'
 import { Modal } from '@/components/Modal'
-import { Aviso, Insignia, Pestanas, Tabla, Tarjeta, Titulo } from '@/components/Ui'
+import { Acento, Aviso, Insignia, Pestanas, Tabla, Tarjeta, Titulo } from '@/components/Ui'
 import { useMoverAsignaciones, useVigentes, type Movimiento } from '@/features/asignaciones/api'
 import { siglaDe, useCargos, useComisiones } from '@/features/comisiones/api'
 import { mensajeError } from '@/lib/errores'
@@ -20,7 +20,9 @@ export function PersonasPage() {
   const [tab, setTab] = useState<Tab>('asignaciones')
   return (
     <>
-      <Titulo sub="Registro de personas, asignaciones iniciales y rotaciones">Personas y asignaciones</Titulo>
+      <Titulo sobre="Gestión" adorno="circulos" sub="Registro de personas, asignaciones iniciales y rotaciones">
+        Personas <Acento>y</Acento> asignaciones
+      </Titulo>
       <Pestanas
         etiqueta="Secciones de personas"
         valor={tab}
@@ -55,8 +57,8 @@ function AsignacionesPanel() {
         <Tarjeta titulo={`Sin asignación vigente (${sinAsignar.length})`}>
           <ul className="flex flex-col gap-2">
             {sinAsignar.map((p) => (
-              <li key={p.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-line p-3">
-                <div className="min-w-0 flex-1">
+              <li key={p.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04]">
+                <div className="min-w-0 flex-1 basis-[13rem]">
                   <Link to={`/personas/${p.id}`} className="font-semibold hover:underline">
                     {p.nombre}
                   </Link>
@@ -107,7 +109,7 @@ function AsignacionesPanel() {
                       <td>{f.comision_sigla ?? f.comision_nombre}</td>
                       <td>{f.cargo_nombre}</td>
                       <td>
-                        <Link to={`/personas/${f.persona_id}`} className="font-semibold text-accent hover:underline">
+                        <Link to={`/personas/${f.persona_id}`} className="font-bold text-acento hover:underline">
                           {f.persona_nombre}
                         </Link>
                       </td>

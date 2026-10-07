@@ -37,7 +37,7 @@ function ControlCriterio({
   return (
     <fieldset
       id={`criterio-${criterio.id}`}
-      className={`scroll-mt-40 rounded-xl border p-3 ${marcado ? 'border-danger bg-danger-soft' : 'border-line'}`}
+      className={`scroll-mt-40 rounded-2xl border p-4 ${marcado ? 'border-danger bg-danger-soft' : 'border-line'}`}
       aria-describedby={marcado ? `${nombre}-marca` : undefined}
       disabled={soloLectura}
     >
@@ -45,7 +45,7 @@ function ControlCriterio({
         {criterio.codigo}. {criterio.texto}
       </legend>
       <p aria-hidden className="mb-2 font-medium leading-snug text-ink">
-        <span className="mr-1.5 font-cond font-bold text-accent">{criterio.codigo}</span>
+        <span className="mr-1.5 font-cond font-bold text-acento">{criterio.codigo}</span>
         {criterio.texto}
       </p>
       {criterio.favorable === 'no' && (
@@ -68,14 +68,14 @@ function ControlCriterio({
               />
               <span
                 aria-hidden
-                className={`flex min-h-12 cursor-pointer items-center justify-center rounded-lg border-2 font-cond text-lg font-bold transition-colors peer-focus-visible:outline peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--focus)] peer-disabled:cursor-default ${
+                className={`flex min-h-14 cursor-pointer items-center justify-center rounded-2xl border-2 font-cond text-lg font-bold transition-colors peer-focus-visible:outline peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--focus)] peer-disabled:cursor-default ${
                   activo
                     ? malo
-                      ? 'border-rojo bg-rojo-bg text-rojo'
+                      ? 'border-transparent bg-grad-rosa text-white shadow-[0_8px_20px_-8px_rgb(229_53_53/0.6)]'
                       : o.valor === 'no_observado'
                         ? 'border-gris bg-gris-bg text-gris'
-                        : 'border-accent bg-accent text-accent-ink'
-                    : 'border-line-strong bg-surface text-ink-2 hover:border-accent'
+                        : 'border-transparent bg-grad-primario text-white shadow-boton'
+                    : 'border-line bg-surface-2 text-ink-2 hover:border-accent dark:bg-white/[0.05]'
                 }`}
               >
                 {o.texto}
@@ -104,7 +104,7 @@ function ControlCriterio({
       {!exigeComentario && !valor.comentario && valor.respuesta && !soloLectura && (
         <button
           type="button"
-          className="mt-2 min-h-9 text-sm font-semibold text-accent"
+          className="mt-2 min-h-9 text-sm font-bold text-acento"
           onClick={() => onCambio({ ...valor, comentario: ' ' })}
         >
           + Agregar comentario
@@ -157,7 +157,7 @@ export function DimensionAcordeon({
   else estado = { texto: `${respondidos}/${criterios.length}${pendientesComentario ? ` · falta comentario` : ''}`, clase: 'bg-amarillo-bg text-amarillo' }
 
   return (
-    <section className={`overflow-hidden rounded-2xl border bg-surface shadow-card ${conMarcas ? 'border-danger' : 'border-line'}`}>
+    <section className={`overflow-hidden rounded-3xl border bg-surface shadow-card dark:bg-vidrio ${conMarcas ? 'border-danger' : 'border-line'}`}>
       <h3>
         <button
           type="button"
@@ -166,11 +166,11 @@ export function DimensionAcordeon({
           onClick={onAlternar}
           className="flex min-h-14 w-full items-center gap-3 px-4 py-3 text-left"
         >
-          <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-lg bg-accent font-cond text-lg font-bold text-accent-ink">
+          <span aria-hidden className="grid size-11 shrink-0 place-items-center rounded-2xl bg-grad-primario font-cond text-xl font-extrabold text-white shadow-boton">
             {dimension.clave}
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block font-semibold leading-tight">{dimension.nombre}</span>
+            <span className="block text-[1.05rem] font-extrabold leading-tight">{dimension.nombre}</span>
             <span className="font-cond text-sm text-ink-3">
               {puntos?.observada ? `Puntos guardados: ${puntaje(puntos.puntos)}` : puntos ? 'Sin puntos guardados' : 'Aún sin guardar'}
             </span>
@@ -182,7 +182,7 @@ export function DimensionAcordeon({
         </button>
       </h3>
       <div id={idPanel} hidden={!abierta} className="flex flex-col gap-3 border-t border-line px-4 py-4">
-        <button type="button" onClick={() => setVer((v) => !v)} className="self-start text-sm font-semibold text-accent" aria-expanded={verCompetencias}>
+        <button type="button" onClick={() => setVer((v) => !v)} className="self-start text-sm font-bold text-acento" aria-expanded={verCompetencias}>
           {verCompetencias ? 'Ocultar competencias' : 'Ver competencias que mide'}
         </button>
         {verCompetencias && <p className="text-sm text-ink-2">{dimension.competencias}</p>}

@@ -38,7 +38,7 @@ export function CriteriosPanel() {
               <section key={d.id}>
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <h3 className="font-semibold">
-                    <span className="font-cond font-bold text-accent">{d.clave}</span> {d.nombre}
+                    <span className="font-cond font-bold text-acento">{d.clave}</span> {d.nombre}
                   </h3>
                   <Boton
                     variante="fantasma"
@@ -51,8 +51,8 @@ export function CriteriosPanel() {
                   {cs
                     .filter((c) => c.dimension_id === d.id)
                     .map((c) => (
-                      <li key={c.id} className={`flex flex-wrap items-center gap-2 rounded-xl border border-line p-3 ${c.activo ? '' : 'opacity-60'}`}>
-                        <span className="font-cond font-bold text-accent">{c.codigo}</span>
+                      <li key={c.id} className={`flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04] ${c.activo ? '' : 'opacity-60'}`}>
+                        <span className="font-cond font-bold text-acento">{c.codigo}</span>
                         <span className="min-w-0 flex-1 basis-60">{c.texto}</span>
                         <Insignia tono={c.favorable === 'no' ? 'alerta' : 'neutro'}>Favorable: {c.favorable === 'si' ? 'Sí' : 'No'}</Insignia>
                         {!c.activo && <Insignia>Inactivo</Insignia>}
@@ -149,7 +149,7 @@ function HistorialModal({ criterio, onCerrar }: { criterio: Criterio; onCerrar: 
               <p>{criterio.texto}</p>
             </li>
             {vs.map((v) => (
-              <li key={v.id} className="rounded-xl border border-line p-3 text-sm">
+              <li key={v.id} className="rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04] text-sm">
                 <p className="font-semibold">
                   v{v.version} · hasta {fechaHora(v.vigente_hasta)}
                 </p>

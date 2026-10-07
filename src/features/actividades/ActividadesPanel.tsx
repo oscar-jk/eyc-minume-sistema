@@ -68,8 +68,8 @@ export function ActividadesPanel({ comisionId, ambito = 'mesa' }: { comisionId: 
               {acts.map((a) => {
                 const editable = a.fase?.estado === 'abierta' && (a.comision_id === comisionId || comisionId === null)
                 return (
-                  <li key={a.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-line p-3">
-                    <div className="min-w-0 flex-1">
+                  <li key={a.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04]">
+                    <div className="min-w-0 flex-1 basis-[13rem]">
                       <p className="font-semibold">{a.nombre}</p>
                       <p className="font-cond text-sm text-ink-3">
                         {TIPO_ACTIVIDAD[a.tipo]} · {fecha(a.fecha)} · {a.fase?.nombre}

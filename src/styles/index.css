@@ -1,115 +1,97 @@
 @import "tailwindcss";
 
-/* Variante "dark:" coherente con el tema: sistema salvo que el usuario fije uno. */
-@custom-variant dark {
-  @media (prefers-color-scheme: dark) {
-    &:where(:root:not([data-theme="light"]) *) {
-      @slot;
-    }
-  }
-  &:where([data-theme="dark"] *) {
-    @slot;
-  }
-}
+/* Tema: claro por defecto; oscuro cuando <html data-theme="dark">. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-/* ───────────────────────── Tokens MINUME XVII ─────────────────────────
-   Todo color de la interfaz sale de aquí. Ningún componente usa colores sueltos.
-   Contrastes verificados AA (texto ≥ 4.5:1, bordes de control y foco ≥ 3:1). */
+/* ───────────── Tokens · Identidad visual MXVII ─────────────
+   Degradados oficiales (SVG de marca): #002193→#0090fb · #0095fa→#00167c · #ffc6ff→#e53535
+   Paleta: índigo #07075e · navy #00209a · azul #0043c5 · azul claro #0095fa · celeste #00b5ff · cian #00f0e6 · rosa #ffc6ff · rojo #e53535 */
 :root {
   color-scheme: light;
-  --bg: #f4f7fc;
+  --bg: #eef3fc;
+  --bg-arte: radial-gradient(1200px 520px at 85% -10%, rgb(0 149 250 / 0.18), transparent 60%),
+    radial-gradient(900px 480px at -10% 0%, rgb(0 33 147 / 0.10), transparent 60%), #eef3fc;
   --surface: #ffffff;
-  --surface-2: #eaf3ff;
-  --border: #c5d2e6;
+  --surface-2: #e6eefc;
+  --surface-vidrio: rgb(255 255 255 / 0.82);
+  --border: #cbd8ee;
   --border-strong: #8597b3;
-  --text: #07274f;
-  --text-2: #3c4f68;
-  --text-3: #556884;
+  --text: #07174a;
+  --text-2: #33476a;
+  --text-3: #51668a;
   --accent: #0043c5;
-  --accent-hover: #00369e;
+  --accent-hover: #00329a;
   --accent-ink: #ffffff;
-  --accent-soft: #dbe8ff;
-  --brand-celeste: #00b5ff;
+  --accent-soft: #dfe9ff;
+  --acento-texto: #0043c5;
   --focus: #0043c5;
-  --danger: #b3261e;
-  --danger-soft: #fde7e6;
+  --danger: #c0262d;
+  --danger-soft: #fde8ea;
 
-  --sem-verde: #15692c;
-  --sem-verde-bg: #e1f4e6;
+  --grad-primario: linear-gradient(120deg, #002193 0%, #0090fb 100%);
+  --grad-primario-hover: linear-gradient(120deg, #001a78 0%, #0078de 100%);
+  --grad-celeste: linear-gradient(120deg, #00b5ff 0%, #00f0e6 100%);
+  --grad-rosa: linear-gradient(120deg, #e53535 0%, #ff7aa8 100%);
+  --grad-noche: linear-gradient(160deg, #07075e 0%, #00209a 55%, #0043c5 100%);
+  --grad-heroe: linear-gradient(120deg, #002193 0%, #0043c5 45%, #0090fb 100%);
+  --grad-texto: linear-gradient(100deg, #002193 0%, #0090fb 100%);
+
+  --sem-verde: #14692d;
+  --sem-verde-bg: #ddf4e4;
   --sem-amarillo: #7a4f00;
-  --sem-amarillo-bg: #fff1c7;
+  --sem-amarillo-bg: #ffefc2;
   --sem-rojo: #b3261e;
-  --sem-rojo-bg: #fde7e6;
+  --sem-rojo-bg: #fde4e6;
   --sem-gris: #4d5d75;
-  --sem-gris-bg: #e6ebf3;
+  --sem-gris-bg: #e4eaf3;
 
-  --shadow: 0 1px 2px rgb(7 39 79 / 0.06), 0 4px 16px rgb(7 39 79 / 0.06);
+  --shadow: 0 1px 2px rgb(0 33 147 / 0.06), 0 10px 30px -12px rgb(0 33 147 / 0.22);
+  --shadow-boton: 0 8px 20px -8px rgb(0 67 197 / 0.6);
 }
 
-/* Oscuro por preferencia del sistema (salvo que el usuario fije claro). */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --bg: #061b3f;
-    --surface: #0b2551;
-    --surface-2: #10306a;
-    --border: #284a80;
-    --border-strong: #6f8bb8;
-    --text: #ecf3ff;
-    --text-2: #c9d8f2;
-    --text-3: #a9bde0;
-    --accent: #3fc4ff;
-    --accent-hover: #7fd6ff;
-    --accent-ink: #04142e;
-    --accent-soft: #123b78;
-    --focus: #3fc4ff;
-    --danger: #ff8a8d;
-    --danger-soft: #3d1420;
-    --sem-verde: #6ee7a0;
-    --sem-verde-bg: #0d3a2d;
-    --sem-amarillo: #fcd34d;
-    --sem-amarillo-bg: #3a300c;
-    --sem-rojo: #ff8a8d;
-    --sem-rojo-bg: #3d1420;
-    --sem-gris: #b6c5de;
-    --sem-gris-bg: #1a3360;
-    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
-  }
-}
-
-/* Oscuro fijado explícitamente por el usuario. */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #061b3f;
-  --surface: #0b2551;
-  --surface-2: #10306a;
-  --border: #284a80;
-  --border-strong: #6f8bb8;
-  --text: #ecf3ff;
-  --text-2: #c9d8f2;
-  --text-3: #a9bde0;
+  --bg: #05054a;
+  --bg-arte: radial-gradient(1100px 600px at 80% -10%, rgb(0 144 251 / 0.28), transparent 60%),
+    radial-gradient(900px 600px at 0% 100%, rgb(0 240 230 / 0.10), transparent 60%),
+    linear-gradient(180deg, #05054a 0%, #001a6e 100%);
+  --surface: #0b1a6b;
+  --surface-2: #12257f;
+  --surface-vidrio: rgb(13 30 120 / 0.62);
+  --border: rgb(120 170 255 / 0.20);
+  --border-strong: rgb(150 190 255 / 0.45);
+  --text: #f1f6ff;
+  --text-2: #cddaf6;
+  --text-3: #a9bce4;
   --accent: #3fc4ff;
-  --accent-hover: #7fd6ff;
-  --accent-ink: #04142e;
-  --accent-soft: #123b78;
-  --focus: #3fc4ff;
+  --accent-hover: #7fd8ff;
+  --accent-ink: #ffffff;
+  --accent-soft: rgb(63 196 255 / 0.16);
+  --acento-texto: #7fdcff;
+  --focus: #00f0e6;
   --danger: #ff8a8d;
-  --danger-soft: #3d1420;
+  --danger-soft: rgb(229 53 53 / 0.18);
+
+  --grad-texto: linear-gradient(100deg, #7fdcff 0%, #00f0e6 100%);
+
   --sem-verde: #6ee7a0;
-  --sem-verde-bg: #0d3a2d;
+  --sem-verde-bg: rgb(52 211 120 / 0.16);
   --sem-amarillo: #fcd34d;
-  --sem-amarillo-bg: #3a300c;
+  --sem-amarillo-bg: rgb(252 211 77 / 0.15);
   --sem-rojo: #ff8a8d;
-  --sem-rojo-bg: #3d1420;
+  --sem-rojo-bg: rgb(229 53 53 / 0.2);
   --sem-gris: #b6c5de;
-  --sem-gris-bg: #1a3360;
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
+  --sem-gris-bg: rgb(182 197 222 / 0.14);
+
+  --shadow: 0 1px 0 rgb(255 255 255 / 0.06) inset, 0 18px 40px -18px rgb(0 0 0 / 0.7);
+  --shadow-boton: 0 8px 24px -8px rgb(0 144 251 / 0.75);
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-vidrio: var(--surface-vidrio);
   --color-line: var(--border);
   --color-line-strong: var(--border-strong);
   --color-ink: var(--text);
@@ -119,7 +101,7 @@
   --color-accent-hover: var(--accent-hover);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
-  --color-celeste: var(--brand-celeste);
+  --color-acento: var(--acento-texto);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
   --color-verde: var(--sem-verde);
@@ -130,7 +112,11 @@
   --color-rojo-bg: var(--sem-rojo-bg);
   --color-gris: var(--sem-gris);
   --color-gris-bg: var(--sem-gris-bg);
+  --color-cian: #00f0e6;
+  --color-celeste: #00b5ff;
+  --color-noche: #05054a;
   --shadow-card: var(--shadow);
+  --shadow-boton: var(--shadow-boton);
 
   --font-sans: "Barlow", system-ui, sans-serif;
   --font-cond: "Barlow Condensed", "Barlow", system-ui, sans-serif;
@@ -142,25 +128,31 @@
     -webkit-text-size-adjust: 100%;
   }
   body {
-    background: var(--bg);
+    background: var(--bg-arte);
+    background-attachment: fixed;
     color: var(--text);
     font-family: var(--font-sans);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     min-height: 100dvh;
   }
-  h1, h2 {
-    font-family: var(--font-serif);
-    letter-spacing: -0.01em;
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-sans);
+    letter-spacing: -0.02em;
   }
   :focus-visible {
     outline: 3px solid var(--focus);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: 6px;
   }
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
   }
@@ -168,4 +160,90 @@
 
 @utility tabular {
   font-variant-numeric: tabular-nums;
+}
+@utility bg-grad-primario {
+  background-image: var(--grad-primario);
+}
+@utility bg-grad-celeste {
+  background-image: var(--grad-celeste);
+}
+@utility bg-grad-rosa {
+  background-image: var(--grad-rosa);
+}
+@utility bg-grad-noche {
+  background-image: var(--grad-noche);
+}
+@utility bg-grad-heroe {
+  background-image: var(--grad-heroe);
+}
+@utility texto-grad {
+  background-image: var(--grad-texto);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* Acento tipográfico: Libre Baskerville en itálica (como «de» en MINUME de ESTRELLAS). */
+@utility acento {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+@utility sobretitulo {
+  font-family: var(--font-cond);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.8rem;
+}
+@utility vidrio {
+  background: var(--surface-vidrio);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+@utility sin-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes brillo {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+@keyframes subir {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animar-entrada {
+  animation: aparecer 0.35s ease both;
+}
+.esqueleto {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: brillo 1.4s linear infinite;
 }

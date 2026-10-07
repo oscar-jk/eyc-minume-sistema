@@ -1,31 +1,32 @@
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 
-export type Tema = 'sistema' | 'light' | 'dark'
+export type Tema = 'light' | 'dark'
 const CLAVE = 'eyc-tema'
+const oyentes = new Set<() => void>()
 
 function leer(): Tema {
-  try {
-    const t = localStorage.getItem(CLAVE)
-    return t === 'light' || t === 'dark' ? t : 'sistema'
-  } catch {
-    return 'sistema'
-  }
+  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
 }
 
-/** Preferencia de tema del navegador (único uso de localStorage en la app). */
+function fijar(t: Tema) {
+  document.documentElement.dataset.theme = t
+  try {
+    localStorage.setItem(CLAVE, t)
+  } catch {
+    /* almacenamiento no disponible: el tema igual se aplica en la sesión */
+  }
+  oyentes.forEach((f) => f())
+}
+
+/** Tema claro por defecto (index.html lo fija antes del primer pintado); compartido por toda la app. */
 export function useTema() {
-  const [tema, setTema] = useState<Tema>(leer)
-  useEffect(() => {
-    const el = document.documentElement
-    if (tema === 'sistema') delete el.dataset.theme
-    else el.dataset.theme = tema
-    try {
-      if (tema === 'sistema') localStorage.removeItem(CLAVE)
-      else localStorage.setItem(CLAVE, tema)
-    } catch {
-      /* almacenamiento no disponible: el tema igual se aplica en la sesión */
-    }
-  }, [tema])
-  const siguiente = () => setTema((t) => (t === 'sistema' ? 'light' : t === 'light' ? 'dark' : 'sistema'))
-  return { tema, siguiente }
+  const tema = useSyncExternalStore(
+    (f) => {
+      oyentes.add(f)
+      return () => oyentes.delete(f)
+    },
+    leer,
+    () => 'light' as Tema,
+  )
+  return { tema, siguiente: () => fijar(tema === 'light' ? 'dark' : 'light') }
 }

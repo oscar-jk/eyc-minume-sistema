@@ -117,13 +117,13 @@ export function PesosPanel() {
               const t = total(a)
               const sucio = Object.keys(edit).some((k) => k.startsWith(a))
               return (
-                <fieldset key={a} className="rounded-xl border border-line p-4">
+                <fieldset key={a} className="rounded-2xl border border-line bg-surface p-4 dark:bg-white/[0.04]">
                   <legend className="px-1 font-semibold">{AMBITO[a]}</legend>
                   <ul className="flex flex-col gap-2">
                     {ds.map((d) => (
                       <li key={d.id} className="flex items-center gap-3">
                         <label htmlFor={`p-${a}-${d.id}`} className="flex-1">
-                          <span className="font-cond font-bold text-accent">{d.clave}</span> {d.nombre}
+                          <span className="font-cond font-bold text-acento">{d.clave}</span> {d.nombre}
                         </label>
                         <input
                           id={`p-${a}-${d.id}`}
@@ -191,7 +191,7 @@ export function CortesPanel() {
         {(cs) => (
           <div className="flex flex-col gap-3">
             {cs.map((c) => (
-              <fieldset key={c.id} className="rounded-xl border border-line p-4">
+              <fieldset key={c.id} className="rounded-2xl border border-line bg-surface p-4 dark:bg-white/[0.04]">
                 <legend className="px-1 font-semibold">{c.nombre}</legend>
                 <p className="mb-3 text-sm text-ink-2">{c.proposito}</p>
                 <div className="flex flex-wrap gap-4">

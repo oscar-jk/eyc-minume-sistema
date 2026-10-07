@@ -3,25 +3,47 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { Boton } from '@/components/Boton'
 import { Campo } from '@/components/Campo'
+import { CieloEstrellado } from '@/components/CieloEstrellado'
+import { Anillo, Destello, Estrella8 } from '@/components/Elementos'
 import { Marca } from '@/components/Marca'
-import { Aviso } from '@/components/Ui'
+import { Acento, Aviso } from '@/components/Ui'
 import { mensajeError } from '@/lib/errores'
 import { cambiarContrasena, entrar, solicitarRecuperacion } from './api'
 import { useSesion } from './AuthProvider'
 
-function Marco({ titulo, children }: { titulo: string; children: ReactNode }) {
+/** Pantallas de acceso: cielo nocturno con estrellas reales y la identidad «MINUME de Estrellas». */
+function Marco({ titulo, children }: { titulo: ReactNode; children: ReactNode }) {
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center px-4 py-10">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 flex justify-center">
-          <Marca tipo="login" className="h-auto w-64" />
+    <main className="relative grid min-h-dvh lg:grid-cols-[1.15fr_1fr]">
+      {/* Arte: cielo estrellado (arriba en móvil, izquierda en PC) */}
+      <section className="relative isolate overflow-hidden bg-grad-noche px-6 pb-16 pt-10 text-white lg:flex lg:flex-col lg:justify-between lg:p-14">
+        <CieloEstrellado />
+        <Anillo className="pointer-events-none absolute -bottom-40 -right-32 -z-0 w-[34rem] text-celeste/60 [animation:girar_240s_linear_infinite] lg:-bottom-56 lg:-right-40 lg:w-[52rem]" />
+        <div aria-hidden className="pointer-events-none absolute -left-24 top-1/3 size-80 rounded-full bg-[#0090fb]/30 blur-[100px]" />
+        <p className="relative flex items-center justify-center gap-3 font-black tracking-tight lg:justify-start">
+          <span className="text-lg">2026</span>
+          <Destello className="size-5 text-cian" />
+          <Marca tipo="estrellas" blanco className="h-9 w-auto" />
+        </p>
+        <div className="relative mt-10 flex flex-col items-center text-center lg:mt-0 lg:items-start lg:text-left">
+          <Marca tipo="lockup" blanco className="h-auto w-64 sm:w-80 lg:w-[30rem]" />
+          <p className="mt-6 hidden max-w-md text-lg text-white/80 lg:block">
+            Sistema de <span className="font-bold text-white">Evaluación y Control</span> del desempeño de las mesas directivas y del equipo de EyC.
+          </p>
         </div>
-        <div className="rounded-2xl border border-line bg-surface p-6 shadow-card">
-          <p className="font-cond text-sm font-semibold uppercase tracking-wider text-accent">Evaluación y Control</p>
-          <h1 className="mb-5 mt-1 text-2xl font-bold">{titulo}</h1>
+        <p className="relative mt-8 hidden text-sm text-white/60 lg:block">Modelo Internacional de las Naciones Unidas del Ministerio de Educación</p>
+      </section>
+
+      {/* Formulario */}
+      <section className="relative -mt-10 flex items-start justify-center px-4 pb-12 lg:mt-0 lg:items-center lg:bg-bg lg:px-10">
+        <div className="animar-entrada w-full max-w-md rounded-3xl border border-line bg-surface p-6 shadow-card sm:p-8 dark:bg-vidrio dark:backdrop-blur-xl">
+          <p className="sobretitulo flex items-center gap-2 text-acento">
+            <Estrella8 tono="azul" className="size-3.5" /> Evaluación y Control
+          </p>
+          <h1 className="mb-6 mt-2 text-[2rem] font-black leading-tight tracking-tight">{titulo}</h1>
           {children}
         </div>
-      </div>
+      </section>
     </main>
   )
 }
@@ -41,15 +63,15 @@ export function LoginPage() {
   }
 
   return (
-    <Marco titulo="Iniciar sesión">
+    <Marco titulo={<>Bienvenido <Acento>de</Acento> vuelta</>}>
       <form onSubmit={enviar} className="flex flex-col gap-4" noValidate>
         <Campo etiqueta="Correo" type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} requerido />
         <Campo etiqueta="Contraseña" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} requerido />
         {m.isError && <Aviso tono="peligro">{mensajeError(m.error)}</Aviso>}
-        <Boton type="submit" cargando={m.isPending} disabled={!email || !password}>
+        <Boton type="submit" className="mt-1 min-h-12 w-full text-base" cargando={m.isPending} disabled={!email || !password}>
           Entrar
         </Boton>
-        <Link to="/recuperar" className="text-center text-sm font-semibold text-accent underline-offset-4 hover:underline">
+        <Link to="/recuperar" className="text-center text-sm font-bold text-acento underline-offset-4 hover:underline">
           ¿Olvidaste tu contraseña?
         </Link>
       </form>
@@ -61,7 +83,7 @@ export function RecuperarPage() {
   const [email, setEmail] = useState('')
   const m = useMutation({ mutationFn: () => solicitarRecuperacion(email) })
   return (
-    <Marco titulo="Recuperar contraseña">
+    <Marco titulo={<>Recupera <Acento>tu</Acento> acceso</>}>
       {m.isSuccess ? (
         <Aviso tono="exito" titulo="Revisa tu correo">
           Si la cuenta existe, te enviamos un enlace para definir una nueva contraseña.
@@ -78,12 +100,12 @@ export function RecuperarPage() {
           <p className="text-sm text-ink-2">Escribe el correo de tu cuenta individual y te enviaremos un enlace.</p>
           <Campo etiqueta="Correo" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} requerido />
           {m.isError && <Aviso tono="peligro">{mensajeError(m.error)}</Aviso>}
-          <Boton type="submit" cargando={m.isPending} disabled={!email}>
+          <Boton type="submit" className="mt-1 min-h-12 w-full text-base" cargando={m.isPending} disabled={!email}>
             Enviar enlace
           </Boton>
         </form>
       )}
-      <Link to="/login" className="mt-4 block text-center text-sm font-semibold text-accent underline-offset-4 hover:underline">
+      <Link to="/login" className="mt-4 block text-center text-sm font-bold text-acento underline-offset-4 hover:underline">
         Volver a iniciar sesión
       </Link>
     </Marco>
@@ -106,7 +128,7 @@ export function NuevaContrasenaPage() {
     return (
       <Marco titulo="Enlace no válido">
         <Aviso tono="alerta">El enlace expiró o ya se usó. Solicita uno nuevo.</Aviso>
-        <Link to="/recuperar" className="mt-4 block text-center text-sm font-semibold text-accent">
+        <Link to="/recuperar" className="mt-4 block text-center text-sm font-bold text-acento">
           Solicitar otro enlace
         </Link>
       </Marco>
@@ -114,7 +136,7 @@ export function NuevaContrasenaPage() {
   }
 
   return (
-    <Marco titulo="Define tu contraseña">
+    <Marco titulo={<>Define <Acento>tu</Acento> contraseña</>}>
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -143,7 +165,7 @@ export function NuevaContrasenaPage() {
           requerido
         />
         {m.isError && <Aviso tono="peligro">{mensajeError(m.error)}</Aviso>}
-        <Boton type="submit" cargando={m.isPending} disabled={!p1 || !p2 || corta || distinta}>
+        <Boton type="submit" className="mt-1 min-h-12 w-full text-base" cargando={m.isPending} disabled={!p1 || !p2 || corta || distinta}>
           Guardar y entrar
         </Boton>
       </form>

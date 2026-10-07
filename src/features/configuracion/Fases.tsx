@@ -36,7 +36,7 @@ export function FasesPanel() {
                 const fe = fechas[f.id] ?? { inicio: f.inicio ?? '', fin: f.fin ?? '' }
                 const sucio = fe.inicio !== (f.inicio ?? '') || fe.fin !== (f.fin ?? '')
                 return (
-                  <li key={f.id} className="rounded-xl border border-line p-4">
+                  <li key={f.id} className="rounded-2xl border border-line bg-surface p-4 dark:bg-white/[0.04]">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="flex-1 font-semibold">{f.nombre}</p>
                       <Insignia tono={f.estado === 'abierta' ? 'exito' : f.estado === 'cerrada' ? 'peligro' : 'neutro'}>{ESTADO_FASE[f.estado]}</Insignia>

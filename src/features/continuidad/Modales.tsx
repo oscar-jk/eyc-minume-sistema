@@ -182,7 +182,7 @@ export function DecisionModal({ caso, onCerrar }: { caso: CasoDecidible | null; 
           error={exige && !comentario.trim() ? 'Obligatorio en casos elevados y en seguimiento o sustitución.' : null}
         />
         {decision === 'sustitucion' && (
-          <div className="flex flex-col gap-3 rounded-xl border border-line p-3">
+          <div className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04]">
             <label className="flex min-h-11 items-center gap-3">
               <input type="checkbox" className="size-5 accent-[var(--accent)]" checked={sustituirAhora} onChange={(e) => setSustituirAhora(e.target.checked)} />
               <span className="text-sm font-semibold">Registrar ya a la persona que entra (se asigna al mismo cargo)</span>

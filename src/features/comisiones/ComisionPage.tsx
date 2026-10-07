@@ -31,7 +31,7 @@ export function ComisionPage() {
 
   return (
     <>
-      <Titulo sub={comision?.nombre}>
+      <Titulo sobre={id ? 'Comisión' : <>Mi <span className="acento normal-case tracking-normal">comisión</span></>} sub={comision?.nombre} adorno="bloques">
         {comision ? siglaDe(comision) : 'Comisión'}
       </Titulo>
       <Pestanas
@@ -110,8 +110,8 @@ function JornadaPanel({ comisionId, fase, hoy }: { comisionId: number; fase: { i
             {filas
               .filter((f) => f.ambito === 'mesa')
               .map((f) => (
-                <li key={f.asignacion_id} className="flex flex-wrap items-center gap-3 rounded-xl border border-line p-3">
-                  <div className="min-w-0 flex-1">
+                <li key={f.asignacion_id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04]">
+                  <div className="min-w-0 flex-1 basis-[13rem]">
                     <Link to={`/personas/${f.persona_id}`} className="font-semibold hover:underline">
                       {f.persona_nombre}
                     </Link>
@@ -124,7 +124,7 @@ function JornadaPanel({ comisionId, fase, hoy }: { comisionId: number; fase: { i
                   {f.dominante && (
                     <Link
                       to={f.evaluacion_id ? `/evaluaciones/${f.evaluacion_id}` : `/evaluar?persona=${f.persona_id}&fecha=${dia}`}
-                      className="inline-flex min-h-11 items-center rounded-lg bg-accent px-4 text-sm font-semibold text-accent-ink hover:bg-accent-hover"
+                      className="inline-flex min-h-11 items-center rounded-xl bg-grad-primario px-5 text-sm font-bold text-white shadow-boton transition hover:-translate-y-px hover:brightness-110"
                     >
                       {f.evaluacion_estado === 'completa' ? 'Ver' : f.evaluacion_estado ? 'Continuar' : 'Evaluar'}
                     </Link>
@@ -141,9 +141,11 @@ function JornadaPanel({ comisionId, fase, hoy }: { comisionId: number; fase: { i
 function PorActividad({ comisionId }: { comisionId: number }) {
   const m = useMomento()
   const vigentes = useVigentes(comisionId)
-  const [actividad, setActividad] = useState<string>('')
-  const evals = useEvaluaciones({ actividadId: actividad }, !!actividad)
+  const [elegida, setActividad] = useState<string>('')
   const actividades = useActividadesAbiertas(comisionId)
+  // Por defecto, la actividad abierta más reciente: el EyC evalúa sin pasos extra.
+  const actividad = elegida || actividades.data?.[0]?.id || ''
+  const evals = useEvaluaciones({ actividadId: actividad }, !!actividad)
 
   return (
     <Tarjeta titulo="Evaluar por actividad">
@@ -153,14 +155,26 @@ function PorActividad({ comisionId }: { comisionId: number }) {
       >
         {(acts) => (
           <div className="flex flex-col gap-4">
-            <Selector etiqueta="Actividad" value={actividad} onChange={(e) => setActividad(e.target.value)}>
-              <option value="">Elige una actividad…</option>
-              {acts.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {fecha(a.fecha)} · {a.nombre}
-                </option>
-              ))}
-            </Selector>
+            <div role="radiogroup" aria-label="Actividad" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sin-scrollbar">
+              {acts.map((a) => {
+                const activa = a.id === actividad
+                return (
+                  <button
+                    key={a.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={activa}
+                    onClick={() => setActividad(a.id)}
+                    className={`flex min-h-14 shrink-0 flex-col items-start justify-center rounded-2xl px-4 py-2 text-left transition ${
+                      activa ? 'bg-grad-primario text-white shadow-boton' : 'bg-surface-2 text-ink hover:bg-accent-soft dark:bg-white/[0.06]'
+                    }`}
+                  >
+                    <span className="font-cond text-xs font-bold uppercase tracking-wider opacity-80">{fecha(a.fecha, true)}</span>
+                    <span className="max-w-56 truncate font-bold">{a.nombre}</span>
+                  </button>
+                )
+              })}
+            </div>
             {actividad && (
               <Consulta q={vigentes} vacio={<EstadoVacio titulo="La mesa directiva aún no está cargada">La Subsecretaría registra a las personas y sus cargos.</EstadoVacio>}>
                 {(personas) => (
@@ -170,15 +184,15 @@ function PorActividad({ comisionId }: { comisionId: number }) {
                       .map((p) => {
                         const ev = evals.data?.find((e) => e.persona_id === p.persona_id)
                         return (
-                          <li key={p.asignacion_id} className="flex flex-wrap items-center gap-3 rounded-xl border border-line p-3">
-                            <div className="min-w-0 flex-1">
+                          <li key={p.asignacion_id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04]">
+                            <div className="min-w-0 flex-1 basis-[13rem]">
                               <p className="font-semibold">{p.persona_nombre}</p>
                               <p className="font-cond text-sm text-ink-3">{p.cargo_nombre}</p>
                             </div>
                             <EstadoEval estado={ev?.estado} />
                             <Link
                               to={ev ? `/evaluaciones/${ev.evaluacion_id}` : `/evaluar?persona=${p.persona_id}&actividad=${actividad}`}
-                              className="inline-flex min-h-11 items-center rounded-lg bg-accent px-4 text-sm font-semibold text-accent-ink hover:bg-accent-hover"
+                              className="inline-flex min-h-11 items-center rounded-xl bg-grad-primario px-5 text-sm font-bold text-white shadow-boton transition hover:-translate-y-px hover:brightness-110"
                             >
                               {ev?.estado === 'completa' ? 'Ver' : ev ? 'Continuar' : 'Evaluar'}
                             </Link>
@@ -227,8 +241,8 @@ function MesaPanel({ comisionId }: { comisionId: number }) {
                 .map((p) => {
                   const fila = monitoreo.data?.find((x) => x.persona_id === p.persona_id)
                   return (
-                    <li key={p.asignacion_id} className="flex flex-wrap items-center gap-3 rounded-xl border border-line p-3">
-                      <div className="min-w-0 flex-1">
+                    <li key={p.asignacion_id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04]">
+                      <div className="min-w-0 flex-1 basis-[13rem]">
                         <Link to={`/personas/${p.persona_id}`} className="font-semibold hover:underline">
                           {p.persona_nombre}
                         </Link>
@@ -333,7 +347,7 @@ function HistoricoPanel({ comisionId }: { comisionId: number }) {
                     <tr key={e.evaluacion_id}>
                       <td className="tabular">{fecha(e.fecha)}</td>
                       <td>
-                        <Link to={`/evaluaciones/${e.evaluacion_id}`} className="font-semibold text-accent hover:underline">
+                        <Link to={`/evaluaciones/${e.evaluacion_id}`} className="font-bold text-acento hover:underline">
                           {e.persona_nombre}
                         </Link>
                       </td>

@@ -1,14 +1,17 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
-type Variante = 'primario' | 'secundario' | 'fantasma' | 'peligro'
+type Variante = 'primario' | 'secundario' | 'fantasma' | 'peligro' | 'claro'
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors min-h-11 px-4 text-sm disabled:opacity-55 disabled:cursor-not-allowed select-none'
+  'relative inline-flex items-center justify-center gap-2 rounded-xl font-bold tracking-tight transition-all duration-200 min-h-11 px-5 text-[0.95rem] select-none disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.98]'
+
+/** Sin botones de solo contorno: todos llevan relleno (degradado de marca o tinte). */
 const variantes: Record<Variante, string> = {
-  primario: 'bg-accent text-accent-ink hover:bg-accent-hover',
-  secundario: 'border border-line-strong bg-surface text-ink hover:bg-surface-2',
-  fantasma: 'text-accent hover:bg-accent-soft',
-  peligro: 'bg-danger text-accent-ink hover:opacity-90',
+  primario: 'bg-grad-primario text-white shadow-boton hover:brightness-110 hover:-translate-y-px',
+  secundario: 'bg-accent-soft text-acento hover:brightness-95 dark:hover:brightness-125',
+  fantasma: 'text-acento hover:bg-accent-soft px-3',
+  peligro: 'bg-grad-rosa text-white shadow-[0_8px_20px_-8px_rgb(229_53_53/0.6)] hover:brightness-110 hover:-translate-y-px',
+  claro: 'bg-white text-[#0043c5] shadow-[0_8px_24px_-10px_rgb(0_0_0/0.4)] hover:-translate-y-px',
 }
 
 export function Boton({
@@ -33,3 +36,4 @@ export function Boton({
     </button>
   )
 }
+

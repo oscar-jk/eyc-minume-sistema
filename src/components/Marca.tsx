@@ -1,12 +1,15 @@
 const ARCHIVO = {
-  header: { base: 'header-logo', alt: 'MINUME XVII' },
+  /** «MINUME XVII Período de Sesiones» */
+  lockup: { base: 'login-lockup', alt: 'MINUME XVII Período de Sesiones' },
+  /** «MINUME de ESTRELLAS» */
+  estrellas: { base: 'header-logo', alt: 'MINUME de Estrellas' },
   footer: { base: 'footer-logo', alt: 'Ministerio de Educación · PLERD' },
-  login: { base: 'login-lockup', alt: 'MINUME XVII Período de Sesiones' },
 } as const
 
-/** Logos oficiales: versión clara (tinta oscura) y oscura (blanca), según el tema. */
-export function Marca({ tipo, className = '' }: { tipo: keyof typeof ARCHIVO; className?: string }) {
+/** Logos oficiales: versión de tinta oscura (tema claro) y blanca (tema oscuro o fondos en degradado). */
+export function Marca({ tipo, className = '', blanco = false }: { tipo: keyof typeof ARCHIVO; className?: string; blanco?: boolean }) {
   const { base, alt } = ARCHIVO[tipo]
+  if (blanco) return <img src={`/brand/${base}-dark.png`} alt={alt} className={className} />
   return (
     <>
       <img src={`/brand/${base}-light.png`} alt={alt} className={`dark:hidden ${className}`} />

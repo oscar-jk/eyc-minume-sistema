@@ -23,7 +23,7 @@ const GESTION = ['subsecretario', 'admin'] as const
 function NoEncontrada() {
   return (
     <EstadoVacio titulo="Página no encontrada">
-      <Link to="/" className="font-semibold text-accent">
+      <Link to="/" className="font-bold text-acento">
         Ir al inicio
       </Link>
     </EstadoVacio>

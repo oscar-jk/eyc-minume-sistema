@@ -5,7 +5,7 @@ import { Boton } from '@/components/Boton'
 import { Campo, Selector } from '@/components/Campo'
 import { Consulta, EstadoVacio } from '@/components/Estados'
 import { Semaforo } from '@/components/Semaforo'
-import { Aviso, Insignia, Pestanas, Tabla, Tarjeta, Titulo } from '@/components/Ui'
+import { Acento, Aviso, Insignia, Pestanas, Tabla, Tarjeta, Titulo } from '@/components/Ui'
 import { useSesion } from '@/features/auth/AuthProvider'
 import { ActividadesPanel } from '@/features/actividades/ActividadesPanel'
 import { useActividades } from '@/features/actividades/api'
@@ -25,7 +25,9 @@ export function MonitoreoPage() {
   const evaluaEyc = perfil?.rol === 'subsecretario' || perfil?.rol === 'admin'
   return (
     <>
-      <Titulo sub="Desempeño por corte, cobertura de evaluación y recomendaciones">Monitoreo</Titulo>
+      <Titulo sobre="Subsecretaría" adorno="circulos" sub="Desempeño por corte, cobertura de evaluación y recomendaciones">
+        Monitoreo <Acento>del</Acento> desempeño
+      </Titulo>
       <AvisoPesos />
       <Pestanas
         etiqueta="Vistas de monitoreo"
@@ -75,6 +77,7 @@ function SemaforoPanel() {
   const [f, setF] = useState({ comision: '', cargo: '', ambito: '' as '' | Ambito, estatus: '' as '' | Estatus, texto: '', inactivas: false })
   const [rec, setRec] = useState<FilaRecomendable | null>(null)
   const [verFiltros, setVerFiltros] = useState(false)
+  const [soloSem, setSoloSem] = useState<TSemaforo | null>(null)
   const corteAbierto = m.abiertas.some((x) => x.corte_id === corte?.id)
 
   const filtradas = useMemo(
@@ -155,12 +158,47 @@ function SemaforoPanel() {
         )}
       </Tarjeta>
 
+      {filtradas.length > 0 && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" role="group" aria-label="Resumen por semáforo (toca para filtrar)">
+          {ORDEN.map((s) => {
+            const n = filtradas.filter((r) => (r.semaforo ?? 'gris') === s).length
+            const activo = soloSem === s
+            // Cada estado con identidad propia: tinte de fondo, franja en degradado y punto luminoso.
+            const est = {
+              rojo: { txt: 'text-rojo', caja: 'bg-rojo-bg ring-rojo/25', franja: 'from-[#e53535] to-[#ff7aa8]', punto: 'bg-rojo' },
+              amarillo: { txt: 'text-amarillo', caja: 'bg-amarillo-bg ring-amarillo/25', franja: 'from-[#f5a300] to-[#ffd84d]', punto: 'bg-amarillo' },
+              verde: { txt: 'text-verde', caja: 'bg-verde-bg ring-verde/25', franja: 'from-[#14a34a] to-[#6ee7a0]', punto: 'bg-verde' },
+              gris: { txt: 'text-gris', caja: 'bg-gris-bg ring-gris/20', franja: 'from-[#6b7c99] to-[#b6c5de]', punto: 'bg-gris' },
+            }[s]
+            return (
+              <button
+                key={s}
+                type="button"
+                aria-pressed={activo}
+                onClick={() => setSoloSem(activo ? null : s)}
+                className={`relative overflow-hidden rounded-3xl p-4 pt-5 text-left shadow-card ring-1 transition hover:-translate-y-0.5 ${
+                  activo ? 'bg-grad-primario text-white ring-transparent' : est.caja
+                }`}
+              >
+                <span aria-hidden className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${est.franja}`} />
+                <span className="flex items-center justify-between">
+                  <span className={`font-cond text-5xl font-extrabold leading-none tabular ${activo ? '' : est.txt}`}>{n}</span>
+                  <span aria-hidden className={`size-3 rounded-full ${est.punto} shadow-[0_0_14px_currentColor] ${est.txt}`} />
+                </span>
+                <span className={`mt-1 block text-sm font-extrabold ${activo ? '' : est.txt}`}>{SEMAFORO[s].etiqueta}</span>
+                <span className={`block text-xs ${activo ? 'text-white/80' : 'text-ink-3'}`}>{activo ? 'Filtro activo · toca para quitar' : 'Toca para filtrar'}</span>
+              </button>
+            )
+          })}
+        </div>
+      )}
+
       <Consulta q={q} filas={6} vacio={<EstadoVacio titulo="Aún no hay personas registradas" />}>
         {() =>
           filtradas.length === 0 ? (
             <EstadoVacio titulo="Nadie coincide con los filtros" />
           ) : (
-            ORDEN.map((s) => {
+            ORDEN.filter((s) => !soloSem || s === soloSem).map((s) => {
               const grupo = filtradas.filter((r) => (r.semaforo ?? 'gris') === s)
               if (!grupo.length) return null
               return (
@@ -174,7 +212,7 @@ function SemaforoPanel() {
                 >
                   <ul className="flex flex-col gap-2">
                     {grupo.map((r) => (
-                      <li key={r.persona_id} className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-line p-3">
+                      <li key={r.persona_id} className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04]">
                         <div className="min-w-0 flex-1 basis-48">
                           <Link to={`/personas/${r.persona_id}`} className="font-semibold hover:underline">
                             {r.nombre}
@@ -260,7 +298,7 @@ function CoberturaPanel() {
                   return (
                     <tr key={r.comision_id}>
                       <td>
-                        <Link to={`/comisiones/${r.comision_id}`} className="font-semibold text-accent hover:underline">
+                        <Link to={`/comisiones/${r.comision_id}`} className="font-bold text-acento hover:underline">
                           {r.comision_sigla ?? r.comision_nombre}
                         </Link>
                       </td>
@@ -326,8 +364,8 @@ function EvaluarEycPanel() {
             return (
               <ul className="flex flex-col gap-2">
                 {eyc.map((r) => (
-                  <li key={r.persona_id} className="flex flex-wrap items-center gap-3 rounded-xl border border-line p-3">
-                    <div className="min-w-0 flex-1">
+                  <li key={r.persona_id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04]">
+                    <div className="min-w-0 flex-1 basis-[13rem]">
                       <Link to={`/personas/${r.persona_id}`} className="font-semibold hover:underline">
                         {r.nombre}
                       </Link>
@@ -335,7 +373,7 @@ function EvaluarEycPanel() {
                     </div>
                     <Semaforo semaforo={r.semaforo} puntaje={r.puntaje} n={r.n_evaluaciones} compacto />
                     {ref && (
-                      <Link to={`/evaluar?persona=${r.persona_id}&${ref}`} className="inline-flex min-h-11 items-center rounded-lg bg-accent px-4 text-sm font-semibold text-accent-ink hover:bg-accent-hover">
+                      <Link to={`/evaluar?persona=${r.persona_id}&${ref}`} className="inline-flex min-h-11 items-center rounded-xl bg-grad-primario px-5 text-sm font-bold text-white shadow-boton transition hover:-translate-y-px hover:brightness-110">
                         Evaluar
                       </Link>
                     )}
