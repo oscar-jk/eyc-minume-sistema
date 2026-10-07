@@ -23,7 +23,7 @@ export function Tarjeta({
       } ${className}`}
     >
       <span aria-hidden className="pointer-events-none absolute left-6 right-16 top-0 h-[3px] rounded-b-full bg-grad-primario opacity-80 dark:bg-grad-celeste" />
-      <Damero tono="azul" aria-hidden className="pointer-events-none absolute -right-3 -top-3 size-14 opacity-[0.08] dark:opacity-[0.14]" />
+      <Damero tono="azul" aria-hidden className="pointer-events-none absolute -right-3 -top-3 size-16 opacity-[0.1] [mask-image:radial-gradient(closest-side,#000_20%,transparent_100%)] [-webkit-mask-image:radial-gradient(closest-side,#000_20%,transparent_100%)] dark:opacity-[0.16]" />
       {(titulo || accion) && (
         <header className="relative mb-4 flex flex-wrap items-center justify-between gap-3">
           {titulo && (
@@ -77,7 +77,7 @@ export function Titulo({
   return (
     <header className="animar-entrada relative isolate mb-6 overflow-hidden rounded-3xl bg-grad-heroe px-5 py-6 text-white shadow-card sm:px-8 sm:py-8">
       <CieloEstrellado densidad={1.6} className="-z-10" />
-      <div aria-hidden className="pointer-events-none absolute -right-10 -top-8 w-56 rotate-6 opacity-30 sm:w-72">
+      <div aria-hidden className="pointer-events-none absolute -right-12 -top-10 w-60 rotate-6 opacity-35 mix-blend-screen [mask-image:radial-gradient(closest-side,#000_35%,transparent_100%)] [-webkit-mask-image:radial-gradient(closest-side,#000_35%,transparent_100%)] sm:w-80">
         {ADORNOS[adorno]('w-full h-auto')}
       </div>
       <Destello aria-hidden className="pointer-events-none absolute bottom-4 right-1/3 size-4 text-white/70" />

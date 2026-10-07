@@ -73,7 +73,7 @@ function Capitulo({ id, n, rol, children }: { id: Rol; n: number; rol: (typeof R
     <section id={id} className="scroll-mt-28 print:break-before-page">
       <header className="relative isolate mb-8 overflow-hidden rounded-[32px] rounded-tr-[8px] bg-grad-heroe px-6 py-8 text-white shadow-card sm:px-10 sm:py-12 print:break-after-avoid print:py-8 print:shadow-none">
         <CieloEstrellado densidad={1.4} className="-z-10 print:hidden" />
-        <div aria-hidden className="pointer-events-none absolute -right-8 -top-6 w-48 rotate-6 opacity-30 sm:w-64">
+        <div aria-hidden className="pointer-events-none absolute -right-10 -top-8 w-52 rotate-6 opacity-35 mix-blend-screen [mask-image:radial-gradient(closest-side,#000_35%,transparent_100%)] [-webkit-mask-image:radial-gradient(closest-side,#000_35%,transparent_100%)] sm:w-72">
           {rol.adorno}
         </div>
         <p className="sobretitulo relative flex items-center gap-3 text-cian">
