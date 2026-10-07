@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+        env:
+          VITE_SUPABASE_URL: https://hnlhhwululasvlckbcrq.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_-3SmtEtO1brhGbThaJeICw_OPugVcG9
+      - name: Ninguna llave de servicio en el bundle
+        run: "! grep -rIl 'service_role' dist"
