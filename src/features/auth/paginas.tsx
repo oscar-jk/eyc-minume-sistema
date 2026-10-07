@@ -91,11 +91,14 @@ export function RecuperarPage() {
 }
 
 export function NuevaContrasenaPage() {
-  const { sesion, cargando } = useSesion()
+  const { sesion, cargando, terminarRecuperacion } = useSesion()
   const nav = useNavigate()
   const [p1, setP1] = useState('')
   const [p2, setP2] = useState('')
-  const m = useMutation({ mutationFn: () => cambiarContrasena(p1), onSuccess: () => nav('/', { replace: true }) })
+  const m = useMutation({ mutationFn: () => cambiarContrasena(p1), onSuccess: () => {
+      terminarRecuperacion()
+      nav('/', { replace: true })
+    } })
   const corta = p1.length > 0 && p1.length < 10
   const distinta = p2.length > 0 && p1 !== p2
 

@@ -10,9 +10,10 @@ interface Estado {
   cargando: boolean
   recuperando: boolean
   errorPerfil: unknown
+  terminarRecuperacion: () => void
 }
 
-const Ctx = createContext<Estado>({ sesion: null, perfil: null, cargando: true, recuperando: false, errorPerfil: null })
+const Ctx = createContext<Estado>({ sesion: null, perfil: null, cargando: true, recuperando: false, errorPerfil: null, terminarRecuperacion: () => {} })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const qc = useQueryClient()
@@ -49,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     cargando: !listo || (!!uid && perfil.isPending),
     recuperando,
     errorPerfil: perfil.error,
+    terminarRecuperacion: () => setRecuperando(false),
   }
   return <Ctx.Provider value={valor}>{children}</Ctx.Provider>
 }
