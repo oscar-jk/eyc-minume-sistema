@@ -15,7 +15,7 @@ Documentación:
 | [SEGURIDAD.md](SEGURIDAD.md) | Matriz de permisos por rol y por fase |
 | [GUIA-INICIO.md](GUIA-INICIO.md) | Una página: cargar personas y abrir la primera fase |
 | [docs/Manual-de-usuario-EyC-MINUME-XVII.pdf](docs/Manual-de-usuario-EyC-MINUME-XVII.pdf) | Manual de usuario por rol (EyC, Subsecretaría, Secretaría General, Admin). También en la app: `/manual` |
-| [docs/Presentacion-EyC-MINUME-XVII.mp4](docs/Presentacion-EyC-MINUME-XVII.mp4) | Video de presentación (46 s, 1080p). Fuente editable en [`presentacion-video/`](presentacion-video) (HyperFrames): `npx hyperframes preview` para editar, `npx hyperframes render` para regenerar |
+| [docs/Presentacion-EyC-MINUME-XVII.mp4](docs/Presentacion-EyC-MINUME-XVII.mp4) | Video de presentación (33 s, 1080p, con música original sincronizada; se regenera con `python presentacion-video/audio/componer.py`). Fuente editable en [`presentacion-video/`](presentacion-video) (HyperFrames): `npx hyperframes preview` para editar, `npx hyperframes render` para regenerar |
 
 ## Arranque local
 

@@ -61,14 +61,14 @@
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="main" data-start="0" data-duration="46" data-width="1920" data-height="1080">
+    <div id="root" data-composition-id="main" data-start="0" data-duration="33" data-width="1920" data-height="1080">
       <!-- Fondo y cielo compartidos -->
       <div id="bg"></div>
       <div id="nebulosa"></div>
       <div id="cielo"></div>
 
       <!-- 1 · Intro -->
-      <section id="s1" class="clip" data-start="0" data-duration="6.2" data-track-index="1">
+      <section id="s1" class="clip" data-start="0" data-duration="4.5" data-track-index="1">
         <div class="escena" id="s1-in">
           <div id="s1-anillo-w" style="position:absolute;left:460px;top:40px;width:1000px;height:1000px;">
             <img id="s1-anillo" src="assets/img/anillo.svg" alt="" style="width:100%;height:100%;mix-blend-mode:screen;" />
@@ -94,7 +94,7 @@
       </section>
 
       <!-- 2 · Propuesta de valor -->
-      <section id="s2" class="clip" data-start="5.7" data-duration="5.8" data-track-index="1">
+      <section id="s2" class="clip" data-start="4" data-duration="4.5" data-track-index="1">
         <div class="escena" id="s2-in">
           <div style="position:absolute;left:180px;top:220px;">
             <p class="sobre" id="s2-sobre">El desempeño de los voluntarios, en un solo lugar</p>
@@ -109,7 +109,7 @@
       </section>
 
       <!-- 3 · Acceso -->
-      <section id="s3" class="clip" data-start="11" data-duration="5.6" data-track-index="1">
+      <section id="s3" class="clip" data-start="8" data-duration="3.5" data-track-index="1">
         <div class="escena" id="s3-in">
           <div style="position:absolute;left:120px;top:250px;width:560px;">
             <p class="sobre s3-t">Acceso seguro</p>
@@ -128,7 +128,7 @@
       </section>
 
       <!-- 4 · Teléfonos -->
-      <section id="s4" class="clip" data-start="16.1" data-duration="7" data-track-index="1">
+      <section id="s4" class="clip" data-start="11" data-duration="4" data-track-index="1">
         <div class="escena" id="s4-in">
           <div data-layout-allow-occlusion style="position:absolute;left:150px;top:230px;width:760px;">
             <p class="sobre s4-t">Equipo de EyC · desde el teléfono</p>
@@ -145,7 +145,7 @@
       </section>
 
       <!-- 5 · Monitoreo -->
-      <section id="s5" class="clip" data-start="22.6" data-duration="7.6" data-track-index="1">
+      <section id="s5" class="clip" data-start="14.5" data-duration="6.5" data-track-index="1">
         <div class="escena" id="s5-in">
           <div style="position:absolute;left:0;right:0;top:56px;text-align:center;">
             <p class="sobre s5-t">Subsecretaría · Secretaría General</p>
@@ -170,7 +170,7 @@
       </section>
 
       <!-- 6 · Ficha y puntaje -->
-      <section id="s6" class="clip" data-start="29.7" data-duration="6.6" data-track-index="1">
+      <section id="s6" class="clip" data-start="20.5" data-duration="5" data-track-index="1">
         <div class="escena" id="s6-in">
           <div class="nav" id="s6-nav" style="left:90px;top:150px;width:1100px;height:731px;">
             <div class="barra"><s></s><s></s><s></s><em>eyc-minume-xvii.vercel.app/personas</em></div>
@@ -193,7 +193,7 @@
       </section>
 
       <!-- 7 · Comisiones y manual -->
-      <section id="s7" class="clip" data-start="35.8" data-duration="5.4" data-track-index="1">
+      <section id="s7" class="clip" data-start="25" data-duration="3.5" data-track-index="1">
         <div class="escena" id="s7-in">
           <div style="position:absolute;left:0;right:0;top:70px;text-align:center;">
             <p class="sobre s7-t">Comisiones · decisiones · rotaciones · auditoría</p>
@@ -211,7 +211,7 @@
       </section>
 
       <!-- 8 · Cierre -->
-      <section id="s8" class="clip" data-start="40.7" data-duration="5.3" data-track-index="1">
+      <section id="s8" class="clip" data-start="28" data-duration="5" data-track-index="1">
         <div class="escena" id="s8-in">
           <div id="s8-anillo-w" style="position:absolute;left:560px;top:-60px;width:800px;height:800px;">
             <img id="s8-anillo" src="assets/img/anillo.svg" alt="" style="width:100%;height:100%;mix-blend-mode:screen;opacity:.55;" />
@@ -232,6 +232,7 @@
       </section>
 
       <div id="barrido" data-layout-allow-occlusion></div>
+      <audio id="musica" src="assets/audio/musica.wav" data-start="0" data-duration="33" data-track-index="5" data-volume="0.9"></audio>
       <div id="negro" data-layout-allow-occlusion style="position:absolute;inset:0;background:#02022a;opacity:0;z-index:60;"></div>
     </div>
 
@@ -262,7 +263,7 @@
         }
 
         const tl = gsap.timeline({ paused: true });
-        const D = 46;
+        const D = 33;
 
         // ── Cielo: deriva lenta y titileo con repeticiones finitas ──
         tl.fromTo("#cielo", { x: 0, y: 0 }, { x: -80, y: -40, duration: D, ease: "none" }, 0);
@@ -277,7 +278,7 @@
           tl.fromTo(el, { scale: 0.55, rotation: 0 }, { scale: 1.05, rotation: 45, duration: per, ease: "sine.inOut", yoyo: true, repeat: Math.max(0, Math.floor(D / per) - 1) }, rnd());
         });
         // Estrellas fugaces
-        [3.2, 13.4, 26.1, 38.0].forEach((t, k) => {
+        [2.2, 9.6, 18.6, 26.6].forEach((t, k) => {
           const f = document.createElement("div");
           f.style.cssText = "position:absolute;width:220px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#bfe9ff,#fff);opacity:0;z-index:2";
           document.getElementById("root").insertBefore(f, document.getElementById("barrido"));
@@ -293,94 +294,93 @@
           tl.fromTo("#barrido", { x: -700, opacity: 0 }, { x: 2100, opacity: 1, duration: 0.9, ease: "power2.inOut" }, t - 0.45);
           tl.to("#barrido", { opacity: 0, duration: 0.2 }, t + 0.25);
         };
-        [5.7, 11, 16.1, 22.6, 29.7, 35.8, 40.7].forEach(barrer);
+        [4.0, 8.0, 11.0, 14.5, 20.5, 25.0, 28.0].forEach(barrer);
 
         // Entrada/salida genérica del contenedor de cada escena (nunca sobre .clip)
         const salida = (sel, fin, dir = -1) => tl.to(sel, { opacity: 0, scale: 1.04, y: dir * 30, filter: "blur(10px)", duration: 0.5, ease: "power2.in" }, fin - 0.5);
         const entrada = (sel, ini) => tl.fromTo(sel, { opacity: 0, scale: 0.97, filter: "blur(8px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.6, ease: "power2.out" }, ini);
 
-        // ── 1 · Intro ──
-        tl.fromTo("#s1-anillo", { rotation: 0 }, { rotation: 70, duration: 6.2, ease: "none" }, 0);
-        tl.fromTo("#s1-anillo-w", { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 0.55, duration: 2.2, ease: "expo.out" }, 0.1);
-        tl.fromTo("#s1-glow", { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.8, ease: "power2.out" }, 0.2);
-        tl.fromTo("#s1-anio", { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, 0.6);
-        tl.fromTo("#s1-dest", { scale: 0, rotation: -180 }, { scale: 1, rotation: 0, duration: 0.9, ease: "back.out(2.2)" }, 0.75);
-        tl.fromTo("#s1-estrellas", { x: 60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, 0.85);
-        tl.fromTo("#s1-lockup", { y: 40, opacity: 0, scale: 0.94, filter: "blur(12px)" }, { y: 0, opacity: 1, scale: 1, filter: "blur(0px)", duration: 1, ease: "expo.out" }, 1.4);
-        tl.fromTo("#s1-sobre", { yPercent: 110 }, { yPercent: 0, duration: 0.6, ease: "power3.out" }, 2.2);
-        tl.fromTo(".s1-pal", { yPercent: 115 }, { yPercent: 0, duration: 0.8, ease: "power4.out", stagger: 0.14 }, 2.4);
-        salida("#s1-in", 6.2);
+        // ── 1 · Intro (0–4.5) ──
+        tl.fromTo("#s1-anillo", { rotation: 0 }, { rotation: 60, duration: 4.5, ease: "none" }, 0);
+        tl.fromTo("#s1-anillo-w", { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 0.55, duration: 1.8, ease: "expo.out" }, 0.05);
+        tl.fromTo("#s1-glow", { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.5, ease: "power2.out" }, 0.1);
+        tl.fromTo("#s1-anio", { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 0.4);
+        tl.fromTo("#s1-dest", { scale: 0, rotation: -180 }, { scale: 1, rotation: 0, duration: 0.8, ease: "back.out(2.2)" }, 0.5);
+        tl.fromTo("#s1-estrellas", { x: 60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 0.6);
+        tl.fromTo("#s1-lockup", { y: 40, opacity: 0, scale: 0.94, filter: "blur(12px)" }, { y: 0, opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.9, ease: "expo.out" }, 1.0);
+        tl.fromTo("#s1-sobre", { yPercent: 110 }, { yPercent: 0, duration: 0.5, ease: "power3.out" }, 1.7);
+        tl.fromTo(".s1-pal", { yPercent: 115 }, { yPercent: 0, duration: 0.7, ease: "power4.out", stagger: 0.12 }, 1.85);
+        salida("#s1-in", 4.5);
 
-        // ── 2 · Propuesta ──
-        entrada("#s2-in", 5.7);
-        tl.fromTo("#s2-sobre", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, 5.9);
-        tl.fromTo(".s2-l", { yPercent: 115 }, { yPercent: 0, duration: 0.85, ease: "power4.out", stagger: 0.55 }, 6.1);
-        tl.fromTo("#s2-estrella", { scale: 0, rotation: -120 }, { scale: 1, rotation: 0, duration: 1.2, ease: "back.out(1.6)" }, 6.3);
-        tl.to("#s2-estrella", { rotation: 90, duration: 4, ease: "none" }, 7.5);
-        salida("#s2-in", 11.5);
+        // ── 2 · Propuesta (4–8.5) ──
+        entrada("#s2-in", 4.0);
+        tl.fromTo("#s2-sobre", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, 4.15);
+        tl.fromTo(".s2-l", { yPercent: 115 }, { yPercent: 0, duration: 0.7, ease: "power4.out", stagger: 0.5 }, 4.3);
+        tl.fromTo("#s2-estrella", { scale: 0, rotation: -120 }, { scale: 1, rotation: 0, duration: 1.1, ease: "back.out(1.6)" }, 4.4);
+        tl.to("#s2-estrella", { rotation: 90, duration: 3, ease: "none" }, 5.5);
+        salida("#s2-in", 8.5);
 
-        // ── 3 · Acceso ──
-        entrada("#s3-in", 11);
-        tl.fromTo(".s3-t", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out", stagger: 0.12 }, 11.2);
-        tl.fromTo(".s3-chip", { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.55, ease: "back.out(1.7)", stagger: 0.16 }, 11.9);
-        tl.fromTo("#s3-nav", { rotationY: -28, rotationX: 8, x: 260, opacity: 0, transformPerspective: 1600 }, { rotationY: -10, rotationX: 3, x: 0, opacity: 1, duration: 1.3, ease: "expo.out", transformPerspective: 1600 }, 11.25);
-        tl.to("#s3-nav", { rotationY: -4, rotationX: 1, scale: 1.03, duration: 3.6, ease: "sine.inOut", transformPerspective: 1600 }, 12.55);
-        salida("#s3-in", 16.6);
+        // ── 3 · Acceso (8–11.5) ──
+        entrada("#s3-in", 8.0);
+        tl.fromTo(".s3-t", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out", stagger: 0.1 }, 8.15);
+        tl.fromTo(".s3-chip", { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "back.out(1.7)", stagger: 0.14 }, 8.7);
+        tl.fromTo("#s3-nav", { rotationY: -28, rotationX: 8, x: 260, opacity: 0, transformPerspective: 1600 }, { rotationY: -10, rotationX: 3, x: 0, opacity: 1, duration: 1.1, ease: "expo.out", transformPerspective: 1600 }, 8.2);
+        tl.to("#s3-nav", { rotationY: -4, rotationX: 1, scale: 1.03, duration: 2.2, ease: "sine.inOut", transformPerspective: 1600 }, 9.3);
+        salida("#s3-in", 11.5);
 
-        // ── 4 · Teléfonos ──
-        entrada("#s4-in", 16.1);
-        tl.fromTo(".s4-t", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out", stagger: 0.12 }, 16.3);
-        tl.fromTo(".s4-v", { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: "power3.out", stagger: 0.35 }, 17.2);
-        tl.fromTo("#s4-tel1", { y: 700, rotation: -8 }, { y: 0, rotation: -4, duration: 1.2, ease: "expo.out" }, 16.3);
-        tl.fromTo("#s4-tel2", { y: 760, rotation: 8 }, { y: 0, rotation: 3, duration: 1.2, ease: "expo.out" }, 16.5);
-        tl.to("#s4-tel1", { y: -20, duration: 5, ease: "sine.inOut" }, 17.5);
-        tl.to("#s4-tel2", { y: 24, duration: 5, ease: "sine.inOut" }, 17.7);
-        salida("#s4-in", 23.1);
+        // ── 4 · Teléfonos (11–15) ──
+        entrada("#s4-in", 11.0);
+        tl.fromTo(".s4-t", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out", stagger: 0.1 }, 11.15);
+        tl.fromTo(".s4-v", { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out", stagger: 0.3 }, 11.8);
+        tl.fromTo("#s4-tel1", { y: 700, rotation: -8 }, { y: 0, rotation: -4, duration: 1.1, ease: "expo.out" }, 11.1);
+        tl.fromTo("#s4-tel2", { y: 760, rotation: 8 }, { y: 0, rotation: 3, duration: 1.1, ease: "expo.out" }, 11.25);
+        tl.to("#s4-tel1", { y: -20, duration: 2.8, ease: "sine.inOut" }, 12.2);
+        tl.to("#s4-tel2", { y: 24, duration: 2.65, ease: "sine.inOut" }, 12.35);
+        salida("#s4-in", 15.0);
 
-        // ── 5 · Monitoreo: entrada, acercamiento a los KPI y cambio a tema claro ──
-        entrada("#s5-in", 22.6);
-        tl.fromTo(".s5-t", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out", stagger: 0.12 }, 22.8);
-        tl.fromTo("#s5-cam", { y: 300, scale: 0.9, transformOrigin: "50% 0%" }, { y: 0, scale: 1, duration: 1.2, ease: "expo.out" }, 22.7);
-        // Acercamiento a las tarjetas de semáforo (≈ 57–71 % de la captura)
-        tl.to(".s5-t", { opacity: 0, y: -40, duration: 0.5, ease: "power2.in", stagger: 0.06 }, 24.3);
-        tl.to("#s5-cam", { scale: 1.42, x: -10, y: -380, transformOrigin: "50% 0%", duration: 1.6, ease: "power3.inOut" }, 24.4);
-        tl.fromTo(".s5-u", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "back.out(1.7)", stagger: 0.12 }, 25.2);
-        tl.fromTo("#s5-claro", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 1.1, ease: "power3.inOut" }, 27.4);
-        tl.fromTo("#s5-tema", { scale: 1 }, { scale: 1.08, duration: 0.3, yoyo: true, repeat: 1, ease: "power2.out" }, 27.6);
-        tl.to("#s5-cam", { scale: 1.12, y: -200, duration: 1.4, ease: "power3.inOut" }, 28.4);
-        salida("#s5-in", 30.2);
+        // ── 5 · Monitoreo (14.5–21): entrada, acercamiento a los KPI y cambio a tema claro ──
+        entrada("#s5-in", 14.5);
+        tl.fromTo(".s5-t", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out", stagger: 0.1 }, 14.65);
+        tl.fromTo("#s5-cam", { y: 300, scale: 0.9, transformOrigin: "50% 0%" }, { y: 0, scale: 1, duration: 1.1, ease: "expo.out" }, 14.55);
+        tl.to(".s5-t", { opacity: 0, y: -40, duration: 0.45, ease: "power2.in", stagger: 0.05 }, 15.9);
+        tl.to("#s5-cam", { scale: 1.42, x: -10, y: -380, transformOrigin: "50% 0%", duration: 1.4, ease: "power3.inOut" }, 16.0);
+        tl.fromTo(".s5-u", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "back.out(1.7)", stagger: 0.1 }, 16.6);
+        tl.fromTo("#s5-claro", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 1.0, ease: "power3.inOut" }, 18.0);
+        tl.fromTo("#s5-tema", { scale: 1 }, { scale: 1.08, duration: 0.25, yoyo: true, repeat: 1, ease: "power2.out" }, 18.2);
+        tl.to("#s5-cam", { scale: 1.12, y: -200, duration: 1.2, ease: "power3.inOut" }, 19.2);
+        salida("#s5-in", 21.0);
 
-        // ── 6 · Ficha ──
-        entrada("#s6-in", 29.7);
-        tl.fromTo("#s6-nav", { x: -300, rotationY: 18, opacity: 0, transformPerspective: 1600 }, { x: 0, rotationY: 6, opacity: 1, duration: 1.2, ease: "expo.out", transformPerspective: 1600 }, 29.8);
-        tl.fromTo("#s6-panel", { x: 200, opacity: 0 }, { x: 0, opacity: 1, duration: 1, ease: "expo.out" }, 30.2);
-        tl.fromTo(".s6-barra", { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: 0.9, ease: "power3.out", stagger: 0.3 }, 31);
+        // ── 6 · Ficha (20.5–25.5) ──
+        entrada("#s6-in", 20.5);
+        tl.fromTo("#s6-nav", { x: -300, rotationY: 18, opacity: 0, transformPerspective: 1600 }, { x: 0, rotationY: 6, opacity: 1, duration: 1.1, ease: "expo.out", transformPerspective: 1600 }, 20.55);
+        tl.fromTo("#s6-panel", { x: 200, opacity: 0 }, { x: 0, opacity: 1, duration: 0.9, ease: "expo.out" }, 20.8);
+        tl.fromTo(".s6-barra", { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: 0.8, ease: "power3.out", stagger: 0.25 }, 21.3);
         const cifra = { v: 0 };
         const total = document.getElementById("s6-total");
-        tl.fromTo(cifra, { v: 0 }, { v: 86.4, duration: 1.8, ease: "power2.out", onUpdate: () => { total.textContent = cifra.v.toFixed(1); } }, 32);
-        tl.fromTo("#s6-total", { scale: 1 }, { scale: 1.06, duration: 0.25, yoyo: true, repeat: 1, ease: "power2.out", transformOrigin: "0% 100%" }, 33.8);
-        tl.to("#s6-nav", { rotationY: 2, scale: 1.02, duration: 4, ease: "sine.inOut", transformPerspective: 1600 }, 31);
-        salida("#s6-in", 36.3);
+        tl.fromTo(cifra, { v: 0 }, { v: 86.4, duration: 1.6, ease: "power2.out", onUpdate: () => { total.textContent = cifra.v.toFixed(1); } }, 21.9);
+        tl.fromTo("#s6-total", { scale: 1 }, { scale: 1.06, duration: 0.25, yoyo: true, repeat: 1, ease: "power2.out", transformOrigin: "0% 100%" }, 23.5);
+        tl.to("#s6-nav", { rotationY: 2, scale: 1.02, duration: 3.3, ease: "sine.inOut", transformPerspective: 1600 }, 21.7);
+        salida("#s6-in", 25.5);
 
-        // ── 7 · Comisiones y manual ──
-        entrada("#s7-in", 35.8);
-        tl.fromTo(".s7-t", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out", stagger: 0.12 }, 36);
-        tl.fromTo("#s7-a", { x: -500, rotation: -6, opacity: 0 }, { x: 0, rotation: -3, opacity: 1, duration: 1.1, ease: "expo.out" }, 36.1);
-        tl.fromTo("#s7-b", { x: 500, rotation: 6, opacity: 0 }, { x: 0, rotation: 2.5, opacity: 1, duration: 1.1, ease: "expo.out" }, 36.35);
-        tl.to("#s7-a", { y: -16, x: -20, duration: 3.6, ease: "sine.inOut" }, 37.2);
-        tl.to("#s7-b", { y: 16, x: 20, duration: 3.4, ease: "sine.inOut" }, 37.5);
-        salida("#s7-in", 41.2);
+        // ── 7 · Comisiones y manual (25–28.5) ──
+        entrada("#s7-in", 25.0);
+        tl.fromTo(".s7-t", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out", stagger: 0.1 }, 25.15);
+        tl.fromTo("#s7-a", { x: -500, rotation: -6, opacity: 0 }, { x: 0, rotation: -3, opacity: 1, duration: 1.0, ease: "expo.out" }, 25.1);
+        tl.fromTo("#s7-b", { x: 500, rotation: 6, opacity: 0 }, { x: 0, rotation: 2.5, opacity: 1, duration: 1.0, ease: "expo.out" }, 25.3);
+        tl.to("#s7-a", { y: -16, x: -20, duration: 2.4, ease: "sine.inOut" }, 26.1);
+        tl.to("#s7-b", { y: 16, x: 20, duration: 2.1, ease: "sine.inOut" }, 26.4);
+        salida("#s7-in", 28.5);
 
-        // ── 8 · Cierre ──
-        entrada("#s8-in", 40.7);
-        tl.fromTo("#s8-anillo", { rotation: 0 }, { rotation: 50, duration: 5.3, ease: "none" }, 40.7);
-        tl.fromTo("#s8-anillo-w", { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.8, ease: "expo.out" }, 40.8);
-        tl.fromTo("#s8-estrellas", { scale: 0.8, opacity: 0, filter: "blur(14px)" }, { scale: 1, opacity: 1, filter: "blur(0px)", duration: 1, ease: "expo.out" }, 41);
-        tl.fromTo("#s8-lockup", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, 41.5);
-        tl.fromTo("#s8-url", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, 41.8);
-        tl.fromTo("#s8-inst", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, 42.3);
+        // ── 8 · Cierre (28–33) ──
+        entrada("#s8-in", 28.0);
+        tl.fromTo("#s8-anillo", { rotation: 0 }, { rotation: 50, duration: 5, ease: "none" }, 28.0);
+        tl.fromTo("#s8-anillo-w", { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.6, ease: "expo.out" }, 28.05);
+        tl.fromTo("#s8-estrellas", { scale: 0.8, opacity: 0, filter: "blur(14px)" }, { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.9, ease: "expo.out" }, 28.15);
+        tl.fromTo("#s8-lockup", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 28.6);
+        tl.fromTo("#s8-url", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 28.85);
+        tl.fromTo("#s8-inst", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, 29.2);
         // Fundido final a negro noche
-        tl.fromTo("#negro", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power1.in" }, 45.4);
+        tl.fromTo("#negro", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power1.in" }, 32.4);
 
         window.__timelines = window.__timelines || {};
         window.__timelines["main"] = tl;
