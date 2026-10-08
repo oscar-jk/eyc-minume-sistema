@@ -130,8 +130,8 @@ export function CieloEstrellado({ densidad = 1, className = '' }: { densidad?: n
         }
         // distribución de magnitudes: la mayoría muy débiles
         const m = Math.pow(Math.random(), 3)
-        const r = 0.25 + m * 0.9
-        const a = 0.18 + m * 0.6
+        const r = 0.3 + m * 1.0
+        const a = 0.28 + m * 0.62
         g.fillStyle = `rgba(${colorEstelar(Math.random())},${a})`
         g.beginPath()
         g.arc(x, y, r, 0, Math.PI * 2)
@@ -152,7 +152,7 @@ export function CieloEstrellado({ densidad = 1, className = '' }: { densidad?: n
       brillantes = Array.from({ length: nb }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,
-        r: 0.9 + Math.pow(Math.random(), 2) * 1.6,
+        r: 1.05 + Math.pow(Math.random(), 2) * 1.7,
         c: colorEstelar(Math.random()),
         fase: Math.random() * Math.PI * 2,
         vel: 0.6 + Math.random() * 1.6,
@@ -164,11 +164,11 @@ export function CieloEstrellado({ densidad = 1, className = '' }: { densidad?: n
       if (fondo) ctx.drawImage(fondo, 0, 0, w, h)
       for (const s of brillantes) {
         // centelleo atmosférico: variación pequeña y rápida, no un parpadeo
-        const a = quieto ? 0.85 : 0.68 + 0.22 * Math.sin(s.fase + (t / 1000) * s.vel) + 0.08 * Math.sin(s.fase * 3 + (t / 1000) * s.vel * 4.3)
+        const a = quieto ? 0.95 : 0.78 + 0.18 * Math.sin(s.fase + (t / 1000) * s.vel) + 0.08 * Math.sin(s.fase * 3 + (t / 1000) * s.vel * 4.3)
         destello(ctx, s.x, s.y, s.r, s.c, a)
       }
       if (!quieto) {
-        if (!fugaz && Math.random() < 0.0018) {
+        if (!fugaz && Math.random() < 0.006) {
           const ang = Math.PI / 5 + Math.random() * 0.4
           const v = 9 + Math.random() * 5
           fugaz = { x: Math.random() * w * 0.7, y: Math.random() * h * 0.35, vx: Math.cos(ang) * v, vy: Math.sin(ang) * v, vida: 1, largo: 10 + Math.random() * 8 }

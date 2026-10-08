@@ -16,14 +16,8 @@ function Marco({ titulo, children }: { titulo: ReactNode; children: ReactNode })
   return (
     <main className="relative grid min-h-dvh lg:grid-cols-[1.15fr_1fr]">
       {/* Arte: cielo estrellado (arriba en móvil, izquierda en PC) */}
-      <section className="relative isolate overflow-hidden bg-grad-noche px-6 pb-16 pt-10 text-white lg:flex lg:flex-col lg:justify-between lg:p-14">
+      <section className="relative isolate overflow-hidden bg-grad-noche px-6 pb-24 pt-12 text-white lg:flex lg:flex-col lg:justify-between lg:p-14">
         <CieloEstrellado />
-        {/* Anillo oficial grande y centrado; el contenedor centra y la imagen gira (transformaciones separadas) */}
-        {/* Mismo encuadre que la cabecera del correo: anillo amplio y suave, centrado en el panel, girando */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-0 grid place-items-center">
-          <div className="absolute inset-x-0 bottom-0 h-3/4 bg-[radial-gradient(closest-side,rgb(0_144_251/0.35),transparent)]" />
-          <img src="/brand/anillo.svg" alt="" className="aspect-square w-[140%] min-w-[40rem] max-w-none opacity-25 mix-blend-screen [animation:girar_240s_linear_infinite]" />
-        </div>
         <div aria-hidden className="pointer-events-none absolute -left-24 top-1/3 size-80 rounded-full bg-[#0090fb]/30 blur-[100px]" />
         <p className="relative flex items-center justify-center gap-3 font-black tracking-tight lg:justify-start">
           <span className="text-lg">2026</span>
@@ -31,7 +25,15 @@ function Marco({ titulo, children }: { titulo: ReactNode; children: ReactNode })
           <Marca tipo="estrellas" blanco className="h-9 w-auto" />
         </p>
         <div className="relative mt-10 flex flex-col items-center text-center lg:mt-0 lg:items-start lg:text-left">
-          <Marca tipo="lockup" blanco className="h-auto w-64 sm:w-80 lg:w-[30rem]" />
+          {/* Como la cabecera del correo: el anillo gira centrado sobre los logos y su hueco los enmarca.
+              El contenedor centra (translate) y la imagen gira (rotate): transformaciones separadas. */}
+          <div className="relative">
+            <div aria-hidden className="pointer-events-none absolute left-1/2 top-[calc(50%-2.25rem)] -z-10 aspect-square w-[260%] -translate-x-1/2 -translate-y-1/2 lg:top-1/2 lg:w-[250%]">
+              <div className="absolute inset-[22%] rounded-full bg-[radial-gradient(closest-side,rgb(0_144_251/0.4),transparent)]" />
+              <img src="/brand/anillo.svg" alt="" className="size-full max-w-none opacity-[0.34] mix-blend-screen lg:opacity-[0.22] [animation:girar_240s_linear_infinite]" />
+            </div>
+            <Marca tipo="lockup" blanco className="h-auto w-64 sm:w-80 lg:w-[30rem]" />
+          </div>
           <p className="mt-6 hidden max-w-md text-lg text-white/80 lg:block">
             Sistema de <span className="font-bold text-white">Evaluación y Control</span> del desempeño de las mesas directivas y del equipo de EyC.
           </p>
