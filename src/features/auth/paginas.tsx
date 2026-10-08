@@ -4,7 +4,7 @@ import { useMutation } from '@tanstack/react-query'
 import { Boton } from '@/components/Boton'
 import { Campo } from '@/components/Campo'
 import { CieloEstrellado } from '@/components/CieloEstrellado'
-import { Anillo, Destello, Estrella8 } from '@/components/Elementos'
+import { Destello, Estrella8 } from '@/components/Elementos'
 import { Marca } from '@/components/Marca'
 import { Acento, Aviso } from '@/components/Ui'
 import { mensajeError } from '@/lib/errores'
@@ -18,7 +18,7 @@ function Marco({ titulo, children }: { titulo: ReactNode; children: ReactNode })
       {/* Arte: cielo estrellado (arriba en móvil, izquierda en PC) */}
       <section className="relative isolate overflow-hidden bg-grad-noche px-6 pb-16 pt-10 text-white lg:flex lg:flex-col lg:justify-between lg:p-14">
         <CieloEstrellado />
-        <Anillo className="pointer-events-none absolute -bottom-40 -right-32 -z-0 w-[34rem] text-celeste/60 [animation:girar_240s_linear_infinite] lg:-bottom-56 lg:-right-40 lg:w-[52rem]" />
+        <img src="/brand/anillo.svg" alt="" aria-hidden className="pointer-events-none absolute -bottom-40 -right-32 -z-0 w-[34rem] opacity-45 mix-blend-screen [animation:girar_240s_linear_infinite] lg:-bottom-56 lg:-right-40 lg:w-[52rem]" />
         <div aria-hidden className="pointer-events-none absolute -left-24 top-1/3 size-80 rounded-full bg-[#0090fb]/30 blur-[100px]" />
         <p className="relative flex items-center justify-center gap-3 font-black tracking-tight lg:justify-start">
           <span className="text-lg">2026</span>
@@ -48,9 +48,17 @@ function Marco({ titulo, children }: { titulo: ReactNode; children: ReactNode })
           <h1 className="mb-6 mt-2 text-[2rem] font-black leading-tight tracking-tight">{titulo}</h1>
           {children}
         </div>
-        <div className="mt-8 flex flex-col items-center gap-2 lg:absolute lg:bottom-8 lg:left-1/2 lg:mt-0 lg:-translate-x-1/2">
-          <p className="font-cond text-[0.7rem] font-bold uppercase tracking-[0.16em] text-ink-3">Una iniciativa de</p>
+        {/* Créditos institucionales: tono formal, serif y filetes finos */}
+        <div className="mt-10 flex w-full max-w-md flex-col items-center gap-3 text-center lg:absolute lg:bottom-8 lg:left-1/2 lg:mt-0 lg:-translate-x-1/2">
+          <p className="flex w-full items-center gap-3 font-serif text-[0.8rem] italic text-ink-3">
+            <span aria-hidden className="h-px flex-1 bg-line-strong/40" />
+            Una iniciativa del
+            <span aria-hidden className="h-px flex-1 bg-line-strong/40" />
+          </p>
           <Marca tipo="footer" className="h-14 w-auto" />
+          <p className="font-serif text-[0.72rem] leading-snug text-ink-3">
+            Ministerio de Educación de la República Dominicana · PLERD
+          </p>
         </div>
       </section>
     </main>

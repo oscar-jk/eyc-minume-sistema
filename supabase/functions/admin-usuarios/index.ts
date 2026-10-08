@@ -5,6 +5,7 @@
 //   → crea la cuenta (sin contraseña conocida) y devuelve un enlace para que la persona defina la suya.
 // POST { accion: "enlace", email, redirect_to }   → nuevo enlace de acceso / recuperación.
 // POST { accion: "activar", user_id, activo }     → activa o bloquea la cuenta.
+// POST { accion: "correo", user_id, email }       → cambia el correo si la cuenta aún no se activó.
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const cors = {
@@ -87,6 +88,18 @@ Deno.serve(async (req) => {
         if (error) return json({ error: error.message }, 400);
         await service.from("perfiles").update({ activo }).eq("id", userId);
         return json({ ok: true });
+      }
+      case "correo": {
+        // Cambiar el correo solo mientras la cuenta no se haya activado (la persona aún no entró ni definió contraseña).
+        const userId = String(body.user_id ?? "");
+        const email = String(body.email ?? "").trim().toLowerCase();
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json({ error: "Correo inválido" }, 400);
+        const { data: u, error: eu } = await service.auth.admin.getUserById(userId);
+        if (eu || !u.user) return json({ error: "Cuenta no encontrada" }, 404);
+        if (u.user.last_sign_in_at) return json({ error: "La persona ya activó su cuenta; su correo no se puede cambiar." }, 409);
+        const { error } = await service.auth.admin.updateUserById(userId, { email, email_confirm: true });
+        if (error) return json({ error: error.message.includes("already") ? "Ya existe una cuenta con ese correo" : error.message }, 400);
+        return json({ ok: true, enlace: await enlace(email) });
       }
       default:
         return json({ error: "Acción desconocida" }, 400);

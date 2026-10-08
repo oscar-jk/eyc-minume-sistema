@@ -28,10 +28,10 @@
   --danger: #c0262d;
   --danger-soft: #fde8ea;
 
-  --grad-primario: linear-gradient(120deg, #002193 0%, #0090fb 100%);
+  --grad-primario: linear-gradient(180deg, #0a4fd6 0%, #0043c5 100%);
   --grad-primario-hover: linear-gradient(120deg, #001a78 0%, #0078de 100%);
-  --grad-celeste: linear-gradient(120deg, #00b5ff 0%, #00f0e6 100%);
-  --grad-rosa: linear-gradient(120deg, #e53535 0%, #ff7aa8 100%);
+  --grad-celeste: linear-gradient(90deg, #0095fa 0%, #22c4f0 100%);
+  --grad-rosa: linear-gradient(180deg, #e0454a 0%, #c9302f 100%);
   --grad-noche: linear-gradient(160deg, #07075e 0%, #00209a 55%, #0043c5 100%);
   --grad-heroe: linear-gradient(120deg, #002193 0%, #0043c5 45%, #0090fb 100%);
   --grad-texto: linear-gradient(100deg, #002193 0%, #0090fb 100%);
@@ -46,7 +46,7 @@
   --sem-gris-bg: #e4eaf3;
 
   --shadow: 0 1px 2px rgb(0 33 147 / 0.06), 0 10px 30px -12px rgb(0 33 147 / 0.22);
-  --shadow-boton: 0 8px 20px -8px rgb(0 67 197 / 0.6);
+  --shadow-boton: 0 1px 0 rgb(255 255 255 / 0.18) inset, 0 4px 12px -6px rgb(0 33 147 / 0.45);
 }
 
 :root[data-theme="dark"] {
@@ -73,6 +73,7 @@
   --danger-soft: rgb(229 53 53 / 0.18);
 
   --grad-texto: linear-gradient(100deg, #7fdcff 0%, #00f0e6 100%);
+  --grad-primario: linear-gradient(180deg, #1a63e8 0%, #0b4fd6 100%);
 
   --sem-verde: #6ee7a0;
   --sem-verde-bg: rgb(52 211 120 / 0.16);
@@ -84,7 +85,7 @@
   --sem-gris-bg: rgb(182 197 222 / 0.14);
 
   --shadow: 0 1px 0 rgb(255 255 255 / 0.06) inset, 0 18px 40px -18px rgb(0 0 0 / 0.7);
-  --shadow-boton: 0 8px 24px -8px rgb(0 144 251 / 0.75);
+  --shadow-boton: 0 1px 0 rgb(255 255 255 / 0.14) inset, 0 4px 14px -6px rgb(0 0 0 / 0.6);
 }
 
 @theme inline {

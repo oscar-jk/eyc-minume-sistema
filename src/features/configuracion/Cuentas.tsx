@@ -10,7 +10,7 @@ import { siglaDe, useComisiones } from '@/features/comisiones/api'
 import { mensajeError } from '@/lib/errores'
 import { ROL, fechaHora } from '@/lib/formato'
 import type { Perfil, Rol } from '@/lib/tipos'
-import { useActivarCuenta, useActualizarPerfil, useAuditoria, useCrearCuenta, useEnlaceAcceso, usePerfiles } from './api'
+import { useActivarCuenta, useActualizarPerfil, useAuditoria, useCambiarCorreo, useCrearCuenta, useCuentasAdmin, useEnlaceAcceso, usePerfiles } from './api'
 
 const ROLES: Rol[] = ['eyc', 'subsecretario', 'secretario', 'admin']
 
@@ -48,6 +48,7 @@ function EnlaceModal({ enlace, onCerrar }: { enlace: string | null; onCerrar: ()
 export function CuentasPanel() {
   const { perfil: yo } = useSesion()
   const perfiles = usePerfiles()
+  const activacion = useCuentasAdmin()
   const comisiones = useComisiones()
   const crear = useCrearCuenta()
   const enlace = useEnlaceAcceso()
@@ -128,7 +129,12 @@ export function CuentasPanel() {
                     <td>{p.email}</td>
                     <td>{p.rol ? ROL[p.rol] : <Insignia tono="alerta">Sin rol</Insignia>}</td>
                     <td>{siglaDe(comisiones.data?.find((c) => c.id === p.comision_id))}</td>
-                    <td>{p.activo ? <Insignia tono="exito">Activa</Insignia> : <Insignia tono="peligro">Bloqueada</Insignia>}</td>
+                    <td>
+                      <div className="flex flex-wrap gap-1">
+                        {p.activo ? <Insignia tono="exito">Activa</Insignia> : <Insignia tono="peligro">Bloqueada</Insignia>}
+                        {activacion.data && !activacion.data.get(p.id)?.activada && <Insignia tono="alerta">Sin activar</Insignia>}
+                      </div>
+                    </td>
                     <td>
                       <div className="flex flex-wrap justify-end gap-1">
                         <Boton variante="fantasma" onClick={() => setEditar(p)}>
@@ -168,6 +174,8 @@ export function CuentasPanel() {
         <EditarPerfil
           key={editar.id}
           perfil={editar}
+          activada={!!activacion.data?.get(editar.id)?.activada}
+          onEnlace={setLink}
           onCerrar={() => setEditar(null)}
           onGuardar={(p) =>
             actualizar.mutate(p, {
@@ -187,39 +195,73 @@ export function CuentasPanel() {
 
 function EditarPerfil({
   perfil,
+  activada,
   onCerrar,
   onGuardar,
+  onEnlace,
   guardando,
 }: {
   perfil: Perfil
+  activada: boolean
   onCerrar: () => void
   onGuardar: (p: { id: string; nombre: string; rol: Rol | null; comision_id: number | null }) => void
+  onEnlace: (enlace: string) => void
   guardando: boolean
 }) {
   const comisiones = useComisiones()
-  const [p, setP] = useState({ nombre: perfil.nombre, rol: perfil.rol ?? ('' as Rol | ''), comision: perfil.comision_id ? String(perfil.comision_id) : '' })
+  const cambiarCorreo = useCambiarCorreo()
+  const [p, setP] = useState({
+    nombre: perfil.nombre,
+    email: perfil.email,
+    rol: perfil.rol ?? ('' as Rol | ''),
+    comision: perfil.comision_id ? String(perfil.comision_id) : '',
+  })
+  const correoCambio = p.email.trim().toLowerCase() !== perfil.email.toLowerCase()
+
+  const guardar = async () => {
+    if (correoCambio) {
+      try {
+        const r = await cambiarCorreo.mutateAsync({ user_id: perfil.id, email: p.email.trim() })
+        onEnlace(r.enlace)
+      } catch {
+        return // el error se muestra en el aviso del formulario
+      }
+    }
+    onGuardar({ id: perfil.id, nombre: p.nombre.trim(), rol: p.rol || null, comision_id: p.rol === 'eyc' ? Number(p.comision) : null })
+  }
+
   return (
     <Modal
       abierto
-      titulo={`Editar ${perfil.email}`}
+      titulo="Editar cuenta"
       onCerrar={onCerrar}
       acciones={
         <>
           <Boton variante="secundario" onClick={onCerrar}>
             Cancelar
           </Boton>
-          <Boton
-            cargando={guardando}
-            disabled={p.rol === 'eyc' && !p.comision}
-            onClick={() => onGuardar({ id: perfil.id, nombre: p.nombre.trim(), rol: p.rol || null, comision_id: p.rol === 'eyc' ? Number(p.comision) : null })}
-          >
+          <Boton cargando={guardando || cambiarCorreo.isPending} disabled={(p.rol === 'eyc' && !p.comision) || p.nombre.trim().length < 2} onClick={guardar}>
             Guardar
           </Boton>
         </>
       }
     >
       <div className="flex flex-col gap-4">
-        <Campo etiqueta="Nombre" value={p.nombre} onChange={(e) => setP({ ...p, nombre: e.target.value })} />
+        <Campo etiqueta="Nombre" value={p.nombre} onChange={(e) => setP({ ...p, nombre: e.target.value })} requerido />
+        <Campo
+          etiqueta="Correo"
+          type="email"
+          value={p.email}
+          disabled={activada}
+          onChange={(e) => setP({ ...p, email: e.target.value })}
+          ayuda={
+            activada
+              ? 'La persona ya activó su cuenta: el correo queda fijo para proteger su acceso.'
+              : correoCambio
+                ? 'Al guardar se genera un enlace nuevo para el correo corregido.'
+                : 'Puedes corregirlo mientras la persona no haya activado su cuenta.'
+          }
+        />
         <Selector etiqueta="Rol" value={p.rol} onChange={(e) => setP({ ...p, rol: e.target.value as Rol | '' })}>
           <option value="">Sin rol (sin acceso)</option>
           {ROLES.map((r) => (
@@ -238,6 +280,7 @@ function EditarPerfil({
             ))}
           </Selector>
         )}
+        {cambiarCorreo.isError && <Aviso tono="peligro">{mensajeError(cambiarCorreo.error)}</Aviso>}
       </div>
     </Modal>
   )

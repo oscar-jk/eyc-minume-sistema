@@ -1869,6 +1869,14 @@ export type Database = {
           hoy: string
         }[]
       }
+      cuentas_admin: {
+        Args: never
+        Returns: {
+          activada: boolean
+          id: string
+          ultimo_acceso: string
+        }[]
+      }
       decidir: {
         Args: {
           p_comentario?: string

@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useTema } from '@/app/tema'
 import { CieloEstrellado } from '@/components/CieloEstrellado'
-import { Anillo, Bloques, Circulos, Damero, Destello, Estrella8, Flor } from '@/components/Elementos'
+import { Bloques, Circulos, Damero, Destello, Estrella8, Flor } from '@/components/Elementos'
 import { IcoLuna, IcoSol } from '@/components/Iconos'
 import { Marca } from '@/components/Marca'
 
@@ -226,7 +226,7 @@ export function ManualPage() {
       {/* Portada */}
       <header className="relative isolate overflow-hidden bg-grad-noche px-5 pb-20 pt-8 text-white sm:px-10 print:h-[255mm]">
         <CieloEstrellado densidad={1.2} className="print:hidden" />
-        <Anillo className="pointer-events-none absolute -bottom-48 -right-40 -z-0 w-[40rem] text-celeste/50 [animation:girar_240s_linear_infinite] sm:w-[56rem]" />
+        <img src="/brand/anillo.svg" alt="" aria-hidden className="pointer-events-none absolute -bottom-48 -right-40 -z-0 w-[40rem] opacity-45 mix-blend-screen [animation:girar_240s_linear_infinite] sm:w-[56rem]" />
         <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-3">
           <p className="flex items-center gap-3 font-black">
             2026 <Destello className="size-5 text-cian" />

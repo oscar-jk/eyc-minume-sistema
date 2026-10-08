@@ -267,3 +267,23 @@ export function useEditarDimension() {
     onSuccess: () => qc.invalidateQueries(),
   })
 }
+
+/** Estado de activación de cada cuenta (solo admin): si ya entró, su correo queda fijo. */
+export function useCuentasAdmin(habilitado = true) {
+  return useQuery({
+    queryKey: ['perfiles', 'activacion'],
+    enabled: habilitado,
+    queryFn: async () => {
+      const filas = datos(await supabase.rpc('cuentas_admin'))
+      return new Map(filas.map((f) => [f.id, f]))
+    },
+  })
+}
+
+export function useCambiarCorreo() {
+  const inv = useInvalidar(['perfiles'])
+  return useMutation({
+    mutationFn: (p: { user_id: string; email: string }) => invocar<{ ok: true; enlace: string }>({ accion: 'correo', ...p }),
+    onSuccess: inv,
+  })
+}
