@@ -1,4 +1,5 @@
-import { Suspense, useState, type ComponentType, type SVGProps } from 'react'
+import type { RemixiconComponentType } from '@remixicon/react'
+import { Suspense, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { CieloEstrellado } from '@/components/CieloEstrellado'
 import { Cargando } from '@/components/Estados'
@@ -13,7 +14,7 @@ import type { Rol } from '@/lib/tipos'
 import { useMomento } from './fase'
 import { useTema } from './tema'
 
-type Ico = ComponentType<SVGProps<SVGSVGElement>>
+type Ico = RemixiconComponentType
 const NAV: { a: string; texto: string; corto: string; ico: Ico; roles: Rol[] }[] = [
   { a: '/comision', texto: 'Mi comisión', corto: 'Comisión', ico: IcoComision, roles: ['eyc'] },
   { a: '/monitoreo', texto: 'Monitoreo', corto: 'Monitoreo', ico: IcoMonitoreo, roles: ['subsecretario', 'secretario', 'admin'] },

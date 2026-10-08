@@ -2,6 +2,7 @@ import { useId, useState } from 'react'
 import { puntaje } from '@/lib/formato'
 import type { Criterio, Dimension, Respuesta } from '@/lib/tipos'
 import { esDesfavorable } from './reglas'
+import { IcoAbajo } from '@/components/Iconos'
 
 export interface EstadoRespuesta {
   respuesta?: Respuesta
@@ -177,7 +178,7 @@ export function DimensionAcordeon({
           </span>
           <span className={`shrink-0 rounded-md px-2 py-0.5 font-cond text-sm font-semibold ${estado.clase}`}>{estado.texto}</span>
           <span aria-hidden className={`shrink-0 text-ink-3 transition-transform ${abierta ? 'rotate-180' : ''}`}>
-            ▾
+            <IcoAbajo className="size-5" />
           </span>
         </button>
       </h3>

@@ -1,3 +1,4 @@
+import { IcoCerrar } from './Iconos'
 import { useEffect, useId, useRef, type PointerEvent as RPointerEvent, type ReactNode } from 'react'
 
 /**
@@ -86,9 +87,7 @@ export function Modal({
                 {titulo}
               </h2>
               <button type="button" onClick={onCerrar} aria-label="Cerrar" className="grid size-9 shrink-0 place-items-center rounded-full text-ink-3 hover:bg-surface-2">
-                <span aria-hidden className="text-xl leading-none">
-                  ×
-                </span>
+                <IcoCerrar className="size-5" aria-hidden />
               </button>
             </div>
           </div>

@@ -18,7 +18,10 @@ function Marco({ titulo, children }: { titulo: ReactNode; children: ReactNode })
       {/* Arte: cielo estrellado (arriba en móvil, izquierda en PC) */}
       <section className="relative isolate overflow-hidden bg-grad-noche px-6 pb-16 pt-10 text-white lg:flex lg:flex-col lg:justify-between lg:p-14">
         <CieloEstrellado />
-        <img src="/brand/anillo.svg" alt="" aria-hidden className="pointer-events-none absolute -bottom-40 -right-32 -z-0 w-[34rem] opacity-45 mix-blend-screen [animation:girar_240s_linear_infinite] lg:-bottom-56 lg:-right-40 lg:w-[52rem]" />
+        {/* Anillo oficial grande y centrado; el contenedor centra y la imagen gira (transformaciones separadas) */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-0 grid place-items-center">
+          <img src="/brand/anillo.svg" alt="" className="w-[40rem] max-w-none opacity-35 mix-blend-screen [animation:girar_240s_linear_infinite] sm:w-[48rem] lg:w-[min(64rem,120vh)]" />
+        </div>
         <div aria-hidden className="pointer-events-none absolute -left-24 top-1/3 size-80 rounded-full bg-[#0090fb]/30 blur-[100px]" />
         <p className="relative flex items-center justify-center gap-3 font-black tracking-tight lg:justify-start">
           <span className="text-lg">2026</span>

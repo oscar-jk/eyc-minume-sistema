@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { CieloEstrellado } from './CieloEstrellado'
 import { Bloques, Circulos, Damero, Destello, Estrella8, Flor } from './Elementos'
+import { IcoFlechaDerecha } from './Iconos'
 
 export function Tarjeta({
   titulo,
@@ -125,11 +126,11 @@ export function Aviso({ tono = 'info', titulo, children, accion }: { tono?: Tono
         {accion &&
           (accion.a ? (
             <Link to={accion.a} className={claseAccion}>
-              {accion.texto} →
+              {accion.texto} <IcoFlechaDerecha className="size-4" aria-hidden />
             </Link>
           ) : (
             <button type="button" onClick={accion.onClick} className={claseAccion}>
-              {accion.texto} →
+              {accion.texto} <IcoFlechaDerecha className="size-4" aria-hidden />
             </button>
           ))}
       </div>
@@ -138,7 +139,7 @@ export function Aviso({ tono = 'info', titulo, children, accion }: { tono?: Tono
 }
 
 const claseAccion =
-  'mt-2.5 inline-flex min-h-9 items-center rounded-xl bg-grad-primario px-3.5 text-sm font-bold text-white shadow-boton transition hover:-translate-y-px hover:brightness-110'
+  'mt-2.5 inline-flex min-h-9 items-center gap-1.5 rounded-xl bg-grad-primario px-3.5 text-sm font-bold text-white shadow-boton transition hover:-translate-y-px hover:brightness-110'
 
 type TonoInsignia = 'neutro' | 'acento' | 'alerta' | 'peligro' | 'exito'
 const tonosInsignia: Record<TonoInsignia, string> = {

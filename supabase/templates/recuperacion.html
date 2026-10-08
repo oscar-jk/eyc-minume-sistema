@@ -18,48 +18,37 @@
     <tr><td align="center" style="padding:28px 14px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
 
-        <!-- Cabecera: cielo nocturno con estrellas -->
-        <tr><td style="border-radius:28px 6px 0 0;background:#07075e;background-image:radial-gradient(circle at 18% 30%,rgba(255,255,255,.95) 0 1px,transparent 2px),radial-gradient(circle at 72% 18%,rgba(255,255,255,.8) 0 1px,transparent 2px),radial-gradient(circle at 88% 62%,rgba(160,240,255,.9) 0 1.5px,transparent 2.5px),radial-gradient(circle at 40% 75%,rgba(255,255,255,.7) 0 1px,transparent 2px),radial-gradient(circle at 60% 45%,rgba(255,214,255,.8) 0 1px,transparent 2px),radial-gradient(circle at 8% 85%,rgba(255,255,255,.6) 0 1px,transparent 2px),linear-gradient(160deg,#07075e 0%,#00209a 55%,#0043c5 100%);padding:30px 32px 34px;">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-              <td style="font-family:Barlow,'Segoe UI',Arial,sans-serif;font-weight:900;font-size:15px;color:#ffffff;letter-spacing:-.2px;">
-                2026 <span style="color:#00f0e6;">&#10022;</span> MINUME <span style="font-family:'Libre Baskerville',Georgia,serif;font-style:italic;font-weight:400;">de</span> ESTRELLAS
-              </td>
-            </tr>
-            <tr><td style="padding-top:26px;">
-              <img src="https://eyc-minume-xvii.vercel.app/brand/login-lockup-dark.png" width="250" alt="MINUME XVII Período de Sesiones" style="display:block;width:250px;max-width:80%;height:auto;border:0;">
-            </td></tr>
-          </table>
+        <!-- Cabecera: cielo con estrellas reales, anillo oficial y logos (imagen única: se ve igual en Gmail, Outlook y Apple Mail) -->
+        <tr><td style="border-radius:26px 26px 0 0;background:#07075e;line-height:0;font-size:0;">
+          <img src="https://eyc-minume-xvii.vercel.app/email/cabecera.png" width="560" alt="2026 · MINUME de Estrellas · MINUME XVII Período de Sesiones" style="display:block;width:100%;max-width:560px;height:auto;border:0;border-radius:26px 26px 0 0;color:#ffffff;font-family:Barlow,Arial,sans-serif;font-size:18px;font-weight:800;line-height:1.4;">
         </td></tr>
-        <!-- Franja de degradado de marca -->
-        <tr><td style="height:6px;line-height:6px;font-size:0;background:#00b5ff;background-image:linear-gradient(90deg,#002193,#0090fb,#00f0e6);">&nbsp;</td></tr>
 
         <!-- Cuerpo -->
-        <tr><td style="background:#ffffff;border:1px solid #cbd8ee;border-top:0;border-radius:0 0 28px 28px;padding:34px 32px 30px;font-family:Barlow,'Segoe UI',Arial,sans-serif;">
-          <p style="margin:0 0 6px;font-family:'Barlow Condensed','Arial Narrow',Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:2.2px;text-transform:uppercase;color:#0043c5;">&#10022;&nbsp; Evaluación y Control</p>
+        <tr><td style="background:#ffffff;border:1px solid #cbd8ee;border-top:0;border-radius:0 0 26px 26px;padding:34px 32px 30px;font-family:Barlow,'Segoe UI',Arial,sans-serif;">
+          <p style="margin:0 0 6px;font-family:'Barlow Condensed','Arial Narrow',Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:2.2px;text-transform:uppercase;color:#0043c5;">Evaluación y Control</p>
           <h1 style="margin:0 0 16px;font-size:32px;line-height:1.1;font-weight:900;letter-spacing:-.8px;color:#07174a;">
-            Define <span style="font-family:'Libre Baskerville',Georgia,serif;font-style:italic;font-weight:400;color:#0043c5;">tu</span> contraseña
+            Define <span style="font-family:'Libre Baskerville',Georgia,serif;font-style:italic;font-weight:400;letter-spacing:0;color:#0043c5;">tu</span> contraseña
           </h1>
           <p style="margin:0 0 26px;font-size:16px;line-height:1.6;color:#33476a;">
-            Recibimos una solicitud para entrar o cambiar la contraseña de tu cuenta del <strong style="color:#07174a;">Sistema de Evaluación y Control</strong>. Toca el botón y elige una contraseña personal de al menos 10 caracteres.
+            Recibimos una solicitud para activar o restablecer el acceso de tu cuenta en el <strong style="color:#07174a;">Sistema de Evaluación y Control</strong>. Pulsa el botón y define una contraseña personal de al menos 10 caracteres.
           </p>
 
-          <!-- Botón con degradado (con color sólido de respaldo para Outlook) -->
+          <!-- Botón: degradado sobrio de marca, con color sólido de respaldo para Outlook -->
           <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 26px;"><tr>
-            <td style="border-radius:14px;background:#0043c5;background-image:linear-gradient(120deg,#002193,#0090fb);box-shadow:0 10px 24px -10px rgba(0,67,197,.7);">
-              <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 30px;font-family:Barlow,'Segoe UI',Arial,sans-serif;font-size:17px;font-weight:800;color:#ffffff;text-decoration:none;border-radius:14px;">Definir mi contraseña &rarr;</a>
+            <td style="border-radius:14px;background:#0043c5;background-image:linear-gradient(180deg,#0a4fd6,#0043c5);box-shadow:0 4px 12px -6px rgba(0,33,147,.45);">
+              <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 30px;font-family:Barlow,'Segoe UI',Arial,sans-serif;font-size:17px;font-weight:800;color:#ffffff;text-decoration:none;border-radius:14px;">Definir mi contraseña</a>
             </td>
           </tr></table>
 
-          <!-- Aviso con estilo de marca -->
+          <!-- Aviso con ícono (Remix Icon · escudo) -->
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#dfe9ff;border-radius:6px 16px 16px 16px;">
             <tr>
-              <td width="44" valign="top" style="padding:14px 0 14px 14px;">
-                <div style="width:32px;height:32px;line-height:32px;text-align:center;border-radius:6px 10px 10px 10px;background:#0043c5;background-image:linear-gradient(135deg,#002193,#0090fb);color:#ffffff;font-size:16px;">&#10022;</div>
+              <td width="46" valign="top" style="padding:14px 0 14px 14px;">
+                <img src="https://eyc-minume-xvii.vercel.app/email/escudo.png" width="32" height="32" alt="" style="display:block;width:32px;height:32px;border:0;">
               </td>
               <td style="padding:14px 16px 14px 12px;font-family:Barlow,'Segoe UI',Arial,sans-serif;">
                 <p style="margin:0;font-family:'Barlow Condensed','Arial Narrow',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#0043c5;">Importante</p>
-                <p style="margin:2px 0 0;font-size:14px;line-height:1.5;color:#07174a;">El enlace es <strong>personal</strong>, de <strong>un solo uso</strong> y caduca en <strong>una hora</strong>. Si no lo pediste, ignora este correo: tu cuenta sigue igual.</p>
+                <p style="margin:2px 0 0;font-size:14px;line-height:1.5;color:#07174a;">El enlace es <strong>personal</strong>, de <strong>un solo uso</strong> y caduca en <strong>una hora</strong>. Si no lo solicitaste, puedes ignorar este mensaje: tu cuenta no tendrá cambios.</p>
               </td>
             </tr>
           </table>
@@ -69,10 +58,24 @@
           </p>
         </td></tr>
 
-        <!-- Pie -->
-        <tr><td align="center" style="padding:22px 10px 6px;font-family:Barlow,'Segoe UI',Arial,sans-serif;font-size:12px;line-height:1.6;color:#51668a;">
-          <strong style="color:#07174a;">MINUME</strong> <span style="font-family:'Libre Baskerville',Georgia,serif;font-style:italic;">de</span> <strong style="color:#07174a;">Estrellas</strong> · Sistema de Evaluación y Control<br>
-          Modelo Internacional de las Naciones Unidas del Ministerio de Educación<br>
+        <!-- Créditos institucionales: tono formal, serif y filetes finos (igual que en el inicio de sesión) -->
+        <tr><td align="center" style="padding:30px 10px 4px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:420px;">
+            <tr>
+              <td style="border-bottom:1px solid #b7c5de;font-size:0;line-height:0;">&nbsp;</td>
+              <td width="150" align="center" style="padding:0 12px;font-family:'Libre Baskerville',Georgia,'Times New Roman',serif;font-style:italic;font-size:13px;color:#51668a;white-space:nowrap;position:relative;top:7px;">Una iniciativa del</td>
+              <td style="border-bottom:1px solid #b7c5de;font-size:0;line-height:0;">&nbsp;</td>
+            </tr>
+          </table>
+        </td></tr>
+        <tr><td align="center" style="padding:18px 10px 8px;">
+          <img src="https://eyc-minume-xvii.vercel.app/brand/footer-logo-light.png" width="140" alt="Ministerio de Educación · PLERD" style="display:block;width:140px;height:auto;border:0;">
+        </td></tr>
+        <tr><td align="center" style="padding:0 10px 4px;font-family:'Libre Baskerville',Georgia,'Times New Roman',serif;font-size:12px;line-height:1.6;color:#51668a;">
+          Ministerio de Educación de la República Dominicana · PLERD
+        </td></tr>
+        <tr><td align="center" style="padding:14px 10px 6px;font-family:Barlow,'Segoe UI',Arial,sans-serif;font-size:12px;line-height:1.6;color:#51668a;">
+          Modelo Internacional de las Naciones Unidas · Sistema de Evaluación y Control<br>
           <a href="https://eyc-minume-xvii.vercel.app/manual" style="color:#0043c5;font-weight:700;text-decoration:none;">Manual de usuario</a>
         </td></tr>
       </table>
