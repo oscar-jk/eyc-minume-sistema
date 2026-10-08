@@ -250,7 +250,7 @@ export function ManualPage() {
           </h1>
           <div className="mt-6 flex flex-wrap items-center gap-4">
             <Marca tipo="lockup" blanco className="h-12 w-auto sm:h-16" />
-            <span aria-hidden className="hidden h-12 w-px bg-white/30 sm:block" />
+            <span aria-hidden className="hidden h-12 w-px bg-white/30 sm:block print:hidden" />
             <Marca tipo="footer" blanco className="h-12 w-auto sm:h-14" />
           </div>
           <p className="mt-6 max-w-xl text-lg text-white/85">
@@ -570,6 +570,11 @@ export function ManualPage() {
                 ]}
               />
               <Nota tipo="regla">Nunca se crean cuentas compartidas. Quien se registra por su cuenta queda sin rol y sin acceso.</Nota>
+              <p>
+                Con <B tono="secundario">Editar</B> cambias nombre, rol, comisión y correo. Las cuentas marcadas <strong>«Sin activar»</strong> aún no entraron: su correo
+                se puede corregir y se genera un enlace nuevo.
+              </p>
+              <Nota tipo="ojo">Cuando la persona ya activó su cuenta, su correo queda fijo para proteger su acceso.</Nota>
             </Seccion>
             <Seccion titulo="Editar comisiones y cargos" donde="Configuración › Comisiones y catálogos">
               <p>

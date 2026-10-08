@@ -264,6 +264,17 @@
   body {
     background-attachment: scroll;
   }
+  /* Bloques pequeños (tarjetas, pasos, notas) no se parten entre páginas */
+  article .grid > *,
+  article ol > li,
+  article [role="status"],
+  article .rounded-2xl {
+    break-inside: avoid;
+  }
+  h2,
+  h3 {
+    break-after: avoid;
+  }
   @page {
     margin: 14mm;
   }
