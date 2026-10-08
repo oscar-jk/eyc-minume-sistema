@@ -269,6 +269,14 @@ for k, m in enumerate([74, 81, 86, 90]):
     campana = (np.sin(2 * np.pi * hz(m) * tt) + 0.3 * np.sin(2 * np.pi * hz(m) * 2.76 * tt)) * np.exp(-tt / 0.9)
     poner(campana * 0.035, 28.6 + k * 0.25, 1 - 0.2 * (k - 1.5), 1 + 0.2 * (k - 1.5))
 
+# Clic del cursor al cambiar a tema oscuro (19.05 s) y brillo del cambio
+n = int(0.06 * SR); tt = np.arange(n) / SR
+poner(hp(rng.standard_normal(n), 2500) * np.exp(-tt / 0.006) * 0.35 + np.sin(2 * np.pi * 1800 * tt) * np.exp(-tt / 0.01) * 0.15, 19.07)
+poner(barrido(0.07), 19.1, 0.8, 1.0)
+for k, m in enumerate([81, 86]):
+    n = int(1.2 * SR); tt = np.arange(n) / SR
+    poner(np.sin(2 * np.pi * hz(m) * tt) * np.exp(-tt / 0.5) * 0.03, 19.15 + k * 0.12)
+
 # ── 5 · Reverberación de sala, mezcla y masterización ──
 def ir(seg, sem):
     r = np.random.default_rng(sem)
