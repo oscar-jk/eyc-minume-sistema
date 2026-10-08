@@ -19,8 +19,10 @@ function Marco({ titulo, children }: { titulo: ReactNode; children: ReactNode })
       <section className="relative isolate overflow-hidden bg-grad-noche px-6 pb-16 pt-10 text-white lg:flex lg:flex-col lg:justify-between lg:p-14">
         <CieloEstrellado />
         {/* Anillo oficial grande y centrado; el contenedor centra y la imagen gira (transformaciones separadas) */}
+        {/* Mismo encuadre que la cabecera del correo: anillo amplio y suave, centrado en el panel, girando */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-0 grid place-items-center">
-          <img src="/brand/anillo.svg" alt="" className="w-[40rem] max-w-none opacity-35 mix-blend-screen [animation:girar_240s_linear_infinite] sm:w-[48rem] lg:w-[min(64rem,120vh)]" />
+          <div className="absolute inset-x-0 bottom-0 h-3/4 bg-[radial-gradient(closest-side,rgb(0_144_251/0.35),transparent)]" />
+          <img src="/brand/anillo.svg" alt="" className="aspect-square w-[140%] min-w-[40rem] max-w-none opacity-25 mix-blend-screen [animation:girar_240s_linear_infinite]" />
         </div>
         <div aria-hidden className="pointer-events-none absolute -left-24 top-1/3 size-80 rounded-full bg-[#0090fb]/30 blur-[100px]" />
         <p className="relative flex items-center justify-center gap-3 font-black tracking-tight lg:justify-start">
