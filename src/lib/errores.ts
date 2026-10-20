@@ -55,12 +55,29 @@ export function interpretarError(e: unknown): ErrorAmigable {
   if (pg === '23P01') return { mensaje: 'Ese cargo ya está ocupado en ese período.', sugerencia: 'Usa «Mover» con la opción «Intercambiar».', codigo: 'EYC-SOLAPE' }
   if (esReglaDelSistema(err) && msg) return { mensaje: msg.replace(/^ERROR:\s*/i, ''), codigo: `EYC-REGLA${pg ? '-' + pg : ''}` }
   if (pg === 'PGRST116') return { mensaje: 'No encontramos ese registro, o no tienes acceso a él.', codigo: 'EYC-NOEXISTE' }
+  const auth = ERRORES_ACCESO[pg]
+  if (auth) return { ...auth, codigo: `EYC-AUTH-${pg}` }
 
   return {
     mensaje: 'Algo no salió como esperábamos.',
     sugerencia: 'Inténtalo de nuevo. Si se repite, comparte el código con la administración.',
     codigo: `EYC-X${pg ? '-' + pg : ''}-${Math.abs(hash(msg)).toString(36).slice(0, 5).toUpperCase()}`,
   }
+}
+
+/** Códigos de Supabase Auth (contraseñas, enlaces, sesión) traducidos a lenguaje claro. */
+const ERRORES_ACCESO: Record<string, Omit<ErrorAmigable, 'codigo'>> = {
+  same_password: { mensaje: 'La nueva contraseña es igual a la que ya tenías.', sugerencia: 'Escribe una contraseña distinta a la anterior.' },
+  weak_password: { mensaje: 'Esa contraseña es demasiado débil o muy común.', sugerencia: 'Usa al menos 10 caracteres combinando letras, números y algún símbolo.' },
+  otp_expired: { mensaje: 'El enlace ya caducó o ya se usó.', sugerencia: 'Pide un enlace nuevo desde «¿Olvidaste tu contraseña?».' },
+  flow_state_expired: { mensaje: 'El enlace ya caducó.', sugerencia: 'Pide un enlace nuevo desde «¿Olvidaste tu contraseña?».' },
+  session_not_found: { mensaje: 'Tu sesión ya no es válida.', sugerencia: 'Vuelve a abrir el enlace del correo o inicia sesión de nuevo.' },
+  session_expired: { mensaje: 'Tu sesión expiró.', sugerencia: 'Vuelve a iniciar sesión para continuar.' },
+  reauthentication_needed: { mensaje: 'Por seguridad debes confirmar tu identidad de nuevo.', sugerencia: 'Pide un enlace nuevo desde «¿Olvidaste tu contraseña?».' },
+  over_email_send_rate_limit: { mensaje: 'Ya enviamos varios correos hace poco.', sugerencia: 'Espera unos minutos antes de pedir otro enlace.' },
+  over_request_rate_limit: { mensaje: 'Hiciste demasiados intentos seguidos.', sugerencia: 'Espera un minuto y vuelve a intentarlo.' },
+  email_address_invalid: { mensaje: 'Ese correo no es válido.', sugerencia: 'Revisa que esté bien escrito.' },
+  user_banned: { mensaje: 'Esta cuenta está desactivada.', sugerencia: 'Contacta a la Subsecretaría de Planificación y Desarrollo.' },
 }
 
 function hash(s: string) {

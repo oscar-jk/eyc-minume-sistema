@@ -47,8 +47,8 @@ function Marco({ titulo, children }: { titulo: ReactNode; children: ReactNode })
       </section>
 
       {/* Formulario */}
-      <section className="relative -mt-10 flex flex-col items-center justify-start px-4 pb-12 lg:mt-0 lg:justify-center lg:bg-bg lg:px-10">
-        <div className="animar-entrada w-full max-w-md rounded-3xl border border-line bg-surface p-6 shadow-card sm:p-8 dark:bg-vidrio dark:backdrop-blur-xl">
+      <section className="relative -mt-10 flex flex-col items-center justify-start px-4 pb-12 lg:mt-0 lg:bg-bg lg:px-10 lg:py-10">
+        <div className="animar-entrada my-auto w-full max-w-md rounded-3xl border border-line bg-surface p-6 shadow-card sm:p-8 dark:bg-vidrio dark:backdrop-blur-xl">
           <p className="sobretitulo flex items-center gap-2 text-acento">
             <Estrella8 tono="azul" className="size-3.5" /> Evaluación y Control
           </p>
@@ -56,7 +56,7 @@ function Marco({ titulo, children }: { titulo: ReactNode; children: ReactNode })
           {children}
         </div>
         {/* Créditos institucionales: tono formal, serif y filetes finos */}
-        <div className="mt-10 flex w-full max-w-md flex-col items-center gap-3 text-center lg:absolute lg:bottom-8 lg:left-1/2 lg:mt-0 lg:-translate-x-1/2">
+        <div className="mt-10 flex w-full max-w-md flex-col items-center gap-3 text-center lg:mt-8">
           <p className="flex w-full items-center gap-3 font-serif text-[0.8rem] italic text-ink-3">
             <span aria-hidden className="h-px flex-1 bg-line-strong/40" />
             Una iniciativa del

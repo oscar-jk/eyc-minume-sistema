@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { Semaforo } from '@/components/Semaforo'
 import { esDesfavorable } from '@/features/evaluacion/reglas'
 import { puntaje, suma } from '@/lib/formato'
+import { interpretarError } from '@/lib/errores'
 
 // Las reglas de cálculo se prueban en la base (supabase/tests/reglas.sql).
 // Aquí se prueban las garantías de la interfaz.
@@ -54,5 +55,16 @@ describe('validación en vivo de pesos', () => {
     expect(suma([20, 30, 15, 15, 10, 10])).toBe(100)
     expect(suma([33.3, 33.3, 33.4])).toBe(100)
     expect(suma([20, 30, 15, 15, 10])).toBe(90)
+  })
+})
+
+describe('errores de acceso en lenguaje claro', () => {
+  it('contraseña igual a la anterior no muestra el error genérico', () => {
+    const e = interpretarError({ code: 'same_password', message: 'New password should be different from the old password.' })
+    expect(e.mensaje).toMatch(/igual a la que ya tenías/)
+    expect(e.codigo).toBe('EYC-AUTH-same_password')
+  })
+  it('enlace caducado indica cómo pedir otro', () => {
+    expect(interpretarError({ code: 'otp_expired', message: 'x' }).sugerencia).toMatch(/Olvidaste/)
   })
 })
