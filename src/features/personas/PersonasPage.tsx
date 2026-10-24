@@ -13,10 +13,11 @@ import { mensajeError } from '@/lib/errores'
 import { AMBITO, MOTIVO, fechaHora } from '@/lib/formato'
 import type { Ambito, Cargo, Comision, MotivoAsignacion } from '@/lib/tipos'
 import { useAltaPersonas, usePersonas, type AltaPersona } from './api'
+import { CalificacionInicialPanel } from './CalificacionInicial'
 import { EditarPersona } from './EditarPersona'
 import { RotacionesPanel } from './Rotaciones'
 
-type Tab = 'asignaciones' | 'rotaciones' | 'alta' | 'masiva'
+type Tab = 'asignaciones' | 'calificacion' | 'rotaciones' | 'alta' | 'masiva'
 
 export function PersonasPage() {
   const [tab, setTab] = useState<Tab>('asignaciones')
@@ -31,12 +32,14 @@ export function PersonasPage() {
         onCambio={setTab}
         opciones={[
           { valor: 'asignaciones', etiqueta: 'Asignaciones' },
+          { valor: 'calificacion', etiqueta: 'Calificación inicial' },
           { valor: 'rotaciones', etiqueta: 'Rotaciones' },
           { valor: 'alta', etiqueta: 'Alta individual' },
           { valor: 'masiva', etiqueta: 'Carga masiva' },
         ]}
       />
       {tab === 'asignaciones' && <AsignacionesPanel />}
+      {tab === 'calificacion' && <CalificacionInicialPanel />}
       {tab === 'rotaciones' && <RotacionesPanel />}
       {tab === 'alta' && <AltaIndividual />}
       {tab === 'masiva' && <CargaMasiva />}

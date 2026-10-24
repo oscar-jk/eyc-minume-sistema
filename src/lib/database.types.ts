@@ -221,6 +221,33 @@ export type Database = {
         }
         Relationships: []
       }
+      calificacion_inicial: {
+        Row: {
+          actualizado_en: string
+          actualizado_por: string | null
+          examen: number | null
+          notas: string | null
+          pares: number | null
+          persona_id: string
+        }
+        Insert: {
+          actualizado_en?: string
+          actualizado_por?: string | null
+          examen?: number | null
+          notas?: string | null
+          pares?: number | null
+          persona_id: string
+        }
+        Update: {
+          actualizado_en?: string
+          actualizado_por?: string | null
+          examen?: number | null
+          notas?: string | null
+          pares?: number | null
+          persona_id?: string
+        }
+        Relationships: []
+      }
       cargos: {
         Row: {
           ambito: Database["public"]["Enums"]["ambito"]
@@ -875,6 +902,7 @@ export type Database = {
           obligatorio: boolean
           opciones: Json
           orden: number
+          puntua: boolean
           roles: string[]
           tipo: string
         }
@@ -890,6 +918,7 @@ export type Database = {
           obligatorio?: boolean
           opciones?: Json
           orden?: number
+          puntua?: boolean
           roles?: string[]
           tipo: string
         }
@@ -905,6 +934,7 @@ export type Database = {
           obligatorio?: boolean
           opciones?: Json
           orden?: number
+          puntua?: boolean
           roles?: string[]
           tipo?: string
         }
@@ -966,6 +996,7 @@ export type Database = {
           creado_en: string
           creado_por: string | null
           descripcion: string | null
+          fuente: string | null
           id: string
           pide_comision: boolean
           pide_referencia: boolean
@@ -979,6 +1010,7 @@ export type Database = {
           creado_en?: string
           creado_por?: string | null
           descripcion?: string | null
+          fuente?: string | null
           id?: string
           pide_comision?: boolean
           pide_referencia?: boolean
@@ -992,6 +1024,7 @@ export type Database = {
           creado_en?: string
           creado_por?: string | null
           descripcion?: string | null
+          fuente?: string | null
           id?: string
           pide_comision?: boolean
           pide_referencia?: boolean
@@ -1445,6 +1478,18 @@ export type Database = {
             referencedColumns: ["persona_id"]
           },
         ]
+      }
+      v_calificacion_inicial: {
+        Row: {
+          examen: number | null
+          institucional: number | null
+          nombre: string | null
+          notas: string | null
+          pares: number | null
+          persona_id: string | null
+          total: number | null
+        }
+        Relationships: []
       }
       v_casos: {
         Row: {
@@ -2050,6 +2095,23 @@ export type Database = {
       formulario_enviar: { Args: { p: Json; p_codigo: string }; Returns: undefined }
       formulario_publico: { Args: { p_codigo: string }; Returns: Json }
       formulario_resultados: { Args: { p_formulario: string }; Returns: Json }
+      puntuacion_rotacion: {
+        Args: { p_dia: number }
+        Returns: {
+          companeros: number
+          delegados: number
+          eyc: number
+          inicial: number
+          nombre: string
+          persona_id: string
+          peso_companeros: number
+          peso_delegados: number
+          peso_eyc: number
+          peso_inicial: number
+          pesos_validos: boolean
+          total: number
+        }[]
+      }
       guardar_cortes: { Args: { p_cortes: Json }; Returns: undefined }
       guardar_evaluacion: { Args: { p: Json }; Returns: string }
       guardar_pesos: {

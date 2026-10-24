@@ -50,6 +50,7 @@ export interface CambiosFormulario {
   pide_comision: boolean
   pide_referencia: boolean
   activo: boolean
+  fuente: string | null
   campos: CampoBorrador[]
   /** Ids de campos que existían y ya no están en el borrador. */
   quitados: string[]
@@ -70,6 +71,7 @@ export function useGuardarFormulario() {
             pide_comision: p.pide_comision,
             pide_referencia: p.pide_referencia,
             activo: p.activo,
+            fuente: p.fuente,
           })
           .eq('id', p.id)
           .select('id')
@@ -94,6 +96,7 @@ export function useGuardarFormulario() {
           escala_min: c.tipo === 'escala' ? c.escala_min : null,
           escala_max: c.tipo === 'escala' ? c.escala_max : null,
           roles: c.roles,
+          puntua: c.tipo === 'escala' && c.puntua && !!p.fuente,
           activo: true,
         }
         if (c.id) datos(await supabase.from('formulario_campos').update(fila).eq('id', c.id).select('id').single())

@@ -22,7 +22,7 @@ export async function crear({ hasta = 999, extra = [] } = {}) {
   `)
   const archivos = fs.readdirSync(MIG).filter((f) => f.endsWith('.sql')).sort()
   for (const f of archivos) {
-    const n = parseInt(f.split('_')[1] ?? f.slice(0, 14).slice(-2), 10)
+    const n = parseInt(f.slice(0, 14).slice(-3), 10)
     if (n > hasta) break
     const sql = fs.readFileSync(path.join(MIG, f), 'utf8')
     try {

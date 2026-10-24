@@ -90,3 +90,11 @@ export function useMoverAsignaciones() {
     onSuccess: () => qc.invalidateQueries(),
   })
 }
+
+/** Puntuación de cada miembro de mesa para decidir la rotación del día (2 o 3): fuentes, pesos y total, calculados por la base. */
+export function usePuntuacionRotacion(dia: number) {
+  return useQuery({
+    queryKey: ['puntuacion-rotacion', dia],
+    queryFn: async () => datos(await supabase.rpc('puntuacion_rotacion', { p_dia: dia })),
+  })
+}

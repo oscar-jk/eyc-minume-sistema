@@ -528,7 +528,12 @@ export function ManualPage() {
                     <strong>Mover</strong> (en Asignaciones): ajuste o asignación inicial de una persona. Si el cargo destino está ocupado, elige <strong>Intercambiar</strong>.
                   </>,
                   <>
-                    <strong>Rotaciones</strong>: elige el Día 2 o el Día 3 de sesiones. Tú decides a qué comisión y con qué cargo pasa cada miembro de mesa. Si eliges el lugar de
+                    <strong>Calificación inicial</strong>: escribe el examen y la evaluación entre pares de cada miembro de mesa (o pega las notas desde Excel). La evaluación institucional sale sola de la nota
+                    del Corte 1. Con las tres notas, el sistema calcula el total (50 %, 30 % y 20 %) que define los roles del Día 1.
+                  </>,
+                  <>
+                    <strong>Rotaciones</strong>: elige el Día 2 o el Día 3 de sesiones. Junto a cada persona ves su <strong>puntuación</strong> (calificación inicial, feedback de delegados y de
+                    compañeros, y la valoración de EyC); los pesos de cada día se ajustan en la misma pantalla y lo que todavía no existe no cuenta como cero. Tú decides a qué comisión y con qué cargo pasa cada miembro de mesa. Si eliges el lugar de
                     otra persona, ella recibe el que tú dejas. El sistema te avisa si alguien vuelve a una comisión que ya conoció. Al terminar, toca <B>Aplicar rotación</B>.
                   </>,
                   <>

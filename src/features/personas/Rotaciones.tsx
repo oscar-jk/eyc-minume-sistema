@@ -7,7 +7,7 @@ import { Campo, Selector } from '@/components/Campo'
 import { Consulta } from '@/components/Estados'
 import { Modal } from '@/components/Modal'
 import { Aviso, Insignia, Tabla, Tarjeta } from '@/components/Ui'
-import { useComisionesVisitadas, useMoverAsignaciones, useVigentes } from '@/features/asignaciones/api'
+import { useComisionesVisitadas, useMoverAsignaciones, usePuntuacionRotacion, useVigentes } from '@/features/asignaciones/api'
 import {
   SESIONES_DIAS_POR_DEFECTO,
   SESIONES_INICIO_POR_DEFECTO,
@@ -26,7 +26,7 @@ import {
 import { siglaDe, useCargos, useComisiones } from '@/features/comisiones/api'
 import { useConfig, useGuardarConfig } from '@/features/configuracion/api'
 import { mensajeError } from '@/lib/errores'
-import { fecha } from '@/lib/formato'
+import { fecha, puntaje } from '@/lib/formato'
 
 /** Lee la regla «comisiones que no rotan» y las fechas de sesiones desde la configuración (con valores por defecto). */
 function useReglas() {
@@ -40,6 +40,7 @@ function useReglas() {
 
 /** Planificador de la rotación de un día de sesiones: cada miembro de mesa pasa a otra comisión; EyC, aprendices y CIJ se quedan. */
 export function RotacionesPanel() {
+  const [dia, setDia] = useState(2)
   const reglas = useReglas()
   const vigentes = useVigentes()
   const visitadas = useComisionesVisitadas()
@@ -47,10 +48,11 @@ export function RotacionesPanel() {
   const cargos = useCargos()
   const m = useMomento()
   const mover = useMoverAsignaciones()
+  const punt = usePuntuacionRotacion(dia)
   const avisar = useAvisar()
-  const [dia, setDia] = useState(2)
   const [edicion, setEdicion] = useState<Plan | null>(null)
   const [confirmar, setConfirmar] = useState(false)
+  const [orden, setOrden] = useState<'comision' | 'puntuacion'>('comision')
 
   const sinSet = useMemo(() => new Set(reglas.sinRotacion), [reglas.sinRotacion])
   const clavePorCargo = useMemo(() => new Map((cargos.data ?? []).map((c) => [c.id, c.clave])), [cargos.data])
@@ -91,6 +93,8 @@ export function RotacionesPanel() {
   const yaRotado = rotan.some((f) => f.motivo === 'rotacion' && f.desde && f.desde.slice(0, 10) >= fechaDia)
 
   const porPersona = new Map(rotan.map((f) => [f.persona_id!, f]))
+  const puntosDe = new Map((punt.data ?? []).map((x) => [x.persona_id, x]))
+  const pesosInvalidos = (punt.data ?? []).some((x) => x.pesos_validos === false)
   const nombreComision = (id: number) => siglaDe(comisiones.data?.find((c) => c.id === id))
   const nombreCargo = (id: number) => cargos.data?.find((c) => c.id === id)?.nombre ?? ''
 
@@ -134,6 +138,13 @@ export function RotacionesPanel() {
             </Aviso>
           </div>
         )}
+        {pesosInvalidos && (
+          <div className="mb-4">
+            <Aviso tono="alerta" titulo="La puntuación está en pausa">
+              Los pesos de este día no suman 100. Corrígelos en «Pesos de la puntuación» (más abajo).
+            </Aviso>
+          </div>
+        )}
         {yaRotado && (
           <div className="mb-4">
             <Aviso tono="info" titulo="Ya hay una rotación registrada ese día o después">
@@ -154,6 +165,7 @@ export function RotacionesPanel() {
                     <tr>
                       <th>Persona</th>
                       <th>Ahora</th>
+                      <th>Puntuación</th>
                       <th>Pasa a</th>
                       <th>
                         <span className="sr-only">Avisos</span>
@@ -163,7 +175,11 @@ export function RotacionesPanel() {
                   <tbody>
                     {casillas
                       .slice()
-                      .sort((a, b) => a.orden - b.orden || a.cargoId - b.cargoId)
+                      .sort((a, b) =>
+                        orden === 'puntuacion'
+                          ? (puntosDe.get(b.personaId)?.total ?? -1) - (puntosDe.get(a.personaId)?.total ?? -1) || a.orden - b.orden
+                          : a.orden - b.orden || a.cargoId - b.cargoId,
+                      )
                       .map((c) => {
                         const f = porPersona.get(c.personaId)!
                         const d = plan.get(c.personaId)!
@@ -176,6 +192,9 @@ export function RotacionesPanel() {
                             </td>
                             <td>
                               {nombreComision(c.comisionId)} · {nombreCargo(c.cargoId)}
+                            </td>
+                            <td>
+                              <Puntuacion x={puntosDe.get(c.personaId)} />
                             </td>
                             <td>
                               <select
@@ -219,7 +238,11 @@ export function RotacionesPanel() {
                 </p>
 
                 {mover.isError && <Aviso tono="peligro">{mensajeError(mover.error)}</Aviso>}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap items-end gap-2">
+                  <Selector etiqueta="Ordenar por" value={orden} onChange={(e) => setOrden(e.target.value as 'comision' | 'puntuacion')} className="min-w-44">
+                    <option value="comision">Comisión</option>
+                    <option value="puntuacion">Puntuación (mayor primero)</option>
+                  </Selector>
                   <Boton variante="secundario" onClick={() => setEdicion(null)} disabled={!edicion}>
                     Deshacer cambios
                   </Boton>
@@ -249,6 +272,8 @@ export function RotacionesPanel() {
           </ul>
         )}
       </Tarjeta>
+
+      <PesosDia key={`${dia}|${JSON.stringify(punt.data?.[0] ? [punt.data[0].peso_inicial, punt.data[0].peso_delegados, punt.data[0].peso_companeros, punt.data[0].peso_eyc] : [])}`} dia={dia} />
 
       <ReglasRotacion key={`${reglas.sinRotacion.join()}|${reglas.inicio}`} sinRotacion={reglas.sinRotacion} inicio={reglas.inicio} />
 
@@ -338,6 +363,72 @@ function ReglasRotacion({ sinRotacion, inicio }: { sinRotacion: string[]; inicio
             Guardar reglas
           </Boton>
         </div>
+      </div>
+    </Tarjeta>
+  )
+}
+
+/** Puntuación del día: total y de dónde sale. Lo que todavía no existe no cuenta como cero. */
+function Puntuacion({ x }: { x: { inicial: number | null; delegados: number | null; companeros: number | null; eyc: number | null; total: number | null } | undefined }) {
+  if (!x || x.total == null) return <span className="text-sm text-ink-3">Sin datos</span>
+  const partes = [
+    ['Inicial', x.inicial],
+    ['Delegados', x.delegados],
+    ['Compañeros', x.companeros],
+    ['EyC', x.eyc],
+  ].filter(([, v]) => v != null) as [string, number][]
+  return (
+    <div>
+      <p className="font-cond text-xl font-extrabold tabular leading-tight">{puntaje(x.total)}</p>
+      <p className="font-cond text-xs text-ink-3">{partes.map(([k, v]) => `${k} ${puntaje(v)}`).join(' · ')}</p>
+    </div>
+  )
+}
+
+/** Pesos de cada fuente para la rotación del día elegido (suman 100). */
+function PesosDia({ dia }: { dia: number }) {
+  const config = useConfig()
+  const guardar = useGuardarConfig()
+  const avisar = useAvisar()
+  const todos = (config.data?.ponderacion_rotacion?.valor ?? {}) as Record<string, Record<string, number>>
+  const v = todos[String(dia)] ?? {}
+  const [w, setW] = useState({ inicial: String(v.inicial ?? 0), delegados: String(v.delegados ?? 0), companeros: String(v.companeros ?? 0), eyc: String(v.eyc ?? 0) })
+  const suma = Number(w.inicial) + Number(w.delegados) + Number(w.companeros) + Number(w.eyc)
+  const campo = (k: keyof typeof w, etiqueta: string, ayuda: string) => (
+    <Campo etiqueta={etiqueta} type="number" min={0} max={100} value={w[k]} onChange={(e) => setW({ ...w, [k]: e.target.value })} ayuda={ayuda} />
+  )
+  return (
+    <Tarjeta titulo={`Pesos de la puntuación · Día ${dia}`}>
+      <p className="mb-3 text-sm text-ink-2">
+        Cuánto pesa cada fuente al decidir esta rotación. Conforme avanzan las sesiones, la calificación inicial pesa menos y lo observado pesa más. Si una fuente todavía no tiene datos de una
+        persona, no cuenta como cero: el resto se reescala.
+      </p>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {campo('inicial', 'Calificación inicial (%)', 'Examen, institucional y pares.')}
+        {campo('delegados', 'Feedback de delegados (%)', 'De los formularios de delegados.')}
+        {campo('companeros', 'Feedback de compañeros (%)', 'De los formularios de la mesa.')}
+        {campo('eyc', 'Valoración de EyC (%)', 'La rúbrica de las jornadas anteriores.')}
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <p role="status" className={`font-cond font-semibold ${suma === 100 ? 'text-verde' : 'text-danger'}`}>
+          Suma: {suma} {suma === 100 ? '✓' : '— debe ser 100'}
+        </p>
+        <Boton
+          disabled={suma !== 100}
+          cargando={guardar.isPending}
+          onClick={() =>
+            guardar.mutate(
+              {
+                clave: 'ponderacion_rotacion',
+                valor: { ...todos, [String(dia)]: { inicial: Number(w.inicial), delegados: Number(w.delegados), companeros: Number(w.companeros), eyc: Number(w.eyc) } },
+                descripcion: 'Pesos de cada fuente para decidir la rotación del Día 2 y del Día 3 (cada día suma 100).',
+              },
+              { onSuccess: () => avisar('Pesos guardados.'), onError: (e) => avisar(mensajeError(e), 'error') },
+            )
+          }
+        >
+          Guardar pesos
+        </Boton>
       </div>
     </Tarjeta>
   )

@@ -37,6 +37,7 @@ function EditorCampo({
   indice,
   total,
   rolesForm,
+  fuente,
   onCambio,
   onMover,
   onQuitar,
@@ -45,6 +46,7 @@ function EditorCampo({
   indice: number
   total: number
   rolesForm: string[]
+  fuente: string | null
   onCambio: (c: CampoBorrador) => void
   onMover: (d: -1 | 1) => void
   onQuitar: () => void
@@ -98,6 +100,15 @@ function EditorCampo({
         <input type="checkbox" className="size-5 accent-[var(--accent)]" checked={campo.obligatorio} onChange={(e) => onCambio({ ...campo, obligatorio: e.target.checked })} />
         Respuesta obligatoria
       </label>
+      {campo.tipo === 'escala' && fuente && (
+        <label className="flex min-h-11 items-start gap-3">
+          <input type="checkbox" className="mt-2.5 size-5 accent-[var(--accent)]" checked={campo.puntua} onChange={(e) => onCambio({ ...campo, puntua: e.target.checked })} />
+          <span>
+            Cuenta para la puntuación de la rotación
+            <span className="block text-sm text-ink-3">La respuesta se convierte a una nota de 0 a 100 y se promedia con las demás preguntas marcadas.</span>
+          </span>
+        </label>
+      )}
       {rolesForm.length > 0 && (
         <fieldset>
           <legend className="mb-1 text-sm font-bold">¿Quién la responde?</legend>
@@ -141,6 +152,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
   const [pideComision, setPideComision] = useState(f.pide_comision)
   const [pideRef, setPideRef] = useState(f.pide_referencia)
   const [activo, setActivo] = useState(f.activo)
+  const [fuente, setFuente] = useState<string | null>(f.fuente)
   const [sucio, setSucio] = useState(false)
   const [campos, setCampos] = useState<CampoBorrador[]>(() =>
     datos.campos
@@ -156,6 +168,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
         escala_min: c.escala_min ?? 1,
         escala_max: c.escala_max ?? 5,
         roles: c.roles,
+        puntua: c.puntua,
       })),
   )
   const [originales] = useState(() => datos.campos.map((c) => c.id))
@@ -194,7 +207,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
 
   const alGuardar = () =>
     guardar.mutate(
-      { id: f.id, titulo, descripcion, roles, pide_comision: pideComision, pide_referencia: pideRef, activo, campos, quitados },
+      { id: f.id, titulo, descripcion, roles, pide_comision: pideComision, pide_referencia: pideRef, activo, fuente, campos, quitados },
       {
         onSuccess: () => {
           avisar('Formulario guardado.')
@@ -239,6 +252,19 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
               ))}
             </div>
           </fieldset>
+          <Selector
+            etiqueta="¿Para qué se usa?"
+            value={fuente ?? ''}
+            onChange={(e) => {
+              cambiar(setFuente)(e.target.value || null)
+              if (e.target.value) setPideComision(true) // el feedback se asigna a la mesa de la comisión de ese día
+            }}
+            ayuda="Si es feedback sobre la mesa, las preguntas de escala que marques suman a la puntuación para decidir las rotaciones (cuenta para quienes integraban la comisión ese día)."
+          >
+            <option value="">Solo recoger opiniones</option>
+            <option value="delegados">Feedback de los delegados sobre la mesa</option>
+            <option value="companeros">Feedback de los compañeros de mesa</option>
+          </Selector>
           <div className="flex flex-wrap gap-x-6">
             <label className="flex min-h-11 items-center gap-2">
               <input type="checkbox" className="size-5 accent-[var(--accent)]" checked={pideComision} onChange={(e) => cambiar(setPideComision)(e.target.checked)} />
@@ -266,6 +292,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
               indice={i}
               total={campos.length}
               rolesForm={roles}
+              fuente={fuente}
               onCambio={(n) => cambiar(setCampos)(campos.map((x) => (x.clave === c.clave ? n : x)))}
               onMover={(d) => {
                 const n = [...campos]
@@ -288,7 +315,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
                 onClick={() =>
                   cambiar(setCampos)([
                     ...campos,
-                    { clave: nuevaClave(), tipo: t, etiqueta: '', ayuda: '', obligatorio: false, opcionesTexto: ESCOGE(t) ? 'Opción 1\nOpción 2' : '', escala_min: 1, escala_max: 5, roles: [] },
+                    { clave: nuevaClave(), tipo: t, etiqueta: '', ayuda: '', obligatorio: false, opcionesTexto: ESCOGE(t) ? 'Opción 1\nOpción 2' : '', escala_min: 1, escala_max: 5, roles: [], puntua: false },
                   ])
                 }
               >

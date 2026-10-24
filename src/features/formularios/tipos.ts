@@ -67,6 +67,8 @@ export interface CampoBorrador {
   escala_min: number
   escala_max: number
   roles: string[]
+  /** Solo en preguntas de escala: cuenta para la puntuación de la rotación. */
+  puntua: boolean
 }
 
 /** Enlace público de un formulario: lo abre cualquier persona, sin cuenta. */

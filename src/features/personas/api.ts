@@ -46,3 +46,31 @@ export function useEditarPersona() {
     onSuccess: () => qc.invalidateQueries(),
   })
 }
+
+// ───────────── Calificación inicial (examen 50 % · institucional 30 % · pares 20 %) ─────────────
+
+/** Una fila por miembro de mesa: examen y pares capturados, institucional (Corte 1) y total, todo calculado por la base. */
+export function useCalificacionInicial() {
+  return useQuery({
+    queryKey: ['calificacion-inicial'],
+    queryFn: async () => datos(await supabase.from('v_calificacion_inicial').select('*').order('nombre')),
+  })
+}
+
+export interface NotaInicial {
+  persona_id: string
+  examen: number | null
+  pares: number | null
+}
+
+/** Guarda varias personas a la vez (alta o cambio). */
+export function useGuardarCalificacionInicial() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (filas: NotaInicial[]) => {
+      datos(await supabase.from('calificacion_inicial').upsert(filas, { onConflict: 'persona_id' }).select('persona_id'))
+    },
+    onSuccess: () =>
+      Promise.all([qc.invalidateQueries({ queryKey: ['calificacion-inicial'] }), qc.invalidateQueries({ queryKey: ['puntuacion-rotacion'] })]),
+  })
+}
