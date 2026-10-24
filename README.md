@@ -66,6 +66,7 @@ Las migraciones versionadas están en [`supabase/migrations/`](supabase/migratio
 | 010 | `vistas_ui` | Vistas y RPC de apoyo a la interfaz |
 | 011 | `edicion_catalogos` | Dimensiones editables por Subsecretaría y admin, con auditoría |
 | 012 | `cuentas_admin` | Estado de activación de cada cuenta (el correo se bloquea al activarse) |
+| 013 | `sesiones_y_cortes` | Evento 14–19 de noviembre con sesiones desde el lunes 16; Corte 2 = sesiones 16–17, Final = 18–19; reglas de rotación |
 
 Para aplicarlas en otro proyecto: `supabase link --project-ref <ref>` y `supabase db push`.
 

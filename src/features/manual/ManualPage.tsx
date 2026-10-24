@@ -173,8 +173,8 @@ function Cortes() {
     <div className="grid gap-3 sm:grid-cols-3">
       {[
         ['25 %', 'Corte 1', 'Preparación: incorporación, capacitaciones y actividades previas.'],
-        ['25 %', 'Corte 2', 'Seguimiento: desempeño de los días 1 y 2 del evento.'],
-        ['50 %', 'Evaluación Final', 'Desempeño de los días 3 al 6 del evento.'],
+        ['25 %', 'Corte 2', 'Seguimiento: desempeño de los días 1 y 2 de sesiones (16 y 17 de noviembre).'],
+        ['50 %', 'Evaluación Final', 'Desempeño de los días 3 y 4 de sesiones (18 y 19 de noviembre).'],
       ].map(([p, t, d]) => (
         <div key={t} className="rounded-2xl rounded-tr-[6px] border border-line bg-surface-2 p-4 dark:bg-white/[0.05]">
           <p className="texto-grad font-cond text-4xl font-extrabold leading-none">{p}</p>
@@ -326,8 +326,8 @@ export function ManualPage() {
                 ))}
               </div>
               <p>
-                Orden: <strong>Incorporación y preparación</strong> → <strong>Corte 1</strong> → <strong>Evento días 1 y 2</strong> → <strong>Corte 2</strong> →{' '}
-                <strong>Evento días 3 al 6</strong> → <strong>Cierre y resultados</strong>.
+                Orden: <strong>Incorporación y preparación</strong> → <strong>Corte 1</strong> → <strong>Sesiones días 1 y 2</strong> → <strong>Corte 2</strong> →{' '}
+                <strong>Sesiones días 3 y 4</strong> → <strong>Cierre y resultados</strong>.
               </p>
             </Seccion>
 
