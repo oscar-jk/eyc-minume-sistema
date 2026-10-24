@@ -68,6 +68,7 @@ export function FormularioPublicoPage() {
             <FormularioRespuesta
               key={vuelta}
               def={q.data}
+              codigo={codigo}
               enviando={enviar.isPending}
               errorEnvio={enviar.isError ? interpretarError(enviar.error).mensaje + (interpretarError(enviar.error).sugerencia ? ' ' + interpretarError(enviar.error).sugerencia : '') : null}
               onEnviar={(p) =>

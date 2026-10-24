@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { datos } from '@/lib/consulta'
-import { opcionesDe, type CampoBorrador, type FormularioPublicoDef, type TipoCampo, type Valores } from './tipos'
+import { opcionesDe, type CampoBorrador, type FormularioPublicoDef, type PersonaComision, type TipoCampo, type Valores } from './tipos'
 
 // ───────────── Formularios de la cuenta (con sesión) ─────────────
 
@@ -50,7 +50,6 @@ export interface CambiosFormulario {
   pide_comision: boolean
   pide_referencia: boolean
   activo: boolean
-  fuente: string | null
   campos: CampoBorrador[]
   /** Ids de campos que existían y ya no están en el borrador. */
   quitados: string[]
@@ -71,7 +70,6 @@ export function useGuardarFormulario() {
             pide_comision: p.pide_comision,
             pide_referencia: p.pide_referencia,
             activo: p.activo,
-            fuente: p.fuente,
           })
           .eq('id', p.id)
           .select('id')
@@ -96,7 +94,6 @@ export function useGuardarFormulario() {
           escala_min: c.tipo === 'escala' ? c.escala_min : null,
           escala_max: c.tipo === 'escala' ? c.escala_max : null,
           roles: c.roles,
-          puntua: c.tipo === 'escala' && c.puntua && !!p.fuente,
           activo: true,
         }
         if (c.id) datos(await supabase.from('formulario_campos').update(fila).eq('id', c.id).select('id').single())
@@ -184,6 +181,16 @@ export function useFormularioPublico(codigo: string | undefined) {
       const d = datos(await supabase.rpc('formulario_publico', { p_codigo: codigo! })) as unknown as FormularioPublicoDef
       return { ...d, campos: d.campos.map((c) => ({ ...c, opciones: opcionesDe(c.opciones) })) }
     },
+  })
+}
+
+/** Personas registradas en la comisión elegida (solo nombre y cargo), para el campo «personas». */
+export function useFormularioPersonas(codigo: string | undefined, comisionId: number | null, activo: boolean) {
+  return useQuery({
+    queryKey: ['formulario-personas', codigo, comisionId],
+    enabled: !!codigo && comisionId != null && activo,
+    staleTime: 60_000,
+    queryFn: async () => (datos(await supabase.rpc('formulario_personas', { p_codigo: codigo!, p_comision: comisionId! })) as unknown as PersonaComision[]),
   })
 }
 

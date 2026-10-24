@@ -9,6 +9,7 @@ declare
   c_ctd smallint; f uuid; cod text;
   k_nombre uuid; k_radio uuid; k_check uuid; k_escala uuid; k_siono uuid; k_solo_del uuid; k_parrafo uuid;
   n int; ok boolean; res jsonb; pruebas int := 0; v jsonb; vn numeric;
+  f2 uuid; cod2 text; k_per uuid; p_a uuid; p_b uuid; p_otra uuid; k_dir smallint; k_adj smallint; c_pnud smallint;
 begin
   select id into c_ctd from public.comisiones where clave = 'ctd';
   insert into auth.users (id, email, raw_app_meta_data, raw_user_meta_data) values
@@ -165,6 +166,46 @@ begin
   -- 8. Auditoría de la creación del formulario.
   select count(*) into n from public.auditoria where tabla = 'formularios' and autor = u_eyc1 and accion = 'insert';
   if n <> 1 then raise exception 'FALLO 8: auditoría del formulario = %', n; end if;
+  pruebas := pruebas + 1;
+
+  -- 9. Campo «personas»: se elige a alguien registrado en la comisión (o «Otro» si es externo); nunca de otra comisión.
+  select id into k_dir from public.cargos where clave = 'director';
+  select id into k_adj from public.cargos where clave = 'adjunto1';
+  select id into c_pnud from public.comisiones where clave = 'pnud';
+  insert into public.personas (nombre, ambito) values ('Ana Ponente', 'mesa') returning id into p_a;
+  insert into public.personas (nombre, ambito) values ('Beto Ponente', 'mesa') returning id into p_b;
+  insert into public.personas (nombre, ambito) values ('Carla de Otra Comisión', 'mesa') returning id into p_otra;
+  insert into public.asignaciones (persona_id, comision_id, cargo_id, desde, motivo) values
+    (p_a, c_ctd, k_dir, now() - interval '30 days', 'inicial'), (p_b, c_ctd, k_adj, now() - interval '30 days', 'inicial'),
+    (p_otra, c_pnud, k_dir, now() - interval '30 days', 'inicial');
+  perform set_config('request.jwt.claims', json_build_object('sub', u_eyc1, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  insert into public.formularios (titulo, roles) values ('Feedback del taller', array['delegado']) returning id, codigo into f2, cod2;
+  insert into public.formulario_campos (formulario_id, orden, tipo, etiqueta, obligatorio) values (f2, 1, 'personas', '¿Quién dio el taller?', true) returning id into k_per;
+  reset role;
+  perform set_config('request.headers', '{"x-forwarded-for":"10.0.0.9","user-agent":"Personas"}', true);
+  set local role anon;
+  v := public.formulario_personas(cod2, c_ctd);
+  if jsonb_array_length(v) <> 2 or v::text like '%Otra Comisión%' then raise exception 'FALLO 9a: personas de la comisión = %', v; end if;
+  if (v -> 0) ? 'correo' or (v -> 0) ? 'telefono' then raise exception 'FALLO 9b: expone datos de contacto'; end if;
+  perform public.formulario_enviar(cod2, jsonb_build_object('rol', 'delegado', 'comision_id', c_ctd, 'referencia', 'Taller 1',
+    'respuestas', jsonb_build_object(k_per::text, jsonb_build_object('persona_id', p_a))));
+  perform public.formulario_enviar(cod2, jsonb_build_object('rol', 'delegado', 'comision_id', c_ctd, 'referencia', 'Taller 1',
+    'respuestas', jsonb_build_object(k_per::text, jsonb_build_object('otro', 'Invitado externo'))));
+  ok := false; begin perform public.formulario_enviar(cod2, jsonb_build_object('rol', 'delegado', 'comision_id', c_ctd, 'referencia', 'Taller 1',
+    'respuestas', jsonb_build_object(k_per::text, jsonb_build_object('persona_id', p_otra))));
+  exception when others then ok := sqlerrm like '%persona de la comisión%'; end;
+  if not ok then raise exception 'FALLO 9d: aceptó a una persona de otra comisión'; end if;
+  ok := false; begin perform public.formulario_enviar(cod2, jsonb_build_object('rol', 'delegado', 'comision_id', c_ctd, 'referencia', 'Taller 1', 'respuestas', '{}'::jsonb));
+  exception when others then ok := sqlerrm like '%Falta responder%'; end;
+  if not ok then raise exception 'FALLO 9e: no exigió el campo de personas obligatorio'; end if;
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('sub', u_eyc1, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  res := public.formulario_resultados(f2);
+  select c -> 'resumen' into v from jsonb_array_elements(res -> 'campos') c where c ->> 'tipo' = 'personas';
+  if (v -> 'conteo' ->> 'Ana Ponente')::int <> 1 or v -> 'otros' <> '["Invitado externo"]'::jsonb then raise exception 'FALLO 9f: resumen de personas = %', v; end if;
+  reset role;
   pruebas := pruebas + 1;
 
   raise exception 'FORMULARIOS_OK (%)', pruebas;

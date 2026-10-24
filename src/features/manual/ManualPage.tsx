@@ -532,8 +532,8 @@ export function ManualPage() {
                     del Corte 1. Con las tres notas, el sistema calcula el total (50 %, 30 % y 20 %) que define los roles del Día 1.
                   </>,
                   <>
-                    <strong>Rotaciones</strong>: elige el Día 2 o el Día 3 de sesiones. Junto a cada persona ves su <strong>puntuación</strong> (calificación inicial, feedback de delegados y de
-                    compañeros, y la valoración de EyC); los pesos de cada día se ajustan en la misma pantalla y lo que todavía no existe no cuenta como cero. Tú decides a qué comisión y con qué cargo pasa cada miembro de mesa. Si eliges el lugar de
+                    <strong>Rotaciones</strong>: elige el Día 2 o el Día 3 de sesiones. Junto a cada persona ves su <strong>puntuación</strong> (calificación inicial y valoración de EyC; el feedback
+                    de los formularios lo lees tú y no suma solo); los pesos de cada día se ajustan en la misma pantalla y lo que todavía no existe no cuenta como cero. Tú decides a qué comisión y con qué cargo pasa cada miembro de mesa. Si eliges el lugar de
                     otra persona, ella recibe el que tú dejas. El sistema te avisa si alguien vuelve a una comisión que ya conoció. Al terminar, toca <B>Aplicar rotación</B>.
                   </>,
                   <>

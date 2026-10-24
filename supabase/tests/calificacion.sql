@@ -75,63 +75,29 @@ begin
   reset role;
   pruebas := pruebas + 1;
 
-  -- 3. Feedback: un formulario de delegados (escala 1–5, cuenta) y otro de compañeros, sobre la comisión CTD el Día 1.
+  -- 3. Valoración de EyC: P1 evaluado con 100 la jornada del Día 1 (los formularios de feedback NO puntúan a nadie).
   perform set_config('request.jwt.claims', json_build_object('sub', u_sub, 'role', 'authenticated')::text, true);
   set local role authenticated;
-  insert into public.formularios (titulo, fuente) values ('Feedback delegados', 'delegados') returning id into fdel;
-  insert into public.formularios (titulo, fuente) values ('Feedback compañeros', 'companeros') returning id into fcom;
-  insert into public.formulario_campos (formulario_id, tipo, etiqueta, escala_min, escala_max, puntua) values (fdel, 'escala', 'Imparcialidad', 1, 5, true) returning id into kdel;
-  insert into public.formulario_campos (formulario_id, tipo, etiqueta, escala_min, escala_max, puntua) values (fcom, 'escala', 'Coordinación', 1, 10, true) returning id into kcom;
-  insert into public.formulario_campos (formulario_id, tipo, etiqueta, escala_min, escala_max, puntua) values (fdel, 'escala', 'Pregunta que no cuenta', 1, 5, false) returning id into kno;
-  ok := false; begin insert into public.formulario_campos (formulario_id, tipo, etiqueta, puntua) values (fdel, 'texto', 'Texto puntuable', true); exception when others then ok := true; end;
-  if not ok then raise exception 'FALLO 3a: un campo de texto no debe poder puntuar'; end if;
+  ok := false; begin perform 1 from information_schema.columns where table_name = 'formularios' and column_name = 'fuente' and table_schema = 'public'; if found then raise exception 'x'; end if; ok := true; exception when others then ok := false; end;
+  if not ok then raise exception 'FALLO 3a: formularios todavía tiene la columna fuente'; end if;
   reset role;
-  -- Envíos del Día 1 (hoy-3) sobre CTD: delegados 5 → 100 y 3 → 50 (promedio 75); compañeros 10 de 10 → 100 y 8 de 10 → 77.78 (promedio 88.89).
-  insert into public.formulario_envios (formulario_id, rol, comision_id, referencia, huella, creado_en)
-    values (fdel, 'delegado', c_ctd, 'S1', 'h1', ((hoy - 3)::timestamp + interval '15 hours') at time zone app.zona()) returning id into e;
-  insert into public.formulario_respuestas values (e, kdel, '5'), (e, kno, '1');
-  insert into public.formulario_envios (formulario_id, rol, comision_id, referencia, huella, creado_en)
-    values (fdel, 'delegado', c_ctd, 'S1', 'h2', ((hoy - 3)::timestamp + interval '16 hours') at time zone app.zona()) returning id into e;
-  insert into public.formulario_respuestas values (e, kdel, '3');
-  insert into public.formulario_envios (formulario_id, rol, comision_id, referencia, huella, creado_en)
-    values (fcom, 'mesa', c_ctd, 'S1', 'h3', ((hoy - 3)::timestamp + interval '17 hours') at time zone app.zona()) returning id into e;
-  insert into public.formulario_respuestas values (e, kcom, '10');
-  insert into public.formulario_envios (formulario_id, rol, comision_id, referencia, huella, creado_en)
-    values (fcom, 'mesa', c_ctd, 'S1', 'h4', ((hoy - 3)::timestamp + interval '18 hours') at time zone app.zona()) returning id into e;
-  insert into public.formulario_respuestas values (e, kcom, '8');
-  -- Un envío del mismo día pero sobre PNUD (otra comisión) y uno del propio Día 2 (no cuenta para decidir el Día 2).
-  insert into public.formulario_envios (formulario_id, rol, comision_id, referencia, huella, creado_en)
-    values (fdel, 'delegado', c_pnud, 'S1', 'h5', ((hoy - 3)::timestamp + interval '15 hours') at time zone app.zona()) returning id into e;
-  insert into public.formulario_respuestas values (e, kdel, '1');
-  insert into public.formulario_envios (formulario_id, rol, comision_id, referencia, huella, creado_en)
-    values (fdel, 'delegado', c_ctd, 'S2', 'h6', ((hoy - 2)::timestamp + interval '10 hours') at time zone app.zona()) returning id into e;
-  insert into public.formulario_respuestas values (e, kdel, '1');
-  -- Valoración de EyC: P1 evaluado con 100 la jornada del Día 1.
   perform public.guardar_evaluacion(jsonb_build_object('persona_id', p1, 'fecha_jornada', hoy - 3, 'estado', 'completa', 'respuestas', perfecto));
 
-  -- 4. Puntuación para el Día 2 (pesos 50/20/15/15).
+  -- 4. Puntuación para el Día 2 (pesos 70/30): P1 = 83·0.7 + 100·0.3 = 88.10
   perform set_config('request.jwt.claims', json_build_object('sub', u_sub, 'role', 'authenticated')::text, true);
   set local role authenticated;
   select * into r from public.puntuacion_rotacion(2) where persona_id = p1;
-  if r.inicial is distinct from 83.00 or r.delegados is distinct from 75.00 or r.companeros is distinct from 88.89 or r.eyc is distinct from 100.00 then
-    raise exception 'FALLO 4a: fuentes de P1 = % / % / % / %', r.inicial, r.delegados, r.companeros, r.eyc;
-  end if;
-  -- (83·50 + 75·20 + 88.89·15 + 100·15) / 100 = 84.83
-  if r.total is distinct from 84.83 or not r.pesos_validos then raise exception 'FALLO 4b: total de P1 = % (esperado 84.83)', r.total; end if;
-  -- P2 no tiene calificación inicial ni valoración de EyC: pesa solo lo que existe → (75·20 + 88.89·15) / 35 = 80.95
+  if r.inicial is distinct from 83.00 or r.eyc is distinct from 100.00 then raise exception 'FALLO 4a: fuentes de P1 = % / %', r.inicial, r.eyc; end if;
+  if r.total is distinct from 88.10 or not r.pesos_validos then raise exception 'FALLO 4b: total de P1 = % (esperado 88.10)', r.total; end if;
+  -- P2 no tiene calificación inicial completa ni valoración de EyC: sin datos, sin total.
   select * into r from public.puntuacion_rotacion(2) where persona_id = p2;
-  if r.inicial is not null or r.eyc is not null then raise exception 'FALLO 4c: P2 no debería tener inicial ni EyC'; end if;
-  if r.total is distinct from 80.95 then raise exception 'FALLO 4d: total de P2 con fuentes faltantes = % (esperado 80.95)', r.total; end if;
-  -- P3 (PNUD) solo tiene feedback de delegados de PNUD (1 → 0): total 0, no nulo.
-  select * into r from public.puntuacion_rotacion(2) where persona_id = p3;
-  if r.delegados is distinct from 0.00 or r.total is distinct from 0.00 then raise exception 'FALLO 4e: P3 delegados=% total=%', r.delegados, r.total; end if;
+  if r.inicial is not null or r.eyc is not null or r.total is not null then raise exception 'FALLO 4c: P2 debería quedar sin datos (% / % / %)', r.inicial, r.eyc, r.total; end if;
   pruebas := pruebas + 1;
 
-  -- 5. Para decidir el Día 3 ya cuenta el feedback del Día 2, con otros pesos (30/30/20/20).
+  -- 5. Día 3: otros pesos (40/60) → 83·0.4 + 100·0.6 = 93.20
   select * into r from public.puntuacion_rotacion(3) where persona_id = p1;
-  -- delegados del Día 1 y del Día 2 sobre CTD: (100 + 50 + 0) / 3 = 50 (las respuestas del Día 2: 1 → 0)
-  if r.delegados is distinct from 50.00 then raise exception 'FALLO 5a: delegados acumulados de P1 = % (esperado 50)', r.delegados; end if;
-  if r.peso_inicial <> 30 or r.peso_eyc <> 20 then raise exception 'FALLO 5b: pesos del Día 3 incorrectos'; end if;
+  if r.peso_inicial <> 40 or r.peso_eyc <> 60 then raise exception 'FALLO 5a: pesos del Día 3 incorrectos'; end if;
+  if r.total is distinct from 93.20 then raise exception 'FALLO 5b: total de P1 el Día 3 = % (esperado 93.20)', r.total; end if;
   ok := false; begin perform * from public.puntuacion_rotacion(1); exception when others then ok := sqlerrm like '%Día 2%'; end;
   if not ok then raise exception 'FALLO 5c: aceptó el Día 1'; end if;
   reset role;

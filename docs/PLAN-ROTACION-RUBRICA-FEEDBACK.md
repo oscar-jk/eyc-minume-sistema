@@ -24,3 +24,8 @@ Basado en el documento «Sistema de Rotación de Mesas Directivas» y en las dec
 - Puntos de cada uno de los 9 criterios (suman 100) y su agrupación.
 - Preguntas de cada formulario (delegados, compañeros de mesa, feedback sobre EyC, aprendiz).
 - Calendario de cortes con el nuevo calendario de sesiones.
+
+
+## Aclaración posterior (24-oct-2026)
+
+Los formularios van dirigidos a los **delegados de una comisión**. Su feedback **no modifica la nota** de ningún miembro: EyC saca sus conclusiones leyendo las respuestas. La puntuación para decidir rotaciones usa solo la calificación inicial y la valoración de EyC (rúbrica). El campo «personas» permite elegir a quien dio un taller entre los integrantes registrados de la comisión, o «Otro» si es externo (migración 017).

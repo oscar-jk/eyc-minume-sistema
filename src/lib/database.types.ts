@@ -902,7 +902,6 @@ export type Database = {
           obligatorio: boolean
           opciones: Json
           orden: number
-          puntua: boolean
           roles: string[]
           tipo: string
         }
@@ -918,7 +917,6 @@ export type Database = {
           obligatorio?: boolean
           opciones?: Json
           orden?: number
-          puntua?: boolean
           roles?: string[]
           tipo: string
         }
@@ -934,7 +932,6 @@ export type Database = {
           obligatorio?: boolean
           opciones?: Json
           orden?: number
-          puntua?: boolean
           roles?: string[]
           tipo?: string
         }
@@ -996,7 +993,6 @@ export type Database = {
           creado_en: string
           creado_por: string | null
           descripcion: string | null
-          fuente: string | null
           id: string
           pide_comision: boolean
           pide_referencia: boolean
@@ -1010,7 +1006,6 @@ export type Database = {
           creado_en?: string
           creado_por?: string | null
           descripcion?: string | null
-          fuente?: string | null
           id?: string
           pide_comision?: boolean
           pide_referencia?: boolean
@@ -1024,7 +1019,6 @@ export type Database = {
           creado_en?: string
           creado_por?: string | null
           descripcion?: string | null
-          fuente?: string | null
           id?: string
           pide_comision?: boolean
           pide_referencia?: boolean
@@ -2093,19 +2087,16 @@ export type Database = {
         }[]
       }
       formulario_enviar: { Args: { p: Json; p_codigo: string }; Returns: undefined }
+      formulario_personas: { Args: { p_codigo: string; p_comision: number }; Returns: Json }
       formulario_publico: { Args: { p_codigo: string }; Returns: Json }
       formulario_resultados: { Args: { p_formulario: string }; Returns: Json }
       puntuacion_rotacion: {
         Args: { p_dia: number }
         Returns: {
-          companeros: number
-          delegados: number
           eyc: number
           inicial: number
           nombre: string
           persona_id: string
-          peso_companeros: number
-          peso_delegados: number
           peso_eyc: number
           peso_inicial: number
           pesos_validos: boolean

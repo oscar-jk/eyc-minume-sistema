@@ -9,7 +9,7 @@ import { useEnviosFormulario, useFormulario, useResultados, type ResumenCampo } 
 import { ROLES_RESPUESTA, TIPOS_CAMPO } from './tipos'
 
 const num = (v: unknown) => (typeof v === 'number' || typeof v === 'string' ? Number(v) : 0)
-const texto = (v: unknown): string => (Array.isArray(v) ? v.join(' · ') : v === true ? 'Sí' : v === false ? 'No' : v == null ? '' : String(v))
+const texto = (v: unknown): string => (v && typeof v === 'object' && !Array.isArray(v) ? String((v as { nombre?: string; otro?: string }).nombre ?? (v as { otro?: string }).otro ?? '') : Array.isArray(v) ? v.join(' · ') : v === true ? 'Sí' : v === false ? 'No' : v == null ? '' : String(v))
 
 function Barras({ datos, total }: { datos: [string, number][]; total: number }) {
   return (
@@ -62,6 +62,26 @@ function Resumen({ c }: { c: ResumenCampo }) {
           <Barras datos={Object.entries((r.distribucion ?? {}) as Record<string, number>).sort(([a], [b]) => Number(a) - Number(b))} total={c.respuestas} />
         </div>
       )
+    case 'personas': {
+      const otros = (r.otros as string[] | undefined) ?? []
+      return (
+        <div className="flex flex-col gap-3">
+          <Barras datos={Object.entries((r.conteo ?? {}) as Record<string, number>).sort(([, a], [, b]) => b - a).map(([k, v]) => [k, num(v)] as [string, number])} total={c.respuestas} />
+          {otros.length > 0 && (
+            <div>
+              <p className="mb-1 text-sm font-bold">Otras personas (externas)</p>
+              <ul className="flex flex-wrap gap-1.5 text-sm">
+                {otros.map((o, i) => (
+                  <li key={i} className="rounded-xl bg-surface-2 px-3 py-1.5 dark:bg-white/[0.05]">
+                    {o}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )
+    }
     case 'numero':
       return (
         <p className="text-sm text-ink-2">

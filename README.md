@@ -68,6 +68,7 @@ Las migraciones versionadas están en [`supabase/migrations/`](supabase/migratio
 | 012 | `cuentas_admin` | Estado de activación de cada cuenta (el correo se bloquea al activarse) |
 | 014 | `rubrica_notas` | Rúbrica de la mesa: 9 criterios con nota de 0 a sus puntos (suman 100), en secciones, con descripción siempre obligatoria |
 | 016 | `calificacion_inicial` | Calificación inicial (examen 50 %, institucional 30 %, pares 20 %) y puntuación por día para decidir las rotaciones |
+| 017 | `feedback_sin_puntaje_y_personas` | El feedback de los formularios no puntúa a nadie (lo analiza EyC); nuevo campo «personas» (integrantes de la comisión u «Otro»); puntuación de rotación = calificación inicial + valoración de EyC |
 | 015 | `formularios` | Formularios sin cuenta: campos de varios tipos, página pública de respuesta, resultados y límites contra abuso |
 | 013 | `sesiones_y_cortes` | Evento 14–19 de noviembre con sesiones desde el lunes 16; Corte 2 = sesiones 16–17, Final = 18–19; reglas de rotación |
 

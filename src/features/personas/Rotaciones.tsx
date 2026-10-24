@@ -273,7 +273,7 @@ export function RotacionesPanel() {
         )}
       </Tarjeta>
 
-      <PesosDia key={`${dia}|${JSON.stringify(punt.data?.[0] ? [punt.data[0].peso_inicial, punt.data[0].peso_delegados, punt.data[0].peso_companeros, punt.data[0].peso_eyc] : [])}`} dia={dia} />
+      <PesosDia key={`${dia}|${JSON.stringify(punt.data?.[0] ? [punt.data[0].peso_inicial, punt.data[0].peso_eyc] : [])}`} dia={dia} />
 
       <ReglasRotacion key={`${reglas.sinRotacion.join()}|${reglas.inicio}`} sinRotacion={reglas.sinRotacion} inicio={reglas.inicio} />
 
@@ -369,12 +369,10 @@ function ReglasRotacion({ sinRotacion, inicio }: { sinRotacion: string[]; inicio
 }
 
 /** Puntuación del día: total y de dónde sale. Lo que todavía no existe no cuenta como cero. */
-function Puntuacion({ x }: { x: { inicial: number | null; delegados: number | null; companeros: number | null; eyc: number | null; total: number | null } | undefined }) {
+function Puntuacion({ x }: { x: { inicial: number | null; eyc: number | null; total: number | null } | undefined }) {
   if (!x || x.total == null) return <span className="text-sm text-ink-3">Sin datos</span>
   const partes = [
     ['Inicial', x.inicial],
-    ['Delegados', x.delegados],
-    ['Compañeros', x.companeros],
     ['EyC', x.eyc],
   ].filter(([, v]) => v != null) as [string, number][]
   return (
@@ -392,8 +390,8 @@ function PesosDia({ dia }: { dia: number }) {
   const avisar = useAvisar()
   const todos = (config.data?.ponderacion_rotacion?.valor ?? {}) as Record<string, Record<string, number>>
   const v = todos[String(dia)] ?? {}
-  const [w, setW] = useState({ inicial: String(v.inicial ?? 0), delegados: String(v.delegados ?? 0), companeros: String(v.companeros ?? 0), eyc: String(v.eyc ?? 0) })
-  const suma = Number(w.inicial) + Number(w.delegados) + Number(w.companeros) + Number(w.eyc)
+  const [w, setW] = useState({ inicial: String(v.inicial ?? 0), eyc: String(v.eyc ?? 0) })
+  const suma = Number(w.inicial) + Number(w.eyc)
   const campo = (k: keyof typeof w, etiqueta: string, ayuda: string) => (
     <Campo etiqueta={etiqueta} type="number" min={0} max={100} value={w[k]} onChange={(e) => setW({ ...w, [k]: e.target.value })} ayuda={ayuda} />
   )
@@ -403,10 +401,8 @@ function PesosDia({ dia }: { dia: number }) {
         Cuánto pesa cada fuente al decidir esta rotación. Conforme avanzan las sesiones, la calificación inicial pesa menos y lo observado pesa más. Si una fuente todavía no tiene datos de una
         persona, no cuenta como cero: el resto se reescala.
       </p>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2">
         {campo('inicial', 'Calificación inicial (%)', 'Examen, institucional y pares.')}
-        {campo('delegados', 'Feedback de delegados (%)', 'De los formularios de delegados.')}
-        {campo('companeros', 'Feedback de compañeros (%)', 'De los formularios de la mesa.')}
         {campo('eyc', 'Valoración de EyC (%)', 'La rúbrica de las jornadas anteriores.')}
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -420,8 +416,8 @@ function PesosDia({ dia }: { dia: number }) {
             guardar.mutate(
               {
                 clave: 'ponderacion_rotacion',
-                valor: { ...todos, [String(dia)]: { inicial: Number(w.inicial), delegados: Number(w.delegados), companeros: Number(w.companeros), eyc: Number(w.eyc) } },
-                descripcion: 'Pesos de cada fuente para decidir la rotación del Día 2 y del Día 3 (cada día suma 100).',
+                valor: { ...todos, [String(dia)]: { inicial: Number(w.inicial), eyc: Number(w.eyc) } },
+                descripcion: 'Pesos de la calificación inicial y de la valoración de EyC para decidir la rotación del Día 2 y del Día 3 (cada día suma 100).',
               },
               { onSuccess: () => avisar('Pesos guardados.'), onError: (e) => avisar(mensajeError(e), 'error') },
             )

@@ -1,6 +1,6 @@
 /** Formularios sin cuenta: tipos compartidos por el constructor, la página pública y los resultados. */
 
-export type TipoCampo = 'texto' | 'parrafo' | 'numero' | 'fecha' | 'radio' | 'checkbox' | 'lista' | 'escala' | 'si_no'
+export type TipoCampo = 'texto' | 'parrafo' | 'numero' | 'fecha' | 'radio' | 'checkbox' | 'lista' | 'escala' | 'si_no' | 'personas'
 
 export const TIPOS_CAMPO: Record<TipoCampo, { nombre: string; descripcion: string }> = {
   texto: { nombre: 'Texto corto', descripcion: 'Una línea de texto' },
@@ -12,6 +12,7 @@ export const TIPOS_CAMPO: Record<TipoCampo, { nombre: string; descripcion: strin
   lista: { nombre: 'Lista desplegable', descripcion: 'Se elige una de una lista' },
   escala: { nombre: 'Escala', descripcion: 'Un valor de menos a más (por ejemplo 1 a 5)' },
   si_no: { nombre: 'Sí o no', descripcion: 'Una pregunta de dos respuestas' },
+  personas: { nombre: 'Persona de la comisión', descripcion: 'Se elige a alguien registrado en la comisión, o «Otro» si es externo' },
 }
 
 /** Quién puede estar respondiendo. La persona elige su rol al entrar al formulario. */
@@ -47,7 +48,19 @@ export interface FormularioPublicoDef {
   campos: CampoDef[]
 }
 
-export type Valor = string | number | boolean | string[] | undefined
+/** Respuesta de un campo «personas»: alguien registrado en la comisión, o un nombre escrito (externo). */
+export interface ValorPersona {
+  persona_id?: string
+  otro?: string
+}
+
+export interface PersonaComision {
+  id: string
+  nombre: string
+  cargo: string
+}
+
+export type Valor = string | number | boolean | string[] | ValorPersona | undefined
 export type Valores = Record<string, Valor>
 
 export const opcionesDe = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [])
@@ -67,8 +80,6 @@ export interface CampoBorrador {
   escala_min: number
   escala_max: number
   roles: string[]
-  /** Solo en preguntas de escala: cuenta para la puntuación de la rotación. */
-  puntua: boolean
 }
 
 /** Enlace público de un formulario: lo abre cualquier persona, sin cuenta. */

@@ -2,7 +2,8 @@ import { useId, useState } from 'react'
 import { Boton } from '@/components/Boton'
 import { AreaTexto, Campo, Selector } from '@/components/Campo'
 import { Aviso } from '@/components/Ui'
-import { ROLES_RESPUESTA, aplicaA, type CampoDef, type FormularioPublicoDef, type Valor, type Valores } from './tipos'
+import { useFormularioPersonas } from './api'
+import { ROLES_RESPUESTA, aplicaA, type CampoDef, type FormularioPublicoDef, type PersonaComision, type Valor, type ValorPersona, type Valores } from './tipos'
 
 function Etiqueta({ id, c }: { id: string; c: CampoDef }) {
   return (
@@ -17,7 +18,20 @@ function Etiqueta({ id, c }: { id: string; c: CampoDef }) {
 }
 
 /** Un campo de cualquier tipo. Valor: texto, número, sí/no (boolean), o lista de opciones (casillas). */
-export function CampoEntrada({ campo: c, valor, onCambio, error }: { campo: CampoDef; valor: Valor; onCambio: (v: Valor) => void; error?: string }) {
+export function CampoEntrada({
+  campo: c,
+  valor,
+  onCambio,
+  error,
+  personas,
+}: {
+  campo: CampoDef
+  valor: Valor
+  onCambio: (v: Valor) => void
+  error?: string
+  /** Personas de la comisión elegida (solo para el tipo «personas»); undefined = todavía no se elige comisión. */
+  personas?: PersonaComision[]
+}) {
   const id = useId()
   const aviso = error && (
     <p role="alert" className="text-sm font-medium text-danger">
@@ -107,6 +121,37 @@ export function CampoEntrada({ campo: c, valor, onCambio, error }: { campo: Camp
         </fieldset>
       )
     }
+    case 'personas': {
+      const v = (valor && typeof valor === 'object' && !Array.isArray(valor) ? valor : {}) as ValorPersona
+      const otro = v.otro !== undefined
+      return (
+        <fieldset aria-labelledby={id} className="flex flex-col gap-2">
+          <Etiqueta id={id} c={c} />
+          {personas === undefined ? (
+            <p className="rounded-2xl bg-surface-2 px-4 py-3 text-sm text-ink-3 dark:bg-white/[0.05]">Elige primero la comisión para ver a sus integrantes.</p>
+          ) : (
+            <Selector
+              etiqueta="Persona"
+              value={otro ? '__otro' : (v.persona_id ?? '')}
+              onChange={(e) => {
+                const x = e.target.value
+                onCambio(x === '' ? undefined : x === '__otro' ? { otro: '' } : { persona_id: x })
+              }}
+            >
+              <option value="">Elige…</option>
+              {personas.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nombre} · {p.cargo}
+                </option>
+              ))}
+              <option value="__otro">Otro (persona externa)…</option>
+            </Selector>
+          )}
+          {otro && <Campo etiqueta="Nombre de la persona" maxLength={120} value={v.otro ?? ''} onChange={(e) => onCambio({ otro: e.target.value })} />}
+          {aviso}
+        </fieldset>
+      )
+    }
     case 'si_no':
       return (
         <fieldset aria-labelledby={id} className="flex flex-col gap-2">
@@ -137,12 +182,15 @@ export function FormularioRespuesta({
   enviando,
   errorEnvio,
   vistaPrevia = false,
+  codigo,
 }: {
   def: FormularioPublicoDef
   onEnviar?: (p: { rol: string | null; comision_id: number | null; referencia: string; respuestas: Valores; web: string }) => void
   enviando?: boolean
   errorEnvio?: string | null
   vistaPrevia?: boolean
+  /** Código público del formulario: sirve para pedir las personas de la comisión. */
+  codigo?: string
 }) {
   const [rol, setRol] = useState<string | null>(def.roles.length === 1 ? def.roles[0] : null)
   const [comision, setComision] = useState('')
@@ -152,6 +200,14 @@ export function FormularioRespuesta({
   const [errores, setErrores] = useState<Record<string, string>>({})
 
   const campos = def.campos.filter((c) => aplicaA(c, rol))
+  const hayPersonas = campos.some((c) => c.tipo === 'personas')
+  const personasQ = useFormularioPersonas(codigo, comision ? Number(comision) : null, hayPersonas && def.pide_comision && !vistaPrevia)
+  // Vista previa del constructor: personas de ejemplo.
+  const personas: PersonaComision[] | undefined = vistaPrevia
+    ? [{ id: 'ej', nombre: 'Nombre de ejemplo', cargo: 'Director' }]
+    : comision
+      ? (personasQ.data ?? [])
+      : undefined
   const necesitaRol = def.roles.length > 0
 
   const validar = () => {
@@ -161,7 +217,8 @@ export function FormularioRespuesta({
     if (def.pide_referencia && !referencia.trim()) e.referencia = 'Escribe la sesión o el taller.'
     for (const c of campos) {
       const v = valores[c.id]
-      if (c.obligatorio && (v === undefined || v === '' || (Array.isArray(v) && !v.length))) e[c.id] = 'Esta pregunta es obligatoria.'
+      if (c.tipo === 'personas' && v && typeof v === 'object' && !Array.isArray(v) && v.otro !== undefined && !v.otro.trim()) e[c.id] = 'Escribe el nombre de la persona.'
+      else if (c.obligatorio && (v === undefined || v === '' || (Array.isArray(v) && !v.length))) e[c.id] = 'Esta pregunta es obligatoria.'
     }
     setErrores(e)
     return Object.keys(e).length === 0
@@ -203,7 +260,7 @@ export function FormularioRespuesta({
 
       {(!necesitaRol || rol) &&
         campos.map((c) => (
-          <CampoEntrada key={c.id} campo={c} valor={valores[c.id]} error={errores[c.id]} onCambio={(v) => setValores((x) => ({ ...x, [c.id]: v }))} />
+          <CampoEntrada key={c.id} campo={c} valor={valores[c.id]} error={errores[c.id]} personas={personas} onCambio={(v) => setValores((x) => ({ ...x, [c.id]: v }))} />
         ))}
       {necesitaRol && !rol && campos.length > 0 && <p className="text-sm text-ink-3">Elige quién eres para ver las preguntas.</p>}
 
