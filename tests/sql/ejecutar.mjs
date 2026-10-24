@@ -1,21 +1,25 @@
-// Ejecuta las migraciones en un Postgres local (PGlite) y corre las pruebas de reglas, sin tocar ninguna base real.
+// Ejecuta las migraciones en un Postgres local (PGlite) y corre cada suite de supabase/tests/*.sql, sin tocar ninguna base real.
+// Cada suite termina con una excepción controlada «<NOMBRE>_OK (n)» que revierte todo lo que creó.
 // Uso: npm run test:sql
 import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { crear } from './db.mjs'
 
-const db = await crear()
-const sql = fs.readFileSync(fileURLToPath(new URL('../../supabase/tests/reglas.sql', import.meta.url)), 'utf8')
-try {
-  await db.exec(sql)
-  console.error('✗ La suite terminó sin la excepción de éxito esperada.')
-  process.exit(1)
-} catch (e) {
-  const m = String(e.message)
-  if (m.startsWith('TODAS_LAS_PRUEBAS_OK')) {
-    console.log('✓ ' + m)
-  } else {
-    console.error('✗ ' + m)
-    process.exit(1)
+const dir = fileURLToPath(new URL('../../supabase/tests/', import.meta.url))
+let fallos = 0
+for (const archivo of fs.readdirSync(dir).filter((f) => f.endsWith('.sql')).sort()) {
+  const db = await crear()
+  try {
+    await db.exec(fs.readFileSync(dir + archivo, 'utf8'))
+    console.error(`✗ ${archivo}: terminó sin la excepción de éxito esperada.`)
+    fallos++
+  } catch (e) {
+    const m = String(e.message)
+    if (/^[A-Z_]+_OK \(\d+\)/.test(m)) console.log(`✓ ${archivo}: ${m}`)
+    else {
+      console.error(`✗ ${archivo}: ${m}`)
+      fallos++
+    }
   }
 }
+process.exit(fallos ? 1 : 0)

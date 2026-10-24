@@ -67,6 +67,7 @@ Las migraciones versionadas están en [`supabase/migrations/`](supabase/migratio
 | 011 | `edicion_catalogos` | Dimensiones editables por Subsecretaría y admin, con auditoría |
 | 012 | `cuentas_admin` | Estado de activación de cada cuenta (el correo se bloquea al activarse) |
 | 014 | `rubrica_notas` | Rúbrica de la mesa: 9 criterios con nota de 0 a sus puntos (suman 100), en secciones, con descripción siempre obligatoria |
+| 015 | `formularios` | Formularios sin cuenta: campos de varios tipos, página pública de respuesta, resultados y límites contra abuso |
 | 013 | `sesiones_y_cortes` | Evento 14–19 de noviembre con sesiones desde el lunes 16; Corte 2 = sesiones 16–17, Final = 18–19; reglas de rotación |
 
 Para aplicarlas en otro proyecto: `supabase link --project-ref <ref>` y `supabase db push`.

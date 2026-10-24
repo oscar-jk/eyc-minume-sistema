@@ -17,6 +17,10 @@ const DecisionesPage = lazy(() => import('@/features/continuidad/DecisionesPage'
 const FichaPage = lazy(() => import('@/features/personas/FichaPage').then((m) => ({ default: m.FichaPage })))
 const PersonasPage = lazy(() => import('@/features/personas/PersonasPage').then((m) => ({ default: m.PersonasPage })))
 const ManualPage = lazy(() => import('@/features/manual/ManualPage').then((m) => ({ default: m.ManualPage })))
+const FormulariosPage = lazy(() => import('@/features/formularios/FormulariosPage').then((m) => ({ default: m.FormulariosPage })))
+const ConstructorFormulario = lazy(() => import('@/features/formularios/ConstructorFormulario').then((m) => ({ default: m.ConstructorFormulario })))
+const ResultadosFormulario = lazy(() => import('@/features/formularios/ResultadosFormulario').then((m) => ({ default: m.ResultadosFormulario })))
+const FormularioPublicoPage = lazy(() => import('@/features/formularios/FormularioPublicoPage').then((m) => ({ default: m.FormularioPublicoPage })))
 const ConfiguracionPage = lazy(() => import('@/features/configuracion/ConfiguracionPage').then((m) => ({ default: m.ConfiguracionPage })))
 
 const PRIV = ['subsecretario', 'secretario', 'admin'] as const
@@ -40,6 +44,7 @@ export const router = createBrowserRouter([
   { path: '/recuperar', element: <RecuperarPage /> },
   { path: '/nueva-contrasena', element: <NuevaContrasenaPage /> },
   { path: '/manual', element: <Suspense fallback={null}><ManualPage /></Suspense> },
+  { path: '/f/:codigo', element: <Suspense fallback={null}><FormularioPublicoPage /></Suspense> },
   {
     element: <RequiereSesion />,
     children: [
@@ -56,6 +61,9 @@ export const router = createBrowserRouter([
           { path: 'decisiones', element: <RequiereRol roles={[...PRIV]}><DecisionesPage /></RequiereRol> },
           { path: 'personas', element: <RequiereRol roles={[...GESTION]}><PersonasPage /></RequiereRol> },
           { path: 'personas/:id', element: <FichaPage /> },
+          { path: 'formularios', element: <RequiereRol roles={['eyc', ...PRIV]}><FormulariosPage /></RequiereRol> },
+          { path: 'formularios/:id', element: <RequiereRol roles={['eyc', ...PRIV]}><ConstructorFormulario /></RequiereRol> },
+          { path: 'formularios/:id/resultados', element: <RequiereRol roles={['eyc', ...PRIV]}><ResultadosFormulario /></RequiereRol> },
           { path: 'configuracion', element: <RequiereRol roles={[...GESTION]}><ConfiguracionPage /></RequiereRol> },
           { path: '*', element: <NoEncontrada /> },
         ],

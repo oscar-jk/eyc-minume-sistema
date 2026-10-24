@@ -22,4 +22,5 @@ export {
   RiEyeOffLine as IcoOcultar,
   RiCloseLine as IcoCerrar,
   RiCheckLine as IcoCheck,
+  RiFileList3Line as IcoFormularios,
 } from '@remixicon/react'

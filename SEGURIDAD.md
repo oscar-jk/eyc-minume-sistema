@@ -2,7 +2,7 @@
 
 ## Principios
 
-- **RLS activa en todas las tablas** de `public`. El rol `anon` no tiene ningún privilegio sobre tablas, vistas ni funciones. La única excepción es `keepalive()`, que devuelve la hora del servidor y no lee nada.
+- **RLS activa en todas las tablas** de `public`. El rol `anon` no tiene ningún privilegio sobre tablas, vistas ni funciones. Las únicas excepciones son `keepalive()` (devuelve la hora del servidor y no lee nada) y las dos funciones de los formularios públicos (`formulario_publico`, `formulario_enviar`), que solo entregan la definición de un formulario activo y reciben una respuesta ya validada.
 - **Una cuenta por persona** (Supabase Auth). No hay cuentas compartidas: la v1 tenía 17 cuentas por comisión, y se eliminaron.
 - **La llave de servicio nunca llega al cliente.** Solo la usa la Edge Function `admin-usuarios`, que antes verifica que quien llama sea admin. El CI comprueba que el bundle no contenga `service_role`.
 - **El rol vive en `perfiles`**, que solo un admin puede editar. Al darse de alta, el rol inicial se toma de `app_metadata`, que solo la llave de servicio puede escribir. Si alguien se registra por su cuenta, queda **sin rol y sin acceso**.
@@ -28,6 +28,8 @@
 | Decisión continúa o seguimiento (no elevada) | — | **Decide** | — | Decide |
 | Decisión elevada (rojo o sustitución) | — | — | **Decide** | Decide |
 | Sustitución (tras decisión de sustitución) | — | Sí | Sí | Sí |
+| Formularios (crear, editar, cerrar) | Los propios | Todos | Lee | Todos |
+| Resultados de formularios | Los de sus formularios | Todos | Todos | Todos |
 | Auditoría | — | Lee | — | Lee |
 
 ## Matriz por fase
@@ -51,3 +53,10 @@ Para corregir algo de una fase cerrada hay que reabrirla (Configuración → Fas
 1. **Authentication → Sign In / Providers → desactivar «Allow new users to sign up».** Aunque registrarse no da acceso, evita cuentas basura.
 2. **URL Configuration:** Site URL y Redirect URLs de producción (ver README).
 3. **SMTP propio**, antes del evento.
+
+## Formularios sin cuenta
+
+- Quien responde **no tiene cuenta ni acceso a ninguna tabla**: el navegador llama a `formulario_publico(código)` (devuelve solo lo necesario para dibujar el formulario) y `formulario_enviar(código, respuesta)`.
+- `formulario_enviar` valida en el servidor todo lo que llega (rol permitido, comisión, campos obligatorios, opciones válidas, valores dentro de la escala, largos máximos), ignora los envíos con la trampa para bots llena y **limita los envíos repetidos** (5 cada 10 minutos por dispositivo). No devuelve datos.
+- La huella del dispositivo (resumen de IP y navegador) se guarda solo para ese límite y **no se muestra en ninguna pantalla**.
+- Las respuestas las ven únicamente quien creó el formulario, la Subsecretaría de Evaluación y Control, la Secretaría General y la administración. Un campo con respuestas no se borra: se oculta.

@@ -457,6 +457,32 @@ export function ManualPage() {
               <p>Puedes elegir jornadas pasadas en las píldoras de días para completar evaluaciones pendientes.</p>
             </Seccion>
 
+            <Seccion titulo="Formularios: recoger opiniones" donde="Formularios">
+              <p>
+                Cualquier rol puede crear un formulario para recoger feedback de una sesión o taller. Quien responde <strong>no necesita cuenta</strong>: entra con el enlace o el código QR,
+                elige quién es (delegado, miembro de mesa, aprendiz…), la comisión y la sesión, responde y sale.
+              </p>
+              <Pasos
+                items={[
+                  <>
+                    Entra a <Ruta>Formularios</Ruta> y toca <B>Nuevo formulario</B>. Ponle un título.
+                  </>,
+                  <>
+                    Marca quién puede responder y agrega las preguntas: texto corto, párrafo, número, fecha, <strong>opción única</strong>, <strong>casillas</strong>, lista desplegable,
+                    escala o sí/no. Puedes hacer que una pregunta la responda solo un rol.
+                  </>,
+                  <>
+                    Revisa la vista previa, toca <B>Guardar formulario</B> y comparte el <strong>enlace</strong> o el <strong>QR</strong>.
+                  </>,
+                  <>
+                    En <B tono="secundario">Resultados</B> ves el resumen por pregunta, cada respuesta y puedes descargar todo en CSV. <B tono="secundario">Cerrar</B> deja de recibir
+                    respuestas sin perder lo recogido.
+                  </>,
+                ]}
+              />
+              <Nota tipo="regla">Las respuestas las ven quien creó el formulario, la Subsecretaría, la Secretaría General y la administración. No se muestra quién respondió desde qué dispositivo.</Nota>
+            </Seccion>
+
             <Seccion titulo="Recomendar en los cortes" donde="Mi comisión › Mesa directiva">
               <Pasos
                 items={[

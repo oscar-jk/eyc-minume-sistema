@@ -862,6 +862,144 @@ export type Database = {
           },
         ]
       }
+      formulario_campos: {
+        Row: {
+          activo: boolean
+          ayuda: string | null
+          creado_en: string
+          escala_max: number | null
+          escala_min: number | null
+          etiqueta: string
+          formulario_id: string
+          id: string
+          obligatorio: boolean
+          opciones: Json
+          orden: number
+          roles: string[]
+          tipo: string
+        }
+        Insert: {
+          activo?: boolean
+          ayuda?: string | null
+          creado_en?: string
+          escala_max?: number | null
+          escala_min?: number | null
+          etiqueta: string
+          formulario_id: string
+          id?: string
+          obligatorio?: boolean
+          opciones?: Json
+          orden?: number
+          roles?: string[]
+          tipo: string
+        }
+        Update: {
+          activo?: boolean
+          ayuda?: string | null
+          creado_en?: string
+          escala_max?: number | null
+          escala_min?: number | null
+          etiqueta?: string
+          formulario_id?: string
+          id?: string
+          obligatorio?: boolean
+          opciones?: Json
+          orden?: number
+          roles?: string[]
+          tipo?: string
+        }
+        Relationships: []
+      }
+      formulario_envios: {
+        Row: {
+          comision_id: number | null
+          creado_en: string
+          formulario_id: string
+          huella: string
+          id: string
+          referencia: string | null
+          rol: string | null
+        }
+        Insert: {
+          comision_id?: number | null
+          creado_en?: string
+          formulario_id: string
+          huella: string
+          id?: string
+          referencia?: string | null
+          rol?: string | null
+        }
+        Update: {
+          comision_id?: number | null
+          creado_en?: string
+          formulario_id?: string
+          huella?: string
+          id?: string
+          referencia?: string | null
+          rol?: string | null
+        }
+        Relationships: []
+      }
+      formulario_respuestas: {
+        Row: {
+          campo_id: string
+          envio_id: string
+          valor: Json
+        }
+        Insert: {
+          campo_id: string
+          envio_id: string
+          valor: Json
+        }
+        Update: {
+          campo_id?: string
+          envio_id?: string
+          valor?: Json
+        }
+        Relationships: []
+      }
+      formularios: {
+        Row: {
+          activo: boolean
+          actualizado_en: string
+          codigo: string
+          creado_en: string
+          creado_por: string | null
+          descripcion: string | null
+          id: string
+          pide_comision: boolean
+          pide_referencia: boolean
+          roles: string[]
+          titulo: string
+        }
+        Insert: {
+          activo?: boolean
+          actualizado_en?: string
+          codigo?: string
+          creado_en?: string
+          creado_por?: string | null
+          descripcion?: string | null
+          id?: string
+          pide_comision?: boolean
+          pide_referencia?: boolean
+          roles?: string[]
+          titulo: string
+        }
+        Update: {
+          activo?: boolean
+          actualizado_en?: string
+          codigo?: string
+          creado_en?: string
+          creado_por?: string | null
+          descripcion?: string | null
+          id?: string
+          pide_comision?: boolean
+          pide_referencia?: boolean
+          roles?: string[]
+          titulo?: string
+        }
+        Relationships: []
+      }
       perfiles: {
         Row: {
           activo: boolean
@@ -1909,6 +2047,9 @@ export type Database = {
           motivo: string
         }[]
       }
+      formulario_enviar: { Args: { p: Json; p_codigo: string }; Returns: undefined }
+      formulario_publico: { Args: { p_codigo: string }; Returns: Json }
+      formulario_resultados: { Args: { p_formulario: string }; Returns: Json }
       guardar_cortes: { Args: { p_cortes: Json }; Returns: undefined }
       guardar_evaluacion: { Args: { p: Json }; Returns: string }
       guardar_pesos: {
