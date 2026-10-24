@@ -55,6 +55,19 @@ export function useAsignadosEn(comisionId: number | undefined, fecha: string | u
   })
 }
 
+/** Todas las comisiones por las que ha pasado cada persona (la actual incluida): evita que una rotación repita. */
+export function useComisionesVisitadas() {
+  return useQuery({
+    queryKey: ['asignaciones', 'visitadas'],
+    queryFn: async () => {
+      const filas = datos(await supabase.from('asignaciones').select('persona_id, comision_id').limit(5000))
+      const m = new Map<string, Set<number>>()
+      for (const f of filas) m.set(f.persona_id, (m.get(f.persona_id) ?? new Set<number>()).add(f.comision_id))
+      return m
+    },
+  })
+}
+
 export interface Movimiento {
   persona_id: string
   comision_id: number | null

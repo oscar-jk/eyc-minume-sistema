@@ -3,7 +3,7 @@ import type { Ambito, EstadoFase, Estatus, MotivoAsignacion, Rol, Semaforo, Tipo
 /** Etiquetas de interfaz. Los valores calculados nunca se derivan aquí: vienen de la base. */
 export const ROL: Record<Rol, string> = {
   eyc: 'Evaluación y Control',
-  subsecretario: 'Subsecretaría de Planificación y Desarrollo',
+  subsecretario: 'Subsecretaría de EyC',
   secretario: 'Secretaría General',
   admin: 'Administración',
 }

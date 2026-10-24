@@ -38,7 +38,7 @@ const ROLES: { id: Rol; corto: string; titulo: ReactNode; quien: string; adorno:
     corto: 'Subsecretaría',
     titulo: (
       <>
-        Subsecretaría <span className="acento">de</span> Planificación
+        Subsecretaría <span className="acento">de</span> EyC
       </>
     ),
     quien: 'Monitorea, configura, recomienda y evalúa al EyC',
@@ -254,7 +254,7 @@ export function ManualPage() {
             <Marca tipo="footer" blanco className="h-12 w-auto sm:h-14" />
           </div>
           <p className="mt-6 max-w-xl text-lg text-white/85">
-            Cómo usar el sistema según tu rol: el equipo de EyC de cada comisión, la Subsecretaría de Planificación y Desarrollo, la Secretaría General y la
+            Cómo usar el sistema según tu rol: el equipo de EyC de cada comisión, la Subsecretaría de EyC, la Secretaría General y la
             administración.
           </p>
         </div>
@@ -403,6 +403,10 @@ export function ManualPage() {
                   </>,
                 ]}
               />
+              <p>
+                Cada actividad se evalúa con la rúbrica vigente. Toca <B tono="secundario">Ver rúbrica</B> (en la actividad o al crearla) para ver las dimensiones, su peso y los
+                criterios con los que se evaluará a cada persona.
+              </p>
               <Nota tipo="ojo">Solo puedes crear actividades mientras la fase de preparación esté abierta.</Nota>
             </Seccion>
 
@@ -437,8 +441,9 @@ export function ManualPage() {
 
             <Seccion titulo="Durante el evento: rotaciones" donde="Mi comisión › Evaluar">
               <p>
-                Las mesas rotan entre comisiones. Tú evalúas a quien estuvo en <strong>tu comisión ese día</strong>. Si alguien rotó a media jornada, se evalúa
-                donde estuvo más tiempo; el sistema lo indica con «rotó: su jornada se evalúa en la otra comisión».
+                <strong>No rota la mesa completa:</strong> cada miembro de mesa pasa a una comisión distinta los días 2 y 3 de sesiones. Los miembros de EyC y los
+                aprendices se quedan fijos en su comisión, y la CIJ no rota. Tú evalúas a quien estuvo en <strong>tu comisión ese día</strong>. Si alguien rotó a media
+                jornada, se evalúa donde estuvo más tiempo; el sistema lo indica con «rotó: su jornada se evalúa en la otra comisión».
               </p>
               <p>Puedes elegir jornadas pasadas en las píldoras de días para completar evaluaciones pendientes.</p>
             </Seccion>
@@ -485,7 +490,11 @@ export function ManualPage() {
                     <strong>Alta individual:</strong> para una sola persona.
                   </>,
                   <>
-                    <strong>Mover</strong> (en Asignaciones): rotación, ajuste o asignación inicial. Si el cargo destino está ocupado, elige <strong>Intercambiar</strong>.
+                    <strong>Mover</strong> (en Asignaciones): ajuste o asignación inicial de una persona. Si el cargo destino está ocupado, elige <strong>Intercambiar</strong>.
+                  </>,
+                  <>
+                    <strong>Rotaciones</strong>: elige el Día 2 o el Día 3 de sesiones. Tú decides a qué comisión y con qué cargo pasa cada miembro de mesa. Si eliges el lugar de
+                    otra persona, ella recibe el que tú dejas. El sistema te avisa si alguien vuelve a una comisión que ya conoció. Al terminar, toca <B>Aplicar rotación</B>.
                   </>,
                   <>
                     <strong>Editar</strong>: cambia nombre, correo o notas. El historial no se pierde nunca.
@@ -493,6 +502,10 @@ export function ManualPage() {
                 ]}
               />
               <Nota>Cargos válidos: director, adjunto1, adjunto2, aprendiz, eyc. Comisión por clave o sigla (ctd, PNUD…).</Nota>
+              <Nota tipo="regla">
+                La rotación es individual. Los EyC, los aprendices y las comisiones marcadas como «no rota» (CIJ) se quedan fijos. El Día 1 de sesiones (lunes 16 de noviembre) cada
+                quien está en su comisión; los días 2 y 3 se rota. Las reglas se ajustan al final de la pestaña Rotaciones.
+              </Nota>
             </Seccion>
 
             <Seccion titulo="Recomendaciones y decisiones" donde="Monitoreo · Decisiones">
@@ -560,7 +573,10 @@ export function ManualPage() {
             <Seccion titulo="Crear cuentas" donde="Configuración › Cuentas">
               <Pasos
                 items={[
-                  <>Escribe nombre y correo, elige el rol (y la comisión si es EyC).</>,
+                  <>
+                    Si es un miembro de EyC ya registrado, elígelo en <strong>Persona ya registrada</strong>: la cuenta toma su nombre, correo y comisión y queda vinculada a su
+                    ficha. Si no, escribe nombre y correo y elige el rol (y la comisión si es EyC).
+                  </>,
                   <>
                     Toca <B>Crear</B>: aparece un <strong>enlace de acceso</strong>. Cópialo y envíalo solo a esa persona.
                   </>,

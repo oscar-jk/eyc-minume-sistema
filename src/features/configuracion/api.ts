@@ -201,6 +201,17 @@ export function useActualizarConfig() {
   })
 }
 
+/** Guarda un valor de configuración; lo crea si todavía no existe (por ejemplo, la regla «no rota»). */
+export function useGuardarConfig() {
+  const inv = useInvalidar(['config'], ['contexto'])
+  return useMutation({
+    mutationFn: async (p: { clave: string; valor: unknown; descripcion: string }) => {
+      datos(await supabase.from('config').upsert({ clave: p.clave, valor: p.valor as never, descripcion: p.descripcion }, { onConflict: 'clave' }).select().single())
+    },
+    onSuccess: inv,
+  })
+}
+
 export function useReprogramarEvento() {
   const inv = useInvalidar(['config'], ['fases'], ['contexto'])
   return useMutation({

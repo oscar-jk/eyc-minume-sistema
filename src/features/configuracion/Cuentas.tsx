@@ -6,7 +6,9 @@ import { Consulta, EstadoVacio } from '@/components/Estados'
 import { Modal } from '@/components/Modal'
 import { Aviso, Insignia, Tabla, Tarjeta } from '@/components/Ui'
 import { useSesion } from '@/features/auth/AuthProvider'
+import { useVigentes } from '@/features/asignaciones/api'
 import { siglaDe, useComisiones } from '@/features/comisiones/api'
+import { usePersonas } from '@/features/personas/api'
 import { mensajeError } from '@/lib/errores'
 import { ROL, fechaHora } from '@/lib/formato'
 import type { Perfil, Rol } from '@/lib/tipos'
@@ -55,7 +57,18 @@ export function CuentasPanel() {
   const activar = useActivarCuenta()
   const actualizar = useActualizarPerfil()
   const avisar = useAvisar()
-  const [nueva, setNueva] = useState({ email: '', nombre: '', rol: 'eyc' as Rol, comision: '' })
+  const personas = usePersonas()
+  const vigentes = useVigentes()
+  const [nueva, setNueva] = useState({ email: '', nombre: '', rol: 'eyc' as Rol, comision: '', persona: '' })
+  // Miembros de EyC ya registrados que todavía no tienen cuenta: al elegirlos se hereda su comisión y su correo.
+  const vinculadas = new Set((perfiles.data ?? []).map((p) => p.persona_id).filter(Boolean))
+  const disponibles = (personas.data ?? []).filter((p) => p.activa && p.ambito === 'eyc' && !vinculadas.has(p.id))
+  const elegirPersona = (id: string) => {
+    const p = disponibles.find((x) => x.id === id)
+    if (!p) return setNueva({ ...nueva, persona: '' })
+    const comision = vigentes.data?.find((v) => v.persona_id === p.id)?.comision_id ?? p.comision_origen_id
+    setNueva({ persona: p.id, nombre: p.nombre, email: p.correo ?? nueva.email, rol: 'eyc', comision: comision ? String(comision) : '' })
+  }
   const [link, setLink] = useState<string | null>(null)
   const [editar, setEditar] = useState<Perfil | null>(null)
 
@@ -68,16 +81,35 @@ export function CuentasPanel() {
           onSubmit={(e) => {
             e.preventDefault()
             crear.mutate(
-              { email: nueva.email, nombre: nueva.nombre, rol: nueva.rol, comision_id: nueva.rol === 'eyc' ? Number(nueva.comision) : null },
+              { email: nueva.email, nombre: nueva.nombre, rol: nueva.rol, comision_id: nueva.rol === 'eyc' ? Number(nueva.comision) : null, persona_id: nueva.persona || null },
               {
                 onSuccess: (r) => {
                   setLink(r.enlace)
-                  setNueva({ email: '', nombre: '', rol: nueva.rol, comision: nueva.comision })
+                  setNueva({ email: '', nombre: '', rol: nueva.rol, comision: nueva.persona ? '' : nueva.comision, persona: '' })
                 },
               },
             )
           }}
         >
+          <div className="sm:col-span-2 lg:col-span-5">
+            <Selector
+              etiqueta="Persona ya registrada (opcional)"
+              value={nueva.persona}
+              onChange={(e) => elegirPersona(e.target.value)}
+              ayuda="Si el miembro de EyC ya está registrado, elígelo: la cuenta toma su nombre, correo y comisión, y queda vinculada a su ficha."
+            >
+              <option value="">Cuenta nueva sin vincular…</option>
+              {disponibles.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nombre}
+                  {(() => {
+                    const c = comisiones.data?.find((x) => x.id === (vigentes.data?.find((v) => v.persona_id === p.id)?.comision_id ?? p.comision_origen_id))
+                    return c ? ` · ${siglaDe(c)}` : ''
+                  })()}
+                </option>
+              ))}
+            </Selector>
+          </div>
           <Campo etiqueta="Nombre" value={nueva.nombre} onChange={(e) => setNueva({ ...nueva, nombre: e.target.value })} requerido />
           <Campo etiqueta="Correo" type="email" value={nueva.email} onChange={(e) => setNueva({ ...nueva, email: e.target.value })} requerido />
           <Selector etiqueta="Rol" value={nueva.rol} onChange={(e) => setNueva({ ...nueva, rol: e.target.value as Rol })}>

@@ -9,6 +9,7 @@ import { Aviso, Insignia, Tarjeta } from '@/components/Ui'
 import { mensajeError } from '@/lib/errores'
 import { TIPO_ACTIVIDAD, fecha } from '@/lib/formato'
 import type { Actividad, Ambito, TipoActividad } from '@/lib/tipos'
+import { RubricaVista } from '@/features/evaluacion/RubricaVista'
 import { useActividades, useCerrarActividad, useCrearActividad } from './api'
 import { EditarActividad } from './EditarActividad'
 
@@ -21,11 +22,20 @@ export function ActividadesPanel({ comisionId, ambito = 'mesa' }: { comisionId: 
   const cerrar = useCerrarActividad()
   const fasePrevia = m.abiertas.find((f) => f.tipo === 'evaluacion' && !f.es_evento) ?? m.fases.find((f) => f.tipo === 'evaluacion' && !f.es_evento)
   const [editar, setEditar] = useState<Actividad | null>(null)
+  const [rubrica, setRubrica] = useState<Ambito | null>(null)
   const [form, setForm] = useState({ nombre: '', tipo: 'taller' as TipoActividad, fecha: m.hoy ?? '' })
 
   return (
     <div className="flex flex-col gap-5">
-      <Tarjeta titulo="Nueva actividad">
+      <Tarjeta
+        titulo="Nueva actividad"
+        accion={
+          <Boton variante="secundario" onClick={() => setRubrica(ambito)}>
+            Ver rúbrica
+          </Boton>
+        }
+      >
+        <p className="mb-3 text-sm text-ink-2">Cada actividad se evalúa con la rúbrica vigente: al crearla, todas las personas de la comisión quedan listas para evaluarse con ella.</p>
         <SiFaseAbierta fase={fasePrevia}>
           <form
             className="grid gap-3 sm:grid-cols-[2fr_1fr_1fr_auto] sm:items-end"
@@ -79,6 +89,9 @@ export function ActividadesPanel({ comisionId, ambito = 'mesa' }: { comisionId: 
                       </p>
                     </div>
                     {a.cerrada ? <Insignia>Cerrada</Insignia> : <Insignia tono="exito">Abierta</Insignia>}
+                    <Boton variante="fantasma" onClick={() => setRubrica(a.ambito)}>
+                      Ver rúbrica
+                    </Boton>
                     {editable && (
                       <Boton variante="fantasma" onClick={() => setEditar(a)}>
                         Editar
@@ -105,6 +118,7 @@ export function ActividadesPanel({ comisionId, ambito = 'mesa' }: { comisionId: 
           )}
         </Consulta>
       </Tarjeta>
+      <RubricaVista ambito={rubrica ?? ambito} abierto={rubrica !== null} onCerrar={() => setRubrica(null)} />
       {editar && <EditarActividad key={editar.id} actividad={editar} max={m.hoy ?? undefined} onCerrar={() => setEditar(null)} />}
     </div>
   )

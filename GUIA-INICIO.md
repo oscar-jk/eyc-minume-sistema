@@ -1,6 +1,6 @@
 # Guía de inicio (una página)
 
-Para la Subsecretaría de Planificación y Desarrollo y la administración.
+Para la Subsecretaría de EyC y la administración.
 
 ## 1. Cuentas (admin)
 
