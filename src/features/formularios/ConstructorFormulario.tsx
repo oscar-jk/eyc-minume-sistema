@@ -147,6 +147,11 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
   const [pideRef, setPideRef] = useState(f.pide_referencia)
   const [activo, setActivo] = useState(f.activo)
   const [sucio, setSucio] = useState(false)
+  const [guardado, setGuardado] = useState(false)
+  // Se sale cuando ya se dibujó sin «cambios pendientes»; si no, el aviso de salida lo frena.
+  useEffect(() => {
+    if (guardado && !sucio) nav('/formularios')
+  }, [guardado, sucio, nav])
   const [campos, setCampos] = useState<CampoBorrador[]>(() =>
     datos.campos
       .filter((c) => c.activo)
@@ -205,7 +210,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
         onSuccess: () => {
           avisar('Formulario guardado.')
           setSucio(false)
-          nav('/formularios')
+          setGuardado(true)
         },
         onError: (e) => avisar(mensajeError(e), 'error'),
       },
