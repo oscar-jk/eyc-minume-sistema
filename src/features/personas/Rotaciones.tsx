@@ -99,7 +99,7 @@ export function RotacionesPanel() {
       <Tarjeta titulo="Cómo rota la mesa">
         <ul className="flex list-disc flex-col gap-1.5 pl-5 text-sm text-ink-2">
           <li>
-            <strong>No rota la mesa completa:</strong> la Subsecretaría de EyC decide a qué comisión y con qué cargo va cada miembro de mesa, persona por persona. Si eliges el lugar de
+            <strong>No rota la mesa completa:</strong> la Subsecretaría de Evaluación y Control decide a qué comisión y con qué cargo va cada miembro de mesa, persona por persona. Si eliges el lugar de
             otra persona, ella recibe el tuyo.
           </li>
           <li>

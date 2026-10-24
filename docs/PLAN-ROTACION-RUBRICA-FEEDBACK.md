@@ -1,9 +1,9 @@
 # Plan · Rotación, rúbrica nueva y formularios de feedback
 
-Basado en el documento «Sistema de Rotación de Mesas Directivas» y en las decisiones tomadas con la Subsecretaría de EyC.
+Basado en el documento «Sistema de Rotación de Mesas Directivas» y en las decisiones tomadas con la Subsecretaría de Evaluación y Control.
 
 ## Decisiones tomadas
-- La rotación es **manual**: la Subsecretaría de EyC decide la comisión y el cargo de cada miembro de mesa. El sistema solo avisa de lo que no cuadra.
+- La rotación es **manual**: la Subsecretaría de Evaluación y Control decide la comisión y el cargo de cada miembro de mesa. El sistema solo avisa de lo que no cuadra.
 - No rota la mesa completa. EyC, aprendices y la CIJ se quedan fijos. Día 1 = lunes 16 de noviembre de 2026; los días 2 y 3 se rota.
 - Rúbrica nueva de 9 criterios: **una nota por criterio**, repartidos en **grupos** para no mostrarlos todos de golpe. Los puntos de los criterios suman **100**. Cada nota lleva siempre su **descripción**, incluso si es N/A.
 - Formularios **sin cuenta**: un apartado para crearlos; cada persona entra, elige su rol (delegado, miembro de mesa, aprendiz, EyC), responde por sesión o taller y sale. El mismo formulario sirve a delegados y a la mesa.

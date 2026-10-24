@@ -38,7 +38,7 @@ const ROLES: { id: Rol; corto: string; titulo: ReactNode; quien: string; adorno:
     corto: 'Subsecretaría',
     titulo: (
       <>
-        Subsecretaría <span className="acento">de</span> EyC
+        Subse <span className="acento">de</span> EyC
       </>
     ),
     quien: 'Monitorea, configura, recomienda y evalúa al EyC',
@@ -254,7 +254,7 @@ export function ManualPage() {
             <Marca tipo="footer" blanco className="h-12 w-auto sm:h-14" />
           </div>
           <p className="mt-6 max-w-xl text-lg text-white/85">
-            Cómo usar el sistema según tu rol: el equipo de EyC de cada comisión, la Subsecretaría de EyC, la Secretaría General y la
+            Cómo usar el sistema según tu rol: el equipo de EyC de cada comisión, la Subsecretaría de Evaluación y Control, la Secretaría General y la
             administración.
           </p>
         </div>

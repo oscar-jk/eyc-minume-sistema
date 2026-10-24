@@ -1,6 +1,6 @@
 # Guía de inicio (una página)
 
-Para la Subsecretaría de EyC y la administración.
+Para la Subsecretaría de Evaluación y Control y la administración.
 
 ## 1. Cuentas (admin)
 

@@ -1,7 +1,7 @@
 /**
  * Reglas de la rotación de mesas directivas (documento «Sistema de Rotación de Mesas Directivas»).
  *
- * - No rota la mesa completa: cada miembro de mesa pasa a OTRA comisión. La Subsecretaría de EyC decide a mano
+ * - No rota la mesa completa: cada miembro de mesa pasa a OTRA comisión. La Subsecretaría de Evaluación y Control decide a mano
  *   la comisión y el cargo de cada persona; el sistema solo cuida las reglas y avisa de lo que no cuadra.
  * - Los miembros de EyC y los aprendices se quedan fijos en su comisión.
  * - Las comisiones marcadas como «no rota» (CIJ) conservan a su mesa.

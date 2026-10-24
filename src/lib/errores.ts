@@ -77,7 +77,7 @@ const ERRORES_ACCESO: Record<string, Omit<ErrorAmigable, 'codigo'>> = {
   over_email_send_rate_limit: { mensaje: 'Ya enviamos varios correos hace poco.', sugerencia: 'Espera unos minutos antes de pedir otro enlace.' },
   over_request_rate_limit: { mensaje: 'Hiciste demasiados intentos seguidos.', sugerencia: 'Espera un minuto y vuelve a intentarlo.' },
   email_address_invalid: { mensaje: 'Ese correo no es válido.', sugerencia: 'Revisa que esté bien escrito.' },
-  user_banned: { mensaje: 'Esta cuenta está desactivada.', sugerencia: 'Contacta a la Subsecretaría de EyC.' },
+  user_banned: { mensaje: 'Esta cuenta está desactivada.', sugerencia: 'Contacta a la Subsecretaría de Evaluación y Control.' },
 }
 
 function hash(s: string) {

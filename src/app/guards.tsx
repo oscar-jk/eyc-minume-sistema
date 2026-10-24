@@ -31,7 +31,7 @@ export function RequiereSesion() {
       <main className="mx-auto flex max-w-md flex-col gap-4 p-6">
         <Aviso tono="alerta" titulo="Tu cuenta no tiene acceso todavía">
           {perfil && !perfil.activo
-            ? 'La cuenta está desactivada. Contacta a la Subsecretaría de EyC.'
+            ? 'La cuenta está desactivada. Contacta a la Subsecretaría de Evaluación y Control.'
             : 'Un administrador debe asignarte un rol (y una comisión si eres de EyC) antes de que puedas usar el sistema.'}
         </Aviso>
         <Boton variante="secundario" onClick={() => salir()}>
@@ -91,7 +91,7 @@ export function useAccionFase() {
   const gestiona = perfil?.rol === 'subsecretario' || perfil?.rol === 'admin'
   return {
     accion: gestiona ? { texto: 'Abrir o cambiar la fase', a: '/configuracion?tab=fases' } : null,
-    quien: gestiona ? '' : ' Pide a la Subsecretaría de EyC que la abra.',
+    quien: gestiona ? '' : ' Pide a la Subsecretaría de Evaluación y Control que la abra.',
     gestiona,
   }
 }
