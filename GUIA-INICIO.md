@@ -15,9 +15,9 @@ Para la Subsecretaría de Evaluación y Control y la administración.
 *Configuración.*
 
 1. **Fases y evento:** confirma el **Día 1** y la **cantidad de días** y pulsa *Aplicar a las fases*. Las fechas de la preparación las fijas tú.
-2. **Pesos A–F:** revisa los dos ámbitos. Deben sumar 100. Cuando la Secretaría los apruebe, pulsa *Marcar como definitivos*.
+2. **Pesos:** revisa los dos ámbitos. Deben sumar 100 (en la mesa son los puntos de cada criterio).
 3. **Cortes y umbrales:** 25 / 25 / 50; verde ≥ 80, amarillo ≥ 60.
-4. **Criterios:** revisa la redacción y la **respuesta favorable** de cada uno («No» en los redactados en negativo).
+4. **Criterios:** revisa la redacción. En la rúbrica de EyC, revisa también la **respuesta favorable** («No» en los redactados en negativo).
 
 ## 3. Cargar personas
 

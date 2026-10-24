@@ -340,6 +340,8 @@ export type Database = {
           favorable: Database["public"]["Enums"]["respuesta_criterio"]
           id: number
           orden: number
+          nota_max: number | null
+          tipo: string
           texto: string
           version: number
         }
@@ -353,6 +355,8 @@ export type Database = {
           favorable: Database["public"]["Enums"]["respuesta_criterio"]
           id?: never
           orden?: number
+          nota_max?: number | null
+          tipo?: string
           texto: string
           version?: number
         }
@@ -366,6 +370,8 @@ export type Database = {
           favorable?: Database["public"]["Enums"]["respuesta_criterio"]
           id?: never
           orden?: number
+          nota_max?: number | null
+          tipo?: string
           texto?: string
           version?: number
         }
@@ -555,6 +561,7 @@ export type Database = {
           id: number
           nombre: string
           orden: number
+          seccion: string | null
         }
         Insert: {
           clave: string
@@ -562,6 +569,7 @@ export type Database = {
           id?: never
           nombre: string
           orden?: number
+          seccion?: string | null
         }
         Update: {
           clave?: string
@@ -569,6 +577,7 @@ export type Database = {
           id?: never
           nombre?: string
           orden?: number
+          seccion?: string | null
         }
         Relationships: []
       }
@@ -1143,6 +1152,8 @@ export type Database = {
           dimension_id: number
           evaluacion_id: string
           favorable: Database["public"]["Enums"]["respuesta_criterio"]
+          nota: number | null
+          nota_max: number | null
           respuesta: Database["public"]["Enums"]["respuesta_criterio"]
           texto: string
         }
@@ -1152,6 +1163,8 @@ export type Database = {
           dimension_id: number
           evaluacion_id: string
           favorable: Database["public"]["Enums"]["respuesta_criterio"]
+          nota?: number | null
+          nota_max?: number | null
           respuesta: Database["public"]["Enums"]["respuesta_criterio"]
           texto: string
         }
@@ -1161,6 +1174,8 @@ export type Database = {
           dimension_id?: number
           evaluacion_id?: string
           favorable?: Database["public"]["Enums"]["respuesta_criterio"]
+          nota?: number | null
+          nota_max?: number | null
           respuesta?: Database["public"]["Enums"]["respuesta_criterio"]
           texto?: string
         }

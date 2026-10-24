@@ -271,7 +271,7 @@ export function useActualizarPerfil() {
 export function useEditarDimension() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (p: { id: number; nombre: string; competencias: string }) => {
+    mutationFn: async (p: { id: number; nombre: string; competencias: string; seccion?: string | null }) => {
       const { id, ...cambios } = p
       datos(await supabase.from('dimensiones').update(cambios).eq('id', id).select().single())
     },

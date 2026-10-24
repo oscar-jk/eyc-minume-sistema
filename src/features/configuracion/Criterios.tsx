@@ -7,6 +7,7 @@ import { Modal } from '@/components/Modal'
 import { Aviso, Insignia, Tarjeta } from '@/components/Ui'
 import { mensajeError } from '@/lib/errores'
 import { AMBITO, fechaHora } from '@/lib/formato'
+import { agruparPorSeccion } from '@/features/evaluacion/reglas'
 import type { Ambito, Criterio, Respuesta } from '@/lib/tipos'
 import { useCriterios, useDimensiones, useGuardarCriterio, useHistorialCriterio } from './api'
 
@@ -28,24 +29,31 @@ export function CriteriosPanel() {
       }
     >
       <p className="mb-4 text-sm text-ink-2">
-        Cada criterio define su respuesta favorable: algunos están redactados en negativo. Editar un criterio no altera evaluaciones ya hechas (guardan el texto con el que se
-        respondieron).
+        {ambito === 'mesa'
+          ? 'Cada criterio se califica con una nota de 0 hasta sus puntos y siempre lleva una descripción, incluso si no se observó (N/A). Los puntos de cada criterio se cambian en «Pesos». '
+          : 'Cada criterio define su respuesta favorable: algunos están redactados en negativo. '}
+        Editar un criterio no altera evaluaciones ya hechas (guardan el texto con el que se respondieron).
       </p>
       <Consulta q={q}>
         {(cs) => (
           <div className="flex flex-col gap-4">
-            {dims.data?.map((d) => (
+            {agruparPorSeccion((dims.data ?? []).filter((d) => cs.some((c) => c.dimension_id === d.id))).map((g) => (
+             <div key={g.seccion ?? 'general'} className="flex flex-col gap-4">
+              {g.seccion && <h3 className="sobretitulo border-b border-line pb-1 text-acento">{g.seccion}</h3>}
+              {g.items.map((d) => (
               <section key={d.id}>
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <h3 className="font-semibold">
                     <span className="font-cond font-bold text-acento">{d.clave}</span> {d.nombre}
                   </h3>
-                  <Boton
-                    variante="fantasma"
-                    onClick={() => setEditar({ ambito, dimension_id: d.id, favorable: 'si', codigo: `${d.clave}${cs.filter((c) => c.dimension_id === d.id).length + 1}`, texto: '' })}
-                  >
-                    + Criterio
-                  </Boton>
+                  {!cs.some((c) => c.dimension_id === d.id && c.tipo === 'nota') && (
+                    <Boton
+                      variante="fantasma"
+                      onClick={() => setEditar({ ambito, dimension_id: d.id, favorable: 'si', codigo: `${d.clave}${cs.filter((c) => c.dimension_id === d.id).length + 1}`, texto: '' })}
+                    >
+                      + Criterio
+                    </Boton>
+                  )}
                 </div>
                 <ul className="flex flex-col gap-2">
                   {cs
@@ -54,7 +62,11 @@ export function CriteriosPanel() {
                       <li key={c.id} className={`flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04] ${c.activo ? '' : 'opacity-60'}`}>
                         <span className="font-cond font-bold text-acento">{c.codigo}</span>
                         <span className="min-w-0 flex-1 basis-60">{c.texto}</span>
-                        <Insignia tono={c.favorable === 'no' ? 'alerta' : 'neutro'}>Favorable: {c.favorable === 'si' ? 'Sí' : 'No'}</Insignia>
+                        {c.tipo === 'nota' ? (
+                          <Insignia tono="acento">{Number(c.nota_max)} pts</Insignia>
+                        ) : (
+                          <Insignia tono={c.favorable === 'no' ? 'alerta' : 'neutro'}>Favorable: {c.favorable === 'si' ? 'Sí' : 'No'}</Insignia>
+                        )}
                         {!c.activo && <Insignia>Inactivo</Insignia>}
                         {c.version > 1 && (
                           <Boton variante="fantasma" onClick={() => setHistorial(c)}>
@@ -68,6 +80,8 @@ export function CriteriosPanel() {
                     ))}
                 </ul>
               </section>
+              ))}
+             </div>
             ))}
           </div>
         )}
@@ -115,15 +129,19 @@ function EditarCriterio({ criterio, onCerrar }: { criterio: Partial<Criterio>; o
       <div className="flex flex-col gap-4">
         {!c.id && <Campo etiqueta="Código" value={c.codigo ?? ''} onChange={(e) => setC({ ...c, codigo: e.target.value })} requerido />}
         <AreaTexto etiqueta="Texto del criterio" value={c.texto ?? ''} onChange={(e) => setC({ ...c, texto: e.target.value })} requerido />
-        <Selector
-          etiqueta="Respuesta favorable"
-          value={c.favorable}
-          onChange={(e) => setC({ ...c, favorable: e.target.value as Respuesta })}
-          ayuda="Si el criterio está redactado en negativo (p. ej. «mostró desconocimiento…»), lo favorable es «No»."
-        >
-          <option value="si">Sí</option>
-          <option value="no">No</option>
-        </Selector>
+        {c.tipo === 'nota' ? (
+          <Aviso tono="info">Este criterio se califica con una nota de 0 a {Number(c.nota_max)} puntos. Para cambiar los puntos, ve a «Pesos».</Aviso>
+        ) : (
+          <Selector
+            etiqueta="Respuesta favorable"
+            value={c.favorable}
+            onChange={(e) => setC({ ...c, favorable: e.target.value as Respuesta })}
+            ayuda="Si el criterio está redactado en negativo (p. ej. «mostró desconocimiento…»), lo favorable es «No»."
+          >
+            <option value="si">Sí</option>
+            <option value="no">No</option>
+          </Selector>
+        )}
         {c.id && (
           <label className="flex min-h-11 items-center gap-3">
             <input type="checkbox" className="size-5 accent-[var(--accent)]" checked={!!c.activo} onChange={(e) => setC({ ...c, activo: e.target.checked })} />

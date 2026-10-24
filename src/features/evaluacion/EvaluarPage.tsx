@@ -18,7 +18,7 @@ import { fecha as fmtFecha, puntaje } from '@/lib/formato'
 import type { Criterio, Fase } from '@/lib/tipos'
 import { buscarExistente, obtenerFaltantes, useEvaluacion, useGuardarEvaluacion } from './api'
 import { DimensionAcordeon, type Respuestas } from './FormularioRubrica'
-import { esDesfavorable } from './reglas'
+import { agruparPorSeccion, esDeNota, exigeComentario } from './reglas'
 
 /** /evaluar?persona=…&actividad=…  |  /evaluar?persona=…&fecha=…  →  crea o retoma la evaluación. */
 export function NuevaEvaluacionPage() {
@@ -187,7 +187,7 @@ function Formulario({
   actividadId?: string
   fechaJornada?: string
   criteriosActivos: Criterio[]
-  dimensiones: { id: number; clave: string; nombre: string; competencias: string; orden: number }[]
+  dimensiones: { id: number; clave: string; nombre: string; competencias: string; orden: number; seccion: string | null }[]
   existente: ReturnType<typeof useEvaluacion>['data']
   soloLectura: boolean
 }) {
@@ -206,6 +206,8 @@ function Formulario({
         dimension_id: r.dimension_id,
         texto: r.texto,
         favorable: r.favorable,
+        tipo: r.nota_max != null ? 'nota' : 'si_no',
+        nota_max: r.nota_max,
       })
     }
     return [...porId.values()].sort((a, b) => a.dimension_id - b.dimension_id || a.orden - b.orden)
@@ -213,7 +215,7 @@ function Formulario({
 
   const inicial = useMemo(() => {
     const resp: Respuestas = {}
-    for (const r of existente?.respuestas ?? []) resp[r.criterio_id] = { respuesta: r.respuesta, comentario: r.comentario ?? '' }
+    for (const r of existente?.respuestas ?? []) resp[r.criterio_id] = { respuesta: r.respuesta, comentario: r.comentario ?? '', nota: r.nota ?? undefined }
     const noObs = new Set((existente?.dimensiones ?? []).filter((d) => d.no_observado).map((d) => d.dimension_id))
     return { resp, noObs, comentario: existente?.cabecera.comentario_general ?? '' }
   }, [existente])
@@ -246,7 +248,7 @@ function Formulario({
   // Progreso (conteo de interfaz; la validación real la hace la base).
   const requeridos = criterios.filter((c) => c.activo && !noObs.has(c.dimension_id))
   const respondidos = requeridos.filter((c) => respuestas[c.id]?.respuesta).length
-  const sinComentario = criterios.filter((c) => !noObs.has(c.dimension_id) && esDesfavorable(c, respuestas[c.id]?.respuesta) && !respuestas[c.id]?.comentario.trim())
+  const sinComentario = criterios.filter((c) => !noObs.has(c.dimension_id) && exigeComentario(c, respuestas[c.id]?.respuesta) && !respuestas[c.id]?.comentario.trim())
   const pct = requeridos.length ? Math.round((respondidos / requeridos.length) * 100) : 100
 
   const carga = (estado: 'borrador' | 'completa') => ({
@@ -258,7 +260,7 @@ function Formulario({
     estado,
     respuestas: Object.entries(respuestas)
       .filter(([, v]) => v.respuesta)
-      .map(([id, v]) => ({ criterio_id: Number(id), respuesta: v.respuesta!, comentario: v.comentario.trim() })),
+      .map(([id, v]) => ({ criterio_id: Number(id), respuesta: v.respuesta!, comentario: v.comentario.trim(), ...(v.nota != null ? { nota: v.nota } : {}) })),
     dimensiones_no_observadas: [...noObs],
   })
 
@@ -365,42 +367,59 @@ function Formulario({
         </Aviso>
       )}
 
-      {dimensiones.map((d) => {
-        const cs = criterios.filter((c) => c.dimension_id === d.id)
-        if (!cs.length) return null
+      {agruparPorSeccion(dimensiones.filter((d) => criterios.some((c) => c.dimension_id === d.id))).map((g) => {
+        const crits = criterios.filter((c) => g.items.some((d) => d.id === c.dimension_id))
+        const hechos = crits.filter((c) => respuestas[c.id]?.respuesta).length
+        const puntosSeccion = crits.reduce((t, c) => t + (esDeNota(c) ? Number(c.nota_max) : 0), 0)
         return (
-          <DimensionAcordeon
-            key={d.id}
-            dimension={d}
-            criterios={cs}
-            respuestas={respuestas}
-            noObservada={noObs.has(d.id)}
-            puntos={puntosPorDim.get(d.id)}
-            abierta={abiertas.has(d.id)}
-            onAlternar={() =>
-              setAbiertas((a) => {
-                const n = new Set(a)
-                if (n.has(d.id)) n.delete(d.id)
-                else n.add(d.id)
-                return n
-              })
-            }
-            onRespuesta={(id, v) => {
-              setRespuestas((r) => ({ ...r, [id]: v }))
-              setSucio(true)
-            }}
-            onNoObservada={(v) => {
-              setNoObs((s) => {
-                const n = new Set(s)
-                if (v) n.add(d.id)
-                else n.delete(d.id)
-                return n
-              })
-              setSucio(true)
-            }}
-            soloLectura={soloLectura}
-            marcas={marcas}
-          />
+          <div key={g.seccion ?? 'sin-seccion'} className="flex flex-col gap-3">
+            {g.seccion && (
+              <header className="mt-3 flex flex-wrap items-baseline justify-between gap-x-3 border-b border-line pb-2">
+                <h2 className="sobretitulo text-acento">{g.seccion}</h2>
+                <p className="font-cond text-sm font-semibold text-ink-3">
+                  {hechos} de {crits.length}
+                  {puntosSeccion > 0 && ` · ${puntosSeccion} puntos`}
+                </p>
+              </header>
+            )}
+            {g.items.map((d) => {
+              const cs = criterios.filter((c) => c.dimension_id === d.id)
+              return (
+                <DimensionAcordeon
+                  key={d.id}
+                  dimension={d}
+                  criterios={cs}
+                  respuestas={respuestas}
+                  noObservada={noObs.has(d.id)}
+                  puntos={puntosPorDim.get(d.id)}
+                  abierta={abiertas.has(d.id)}
+                  onAlternar={() =>
+                    setAbiertas((a) => {
+                      const n = new Set(a)
+                      if (n.has(d.id)) n.delete(d.id)
+                      else n.add(d.id)
+                      return n
+                    })
+                  }
+                  onRespuesta={(id, v) => {
+                    setRespuestas((r) => ({ ...r, [id]: v }))
+                    setSucio(true)
+                  }}
+                  onNoObservada={(v) => {
+                    setNoObs((st) => {
+                      const n = new Set(st)
+                      if (v) n.add(d.id)
+                      else n.delete(d.id)
+                      return n
+                    })
+                    setSucio(true)
+                  }}
+                  soloLectura={soloLectura}
+                  marcas={marcas}
+                />
+              )
+            })}
+          </div>
         )
       })}
 

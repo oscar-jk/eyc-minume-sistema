@@ -37,7 +37,7 @@ Esquemas:
 
 ### Puntaje de una evaluación (`v_evaluacion_dimension`, `v_evaluacion_puntaje`)
 
-- **Puntos de una dimensión** = % de criterios con respuesta favorable entre los observados (Sí/No).
+- **Puntos de una dimensión** = % de criterios con respuesta favorable entre los observados (Sí/No). En la rúbrica de la mesa (criterios de **nota**, migración 014) cada dimensión tiene un criterio con nota de 0 a sus puntos: puntos de la dimensión = nota / nota máxima. La descripción de la nota es obligatoria siempre, incluso en N/A; un N/A sale del cálculo y el resto se reescala.
 - Una dimensión es **no observada** si el evaluador la marca así o si todos sus criterios son N/O. En ese caso se excluye.
 - **Puntaje** = Σ(puntos × peso) / Σ(peso de las dimensiones observadas). Los pesos del resto se renormalizan, así que N/O **nunca** cuenta como cero.
 - Si los pesos de un ámbito no suman 100, `pesos_validos = false` y el puntaje queda **nulo** para todo el ámbito. No se calcula a medias.

@@ -66,18 +66,19 @@ Las migraciones versionadas están en [`supabase/migrations/`](supabase/migratio
 | 010 | `vistas_ui` | Vistas y RPC de apoyo a la interfaz |
 | 011 | `edicion_catalogos` | Dimensiones editables por Subsecretaría y admin, con auditoría |
 | 012 | `cuentas_admin` | Estado de activación de cada cuenta (el correo se bloquea al activarse) |
+| 014 | `rubrica_notas` | Rúbrica de la mesa: 9 criterios con nota de 0 a sus puntos (suman 100), en secciones, con descripción siempre obligatoria |
 | 013 | `sesiones_y_cortes` | Evento 14–19 de noviembre con sesiones desde el lunes 16; Corte 2 = sesiones 16–17, Final = 18–19; reglas de rotación |
 
 Para aplicarlas en otro proyecto: `supabase link --project-ref <ref>` y `supabase db push`.
 
 ### Pruebas de reglas (base de datos)
 
-[`supabase/tests/reglas.sql`](supabase/tests/reglas.sql) prueba con **usuarios reales de prueba** (uno por rol) las reglas que no pueden fallar: renormalización con N/O, comentario obligatorio según la respuesta favorable, promedio por corte, puntaje final nulo si falta un corte, RLS por rol, `anon` sin acceso, rotación sin pérdida de historial, elevación al Secretario General, pesos inválidos que bloquean el cálculo, fase cerrada que bloquea a cualquier rol y auditoría.
+[`supabase/tests/reglas.sql`](supabase/tests/reglas.sql) prueba con **usuarios reales de prueba** (uno por rol) las reglas que no pueden fallar: renormalización con N/A, descripción obligatoria en toda nota (también en N/A), nota dentro de sus puntos, rúbrica Sí/No de EyC, promedio por corte, puntaje final nulo si falta un corte, RLS por rol, `anon` sin acceso, rotación sin pérdida de historial, elevación al Secretario General, pesos inválidos que bloquean el cálculo, fase cerrada que bloquea a cualquier rol y auditoría.
 
 Se ejecuta completa dentro de un bloque que termina con una excepción controlada, así que **no deja rastro**. Pégala en el SQL Editor de Supabase. El resultado esperado es este error:
 
 ```
-ERROR: TODAS_LAS_PRUEBAS_OK (11)
+ERROR: TODAS_LAS_PRUEBAS_OK (13)
 ```
 
 Cualquier otro mensaje (`FALLO n …`) indica la regla que no se cumplió.
@@ -116,7 +117,7 @@ La interfaz nunca muestra errores técnicos: cada fallo se traduce a un mensaje 
 El detalle técnico queda en la consola del navegador con ese mismo código. Ver `src/lib/errores.ts`.
 
 Los avisos de la interfaz llevan un botón que abre la pantalla donde se resuelven (por ejemplo, «Abrir o cambiar la fase»
-lleva a *Configuración › Fases*; «Corregir los pesos» a *Configuración › Pesos A–F*).
+lleva a *Configuración › Fases*; «Corregir los pesos» a *Configuración › Pesos*).
 
 ## Plantilla de correo
 

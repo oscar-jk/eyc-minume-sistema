@@ -48,7 +48,8 @@ begin
     (p2, c_ctd,  k_adj, now() - interval '30 days', 'inicial'),
     (p3, c_pnud, k_dir, now() - interval '30 days', 'inicial');
 
-  select jsonb_agg(jsonb_build_object('criterio_id', c.id, 'respuesta', c.favorable::text, 'comentario', null))
+  -- Calificación perfecta: cada criterio con su nota máxima y su descripción (siempre obligatoria).
+  select jsonb_agg(jsonb_build_object('criterio_id', c.id, 'respuesta', 'si', 'nota', c.nota_max, 'comentario', 'Desempeño sobresaliente'))
     into resp_todo_si from public.criterios c where c.ambito = 'mesa';
 
   -- ───────── EyC de CTD evalúa ─────────
@@ -58,46 +59,67 @@ begin
   insert into public.actividades (fase_id, comision_id, tipo, nombre, fecha) values (f_prep, c_ctd, 'taller', 'Taller 1', hoy - 10) returning id into act1;
   insert into public.actividades (fase_id, comision_id, tipo, nombre, fecha) values (f_prep, c_ctd, 'taller', 'Taller 2', hoy - 9) returning id into act2;
 
-  -- 1. Renormalización con N/O: C–F no observadas; A = 100, B = 75 → (100·20 + 75·30) / 50 = 85.
+  -- 1. Renormalización con N/A: solo se observan «Dominio procedimental» (15 pts, nota 15) e «Imparcialidad» (10 pts, nota 5);
+  --    el resto es N/A con su descripción. (15 + 5) / (15 + 10) = 80.
   ev := public.guardar_evaluacion(jsonb_build_object(
     'persona_id', p1, 'actividad_id', act1, 'estado', 'completa',
-    'dimensiones_no_observadas', (select jsonb_agg(id) from public.dimensiones where clave in ('C','D','E','F')),
     'respuestas', (select jsonb_agg(jsonb_build_object('criterio_id', c.id,
-                     'respuesta', case when c.codigo = 'B4' then 'si' else c.favorable::text end,
-                     'comentario', case when c.codigo = 'B4' then 'Errores de redacción en el informe' end))
-                   from public.criterios c join public.dimensiones d on d.id = c.dimension_id
-                   where c.ambito = 'mesa' and d.clave in ('A','B'))));
+                     'respuesta', case when c.codigo in ('1', '4') then 'si' else 'no_observado' end,
+                     'nota', case c.codigo when '1' then 15 when '4' then 5 end,
+                     'comentario', case when c.codigo in ('1', '4') then 'Observado durante la sesión' else 'No hubo ocasión de observarlo' end))
+                   from public.criterios c where c.ambito = 'mesa')));
   select puntaje into v from public.v_evaluacion_puntaje where evaluacion_id = ev;
-  if v is distinct from 85.00 then raise exception 'FALLO 1 renormalización N/O: esperado 85, obtenido %', v; end if;
+  if v is distinct from 80.00 then raise exception 'FALLO 1 renormalización N/A: esperado 80, obtenido %', v; end if;
   pruebas := pruebas + 1;
 
-  -- 2. Comentario obligatorio según la respuesta favorable de cada criterio.
-  --    B1 está en negativo (favorable = "no"): responder "no" sin comentario es válido;
-  --    responder "si" sin comentario debe bloquear la evaluación completa.
+  -- 2. La descripción es obligatoria SIEMPRE (también en N/A) y la nota debe estar dentro de sus puntos.
+  ok := false;
+  begin
+    perform public.guardar_evaluacion(jsonb_build_object(
+      'persona_id', p1, 'actividad_id', act2, 'estado', 'completa',
+      'respuestas', (select jsonb_agg(jsonb_build_object('criterio_id', c.id, 'respuesta', 'si', 'nota', c.nota_max,
+                       'comentario', case when c.codigo = '3' then '' else 'Bien' end))
+                     from public.criterios c where c.ambito = 'mesa')));
+  exception when others then
+    ok := sqlerrm like '%3: Falta la descripción%';
+  end;
+  if not ok then raise exception 'FALLO 2a: no exigió descripción en un criterio calificado'; end if;
   ok := false;
   begin
     perform public.guardar_evaluacion(jsonb_build_object(
       'persona_id', p1, 'actividad_id', act2, 'estado', 'completa',
       'respuestas', (select jsonb_agg(jsonb_build_object('criterio_id', c.id,
-                       'respuesta', case when c.codigo = 'B1' then 'si' else c.favorable::text end))
+                       'respuesta', case when c.codigo = '9' then 'no_observado' else 'si' end,
+                       'nota', case when c.codigo = '9' then null else c.nota_max end,
+                       'comentario', case when c.codigo = '9' then null else 'Bien' end))
                      from public.criterios c where c.ambito = 'mesa')));
   exception when others then
-    ok := sqlerrm like '%B1: Falta comentario%';
+    ok := sqlerrm like '%9: Falta la descripción%';
   end;
-  if not ok then raise exception 'FALLO 2a: no exigió comentario en respuesta desfavorable de criterio negativo'; end if;
+  if not ok then raise exception 'FALLO 2b: un N/A sin descripción fue aceptado'; end if;
+  ok := false;
+  begin
+    perform public.guardar_evaluacion(jsonb_build_object('persona_id', p1, 'actividad_id', act2, 'estado', 'borrador',
+      'respuestas', jsonb_build_array(jsonb_build_object('criterio_id',
+         (select id from public.criterios where ambito = 'mesa' and codigo = '1'), 'respuesta', 'si', 'nota', 16, 'comentario', 'x'))));
+  exception when others then ok := sqlerrm like '%debe estar entre 0 y 15%';
+  end;
+  if not ok then raise exception 'FALLO 2c: aceptó una nota por encima de los puntos del criterio'; end if;
   -- Borrador sí se permite con faltantes.
   ev := public.guardar_evaluacion(jsonb_build_object('persona_id', p1, 'actividad_id', act2, 'estado', 'borrador',
           'respuestas', jsonb_build_array(jsonb_build_object('criterio_id',
-             (select id from public.criterios where ambito = 'mesa' and codigo = 'B1'), 'respuesta', 'si'))));
+             (select id from public.criterios where ambito = 'mesa' and codigo = '1'), 'respuesta', 'si', 'nota', 10))));
   select count(*) into n from public.faltantes_evaluacion(ev);
-  if n < 2 then raise exception 'FALLO 2b: faltantes debería listar criterios sin responder y el comentario de B1 (n=%)', n; end if;
-  -- Completar todo favorable (B1 = "no", sin comentario) → válido, 100.
+  if n < 9 then raise exception 'FALLO 2d: faltantes debería listar 8 criterios sin calificar y la descripción del 1 (n=%)', n; end if;
+  -- Completar con todas las notas máximas y su descripción → válido, 100.
   perform public.guardar_evaluacion(jsonb_build_object('id', ev, 'persona_id', p1, 'estado', 'completa', 'respuestas', resp_todo_si));
+  select puntaje into v from public.v_evaluacion_puntaje where evaluacion_id = ev;
+  if v is distinct from 100.00 then raise exception 'FALLO 2e: nota perfecta debería dar 100, dio %', v; end if;
   pruebas := pruebas + 1;
 
-  -- 3. Promedio simple por corte: (85 + 100) / 2 = 92.5 con 2 evaluaciones.
+  -- 3. Promedio simple por corte: (80 + 100) / 2 = 90 con 2 evaluaciones.
   select puntaje, n_evaluaciones into v, n from public.v_puntaje_corte where persona_id = p1 and corte_clave = 'c1';
-  if v is distinct from 92.50 or n <> 2 then raise exception 'FALLO 3 promedio por corte: % con n=%', v, n; end if;
+  if v is distinct from 90.00 or n <> 2 then raise exception 'FALLO 3 promedio por corte: % con n=%', v, n; end if;
   pruebas := pruebas + 1;
 
   -- 4. Puntaje final nulo mientras falte un corte; corte sin datos = gris, nunca 0.
@@ -106,11 +128,11 @@ begin
   if v is not null or b or s <> 'gris' or n is not null then
     raise exception 'FALLO 4 final nulo: final=% completo=% c2=%', v, b, s;
   end if;
-  -- Con los tres cortes: 92.5·0.25 + 100·0.25 + 100·0.50 = 98.13
+  -- Con los tres cortes: 90·0.25 + 100·0.25 + 100·0.50 = 97.5
   perform public.guardar_evaluacion(jsonb_build_object('persona_id', p1, 'fecha_jornada', hoy - 5, 'estado', 'completa', 'respuestas', resp_todo_si));
   perform public.guardar_evaluacion(jsonb_build_object('persona_id', p1, 'fecha_jornada', hoy - 3, 'estado', 'completa', 'respuestas', resp_todo_si));
   select puntaje_final into v from public.v_puntaje_final where persona_id = p1;
-  if v is distinct from 98.13 then raise exception 'FALLO 4b puntaje final: %', v; end if;
+  if v is distinct from 97.50 then raise exception 'FALLO 4b puntaje final: %', v; end if;
   -- La evaluación final usa solo lo evaluado del 16 al 19 (corte final ≠ cortes previos).
   select n_evaluaciones into n from public.v_puntaje_corte where persona_id = p1 and corte_clave = 'final';
   if n <> 1 then raise exception 'FALLO 4c: la evaluación final cuenta % evaluaciones (esperado 1)', n; end if;
@@ -202,11 +224,51 @@ begin
 
   -- 9. Pesos que no suman 100 bloquean el cálculo del ámbito (no calculan a medias).
   update public.pesos_dimension set peso = 25
-   where ambito = 'mesa' and dimension_id = (select id from public.dimensiones where clave = 'A');
+   where ambito = 'mesa' and dimension_id = (select id from public.dimensiones where clave = '1');
   select puntaje, pesos_validos into v, b from public.v_evaluacion_puntaje where persona_id = p1 limit 1;
   if v is not null or b then raise exception 'FALLO 9: con pesos inválidos se calculó %', v; end if;
-  update public.pesos_dimension set peso = 20
-   where ambito = 'mesa' and dimension_id = (select id from public.dimensiones where clave = 'A');
+  update public.pesos_dimension set peso = 15
+   where ambito = 'mesa' and dimension_id = (select id from public.dimensiones where clave = '1');
+  pruebas := pruebas + 1;
+
+  -- 12. La rúbrica Sí/No de EyC sigue intacta: renormalización con N/O y comentario obligatorio en lo desfavorable.
+  --     A = 100 (todo favorable), B = 50 (B2 desfavorable, con comentario), C–F no observadas → (100·25 + 50·15) / 40 = 81.25.
+  perform set_config('request.jwt.claims', json_build_object('sub', u_sub, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  insert into public.actividades (fase_id, comision_id, ambito, tipo, nombre, fecha) values (f_prep, null, 'eyc', 'reunion', 'Reunión EyC', hoy - 8) returning id into act1;
+  ok := false;
+  begin
+    perform public.guardar_evaluacion(jsonb_build_object('persona_id', pe, 'actividad_id', act1, 'estado', 'completa',
+      'dimensiones_no_observadas', (select jsonb_agg(id) from public.dimensiones where clave in ('C','D','E','F')),
+      'respuestas', (select jsonb_agg(jsonb_build_object('criterio_id', c.id,
+                       'respuesta', case when c.codigo = 'B2' then 'si' else c.favorable::text end))
+                     from public.criterios c join public.dimensiones d on d.id = c.dimension_id
+                     where c.ambito = 'eyc' and d.clave in ('A','B'))));
+  exception when others then ok := sqlerrm like '%B2: Falta comentario%';
+  end;
+  if not ok then raise exception 'FALLO 12a: EyC no exigió comentario en respuesta desfavorable'; end if;
+  ev := public.guardar_evaluacion(jsonb_build_object('persona_id', pe, 'actividad_id', act1, 'estado', 'completa',
+      'dimensiones_no_observadas', (select jsonb_agg(id) from public.dimensiones where clave in ('C','D','E','F')),
+      'respuestas', (select jsonb_agg(jsonb_build_object('criterio_id', c.id,
+                       'respuesta', case when c.codigo = 'B2' then 'si' else c.favorable::text end,
+                       'comentario', case when c.codigo = 'B2' then 'Comentarios sin sustento' end))
+                     from public.criterios c join public.dimensiones d on d.id = c.dimension_id
+                     where c.ambito = 'eyc' and d.clave in ('A','B'))));
+  select puntaje into v from public.v_evaluacion_puntaje where evaluacion_id = ev;
+  if v is distinct from 81.25 then raise exception 'FALLO 12b: EyC esperado 81.25, obtenido %', v; end if;
+  reset role;
+  pruebas := pruebas + 1;
+
+  -- 13. Cambiar el peso de una dimensión de mesa mueve la nota máxima de su criterio (y las evaluaciones hechas no se alteran).
+  update public.pesos_dimension set peso = 20, ambito = ambito
+   where ambito = 'mesa' and dimension_id = (select id from public.dimensiones where clave = '2');
+  update public.pesos_dimension set peso = 10
+   where ambito = 'mesa' and dimension_id = (select id from public.dimensiones where clave = '3');
+  select nota_max into v from public.criterios where ambito = 'mesa' and codigo = '2';
+  if v is distinct from 20.00 then raise exception 'FALLO 13a: la nota máxima no siguió al peso (%)', v; end if;
+  select max(r.nota_max) into v from public.respuestas r join public.criterios c on c.id = r.criterio_id where c.codigo = '2' and c.ambito = 'mesa';
+  if v is distinct from 15.00 then raise exception 'FALLO 13b: una evaluación hecha cambió su nota máxima (%)', v; end if;
+  update public.pesos_dimension set peso = 15 where ambito = 'mesa' and dimension_id = (select id from public.dimensiones where clave = '2');
   pruebas := pruebas + 1;
 
   -- 10. Fase cerrada bloquea toda escritura, sin importar el rol (incluido admin).

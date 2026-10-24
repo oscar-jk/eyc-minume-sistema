@@ -6,6 +6,7 @@ import { Modal } from '@/components/Modal'
 import { Aviso, Tarjeta } from '@/components/Ui'
 import { mensajeError } from '@/lib/errores'
 import { AMBITO, plural, suma } from '@/lib/formato'
+import { agruparPorSeccion } from '@/features/evaluacion/reglas'
 import type { Ambito, Corte } from '@/lib/tipos'
 import {
   contarCompletas,
@@ -80,12 +81,14 @@ export function PesosPanel() {
   const confirmados = config.data?.pesos_dimension_confirmados?.valor === true
 
   const valor = (a: Ambito, d: number) => edit[`${a}-${d}`] ?? Number(pesos.data?.find((p) => p.ambito === a && p.dimension_id === d)?.peso ?? 0)
-  const total = (a: Ambito) => suma((dims.data ?? []).map((d) => valor(a, d.id)))
+  // Cada ámbito tiene sus propias dimensiones: las que tienen un peso definido para él.
+  const dimsDe = (a: Ambito) => (dims.data ?? []).filter((d) => pesos.data?.some((p) => p.ambito === a && p.dimension_id === d.id))
+  const total = (a: Ambito) => suma(dimsDe(a).map((d) => valor(a, d.id)))
 
   const guardarAmbito = (a: Ambito) =>
     pedir(a, () =>
       guardar.mutate(
-        { ambito: a, pesos: Object.fromEntries((dims.data ?? []).map((d) => [d.id, valor(a, d.id)])) },
+        { ambito: a, pesos: Object.fromEntries(dimsDe(a).map((d) => [d.id, valor(a, d.id)])) },
         {
           onSuccess: () => {
             avisar(`Pesos de ${AMBITO[a]} guardados.`)
@@ -101,7 +104,7 @@ export function PesosPanel() {
       {!confirmados && (
         <div className="mb-4">
           <Aviso tono="alerta" titulo="Pesos provisionales">
-            El instructivo no define los pesos A–F. Estos valores son un punto de partida y deben confirmarse por la Secretaría.
+            Estos valores son un punto de partida y deben confirmarse por la Subsecretaría.
             <div className="mt-2">
               <Boton variante="secundario" cargando={confirmarCfg.isPending} onClick={() => confirmarCfg.mutate({ clave: 'pesos_dimension_confirmados', valor: true, provisional: false }, { onSuccess: () => avisar('Pesos marcados como definitivos.') })}>
                 Marcar como definitivos
@@ -119,27 +122,39 @@ export function PesosPanel() {
               return (
                 <fieldset key={a} className="rounded-2xl border border-line bg-surface p-4 dark:bg-white/[0.04]">
                   <legend className="px-1 font-semibold">{AMBITO[a]}</legend>
-                  <ul className="flex flex-col gap-2">
-                    {ds.map((d) => (
-                      <li key={d.id} className="flex items-center gap-3">
-                        <label htmlFor={`p-${a}-${d.id}`} className="flex-1">
-                          <span className="font-cond font-bold text-acento">{d.clave}</span> {d.nombre}
-                        </label>
-                        <input
-                          id={`p-${a}-${d.id}`}
-                          className={input}
-                          type="number"
-                          inputMode="decimal"
-                          min={0}
-                          max={100}
-                          step="0.5"
-                          value={valor(a, d.id)}
-                          aria-invalid={t !== 100 || undefined}
-                          onChange={(e) => setEdit({ ...edit, [`${a}-${d.id}`]: Number(e.target.value) })}
-                        />
-                      </li>
+                  <div className="flex flex-col gap-3">
+                    {agruparPorSeccion(ds.filter((d) => dimsDe(a).includes(d))).map((g) => (
+                      <div key={g.seccion ?? 'general'}>
+                        {g.seccion && (
+                          <p className="mb-1 flex items-baseline justify-between font-cond text-sm font-bold uppercase tracking-wider text-ink-3">
+                            <span>{g.seccion}</span>
+                            <span className="tabular">{suma(g.items.map((d) => valor(a, d.id)))} pts</span>
+                          </p>
+                        )}
+                        <ul className="flex flex-col gap-2">
+                          {g.items.map((d) => (
+                            <li key={d.id} className="flex items-center gap-3">
+                              <label htmlFor={`p-${a}-${d.id}`} className="flex-1">
+                                <span className="font-cond font-bold text-acento">{d.clave}</span> {d.nombre}
+                              </label>
+                              <input
+                                id={`p-${a}-${d.id}`}
+                                className={input}
+                                type="number"
+                                inputMode="decimal"
+                                min={0}
+                                max={100}
+                                step="0.5"
+                                value={valor(a, d.id)}
+                                aria-invalid={t !== 100 || undefined}
+                                onChange={(e) => setEdit({ ...edit, [`${a}-${d.id}`]: Number(e.target.value) })}
+                              />
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                     <Suma valor={t} />
                     <Boton disabled={t !== 100 || !sucio} cargando={guardar.isPending && guardar.variables?.ambito === a} onClick={() => guardarAmbito(a)}>

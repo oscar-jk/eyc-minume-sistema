@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { Semaforo } from '@/components/Semaforo'
-import { esDesfavorable } from '@/features/evaluacion/reglas'
+import { agruparPorSeccion, esDesfavorable, exigeComentario } from '@/features/evaluacion/reglas'
 import { puntaje, suma } from '@/lib/formato'
 import { interpretarError } from '@/lib/errores'
 
@@ -66,5 +66,33 @@ describe('errores de acceso en lenguaje claro', () => {
   })
   it('enlace caducado indica cómo pedir otro', () => {
     expect(interpretarError({ code: 'otp_expired', message: 'x' }).sugerencia).toMatch(/Olvidaste/)
+  })
+})
+
+describe('rúbrica de notas', () => {
+  const nota = { favorable: 'si' as const, tipo: 'nota' }
+  it('toda nota exige descripción, incluso N/A', () => {
+    expect(exigeComentario(nota, 'si')).toBe(true)
+    expect(exigeComentario(nota, 'no_observado')).toBe(true)
+    expect(exigeComentario(nota, undefined)).toBe(false)
+  })
+  it('un criterio de nota nunca es «desfavorable» por su respuesta', () => {
+    expect(esDesfavorable(nota, 'si')).toBe(false)
+  })
+  it('en Sí/No solo lo desfavorable exige comentario', () => {
+    expect(exigeComentario({ favorable: 'si' }, 'no')).toBe(true)
+    expect(exigeComentario({ favorable: 'si' }, 'si')).toBe(false)
+    expect(exigeComentario({ favorable: 'si' }, 'no_observado')).toBe(false)
+  })
+  it('las dimensiones se agrupan por sección en su orden', () => {
+    const g = agruparPorSeccion([
+      { id: 1, seccion: 'Conducción' },
+      { id: 2, seccion: 'Conducción' },
+      { id: 3, seccion: 'Trato' },
+    ])
+    expect(g.map((x) => [x.seccion, x.items.length])).toEqual([
+      ['Conducción', 2],
+      ['Trato', 1],
+    ])
   })
 })

@@ -9,8 +9,9 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",
-    "test": "vitest run",
-    "types": "supabase gen types typescript --project-id hnlhhwululasvlckbcrq > src/lib/database.types.ts"
+    "test": "vitest run src",
+    "types": "supabase gen types typescript --project-id hnlhhwululasvlckbcrq > src/lib/database.types.ts",
+    "test:sql": "node tests/sql/ejecutar.mjs"
   },
   "dependencies": {
     "@remixicon/react": "^4.9.0",
@@ -21,6 +22,7 @@
     "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.11",
     "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^7.0.1",

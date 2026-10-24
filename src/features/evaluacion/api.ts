@@ -69,6 +69,7 @@ export interface RespuestaForm {
   criterio_id: number
   respuesta: Respuesta
   comentario: string
+  nota?: number
 }
 
 export interface GuardarEvaluacion {

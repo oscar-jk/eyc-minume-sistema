@@ -181,6 +181,7 @@ function DimensionesEditables() {
               <li key={d.id} className="flex gap-3 rounded-2xl border border-line bg-surface p-4 dark:bg-white/[0.04]">
                 <span className="grid size-11 shrink-0 place-items-center rounded-xl rounded-tr-sm bg-grad-primario font-cond text-xl font-extrabold text-white">{d.clave}</span>
                 <span className="min-w-0 flex-1">
+                  <span className="block font-cond text-xs font-bold uppercase tracking-wider text-ink-3">{d.seccion ? `Mesa directiva · ${d.seccion}` : 'Miembro de EyC'}</span>
                   <span className="block font-extrabold">{d.nombre}</span>
                   <span className="block text-sm text-ink-3">{d.competencias}</span>
                 </span>
@@ -200,7 +201,7 @@ function DimensionesEditables() {
 function EditarDimension({ dimension, onCerrar }: { dimension: Dimension; onCerrar: () => void }) {
   const avisar = useAvisar()
   const m = useEditarDimension()
-  const [f, setF] = useState({ nombre: dimension.nombre, competencias: dimension.competencias })
+  const [f, setF] = useState({ nombre: dimension.nombre, competencias: dimension.competencias, seccion: dimension.seccion ?? '' })
   return (
     <Modal
       abierto
@@ -216,7 +217,7 @@ function EditarDimension({ dimension, onCerrar }: { dimension: Dimension; onCerr
             disabled={f.nombre.trim().length < 3}
             onClick={() =>
               m.mutate(
-                { id: dimension.id, nombre: f.nombre.trim(), competencias: f.competencias.trim() },
+                { id: dimension.id, nombre: f.nombre.trim(), competencias: f.competencias.trim(), ...(dimension.seccion != null ? { seccion: f.seccion.trim() || null } : {}) },
                 { onSuccess: () => (avisar('Dimensión actualizada.'), onCerrar()) },
               )
             }
@@ -228,6 +229,7 @@ function EditarDimension({ dimension, onCerrar }: { dimension: Dimension; onCerr
     >
       <div className="flex flex-col gap-4">
         <Campo etiqueta="Nombre" value={f.nombre} onChange={(e) => setF({ ...f, nombre: e.target.value })} requerido />
+        {dimension.seccion != null && <Campo etiqueta="Sección" value={f.seccion} onChange={(e) => setF({ ...f, seccion: e.target.value })} ayuda="Las dimensiones con la misma sección se muestran juntas al evaluar." />}
         <AreaTexto etiqueta="Competencias que mide" value={f.competencias} onChange={(e) => setF({ ...f, competencias: e.target.value })} />
         {m.isError && <Aviso tono="peligro">{mensajeError(m.error)}</Aviso>}
       </div>

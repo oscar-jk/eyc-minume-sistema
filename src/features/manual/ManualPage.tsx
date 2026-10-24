@@ -346,29 +346,38 @@ export function ManualPage() {
               <Nota>Una sola evaluación de 100 no pesa igual que diez. Fíjate siempre en el número entre paréntesis.</Nota>
             </Seccion>
 
-            <Seccion titulo="La rúbrica: seis dimensiones">
-              <div className="grid gap-2 sm:grid-cols-2">
+            <Seccion titulo="La rúbrica de la mesa directiva: nueve criterios">
+              <p>
+                Todas las personas de la mesa se evalúan con <strong>la misma rúbrica</strong>, cualquiera que sea su cargo y la comisión en la que estén ese día. Los criterios
+                están en tres secciones y los puntos suman 100.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-3">
                 {[
-                  ['A', 'Cumplimiento y responsabilidad'],
-                  ['B', 'Competencia académica y funcional'],
-                  ['C', 'Trabajo colaborativo'],
-                  ['D', 'Comunicación'],
-                  ['E', 'Gestión humana y resolución'],
-                  ['F', 'Ética, inclusión e innovación'],
-                ].map(([k, n]) => (
-                  <div key={k} className="flex items-center gap-3 rounded-2xl bg-surface-2 p-3 dark:bg-white/[0.05]">
-                    <span className="grid size-10 place-items-center rounded-xl rounded-tr-sm bg-grad-primario font-cond text-lg font-extrabold text-white">{k}</span>
-                    <span className="font-bold text-ink">{n}</span>
+                  ['Conducción de la sesión', 'Dominio procedimental · 15', 'Conducción del debate · 15', 'Manejo del tiempo · 10'],
+                  ['Decisiones y trato', 'Imparcialidad · 10', 'Manejo de situaciones difíciles · 10', 'Criterio · 10'],
+                  ['Equipo y evaluación', 'Comunicación · 10', 'Trabajo en equipo · 10', 'Capacidad de evaluación · 10'],
+                ].map(([t, ...cs]) => (
+                  <div key={t} className="rounded-2xl rounded-tr-[6px] bg-surface-2 p-4 dark:bg-white/[0.05]">
+                    <p className="sobretitulo text-acento">{t}</p>
+                    <ul className="mt-2 flex flex-col gap-1 text-sm font-semibold text-ink">
+                      {cs.map((c) => (
+                        <li key={c}>{c}</li>
+                      ))}
+                    </ul>
                   </div>
                 ))}
               </div>
               <p>
-                Cada criterio se responde <B>Sí</B> <B>No</B> o <B tono="secundario">N/O</B> (no observado). Algunos criterios están redactados en negativo —por
-                ejemplo «mostró desconocimiento del procedimiento»— y ahí lo esperado es <strong>«No»</strong>; el sistema lo indica debajo del criterio.
+                Cada criterio recibe una <strong>nota de 0 hasta sus puntos</strong> y <strong>siempre una descripción</strong> de lo observado. Si un criterio no se pudo observar,
+                se marca <B tono="secundario">N/A</B> y también se explica por qué.
               </p>
               <Nota tipo="regla">
-                <strong>N/O no es cero.</strong> Una dimensión no observada se excluye y el peso del resto se reparte. Una respuesta desfavorable exige comentario.
+                <strong>N/A no es cero.</strong> El criterio sale del cálculo y el resto se reescala a 100. Ejemplo: si solo se observaron «Dominio procedimental» (15 puntos) con 15 e
+                «Imparcialidad» (10 puntos) con 5, el puntaje es 20 de 25 = 80.
               </Nota>
+              <p>
+                La rúbrica de los miembros de EyC es distinta: sus seis dimensiones (A a F) se responden con <B>Sí</B> <B>No</B> o <B tono="secundario">N/O</B>.
+              </p>
             </Seccion>
           </Capitulo>
 
@@ -421,11 +430,11 @@ export function ManualPage() {
                     Toca <B>Evaluar</B> junto a la persona.
                   </>,
                   <>
-                    Abre cada dimensión (A a F) y responde cada criterio con <B>Sí</B> <B>No</B> o <B tono="secundario">N/O</B>. Si no pudiste observar una dimensión
-                    completa, marca <strong>«Dimensión no observada»</strong>.
+                    Abre cada criterio, escribe su <strong>nota</strong> (de 0 hasta sus puntos, o con los botones de nota rápida) y <strong>describe lo que observaste</strong>. Si no
+                    pudiste observarlo, marca <B tono="secundario">N/A</B> y explica por qué.
                   </>,
                   <>
-                    Si una respuesta es desfavorable (se pinta en <span className="font-bold text-rojo">rojo</span>), escribe el comentario obligatorio.
+                    La descripción es obligatoria en todos los criterios, también en N/A. Mientras falte alguna, el criterio se marca y el sistema te lleva hasta él.
                   </>,
                   <>
                     Toca <B tono="secundario">Guardar borrador</B> si vas a seguir luego, o <B>Marcar completa</B> al terminar.
@@ -526,10 +535,10 @@ export function ManualPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 {[
                   ['Fases y evento', 'Abrir y cerrar fases, fechas, día 1 del evento y método de promedio.'],
-                  ['Pesos A–F', 'Por ámbito; deben sumar 100. Márcalos como definitivos cuando se aprueben.'],
+                  ['Pesos', 'Puntos de cada criterio (mesa) y pesos de EyC; deben sumar 100.'],
                   ['Cortes y umbrales', 'Peso de cada corte y bandas del semáforo.'],
                   ['Criterios', 'Texto y respuesta esperada; cada cambio guarda versión.'],
-                  ['Comisiones y catálogos', 'Nombres y competencias de las dimensiones.'],
+                  ['Comisiones y catálogos', 'Nombres, secciones y competencias de las dimensiones.'],
                   ['Auditoría', 'Quién cambió qué y cuándo, con valores anteriores.'],
                 ].map(([t, d]) => (
                   <div key={t} className="rounded-2xl border border-line p-4">
