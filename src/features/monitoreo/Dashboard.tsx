@@ -163,7 +163,7 @@ function BarraFila({ etiqueta, sub, valor, texto, marca, clase = DEGRADADO.marca
 
 /** Línea de la evolución del promedio por día, con las bandas del semáforo como referencia. */
 function Tendencia({ datos, verde, amarillo }: { datos: DashboardMonitoreo['tendencia']; verde: number; amarillo: number }) {
-  const W = 460
+  const W = 640
   const H = 230
   const m = { l: 30, r: 16, t: 22, b: 30 }
   const x = (i: number) => (datos.length === 1 ? (W + m.l - m.r) / 2 : m.l + (i / (datos.length - 1)) * (W - m.l - m.r))
@@ -322,8 +322,8 @@ export function DashboardPanel() {
                 )}
               </Tarjeta>
 
-              <div className="grid gap-4 lg:grid-cols-2">
-                <Tarjeta titulo="Evolución del promedio">
+              <div className="grid gap-4 lg:grid-cols-3">
+                <Tarjeta titulo="Evolución del promedio" className="lg:col-span-2">
                   {d.tendencia.length ? (
                     <>
                       <Tendencia datos={d.tendencia} verde={verde} amarillo={amarillo} />

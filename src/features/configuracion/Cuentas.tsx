@@ -170,7 +170,7 @@ export function CuentasPanel() {
                       </div>
                     </td>
                     <td>
-                      <div className="flex flex-wrap justify-end gap-1">
+                      <div className="flex justify-end gap-1 whitespace-nowrap">
                         <Boton variante="fantasma" onClick={() => setEditar(p)}>
                           Editar
                         </Boton>
