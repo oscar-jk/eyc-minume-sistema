@@ -443,7 +443,7 @@ export function ManualPage() {
   return (
     <div className="manual min-h-dvh">
       {/* Portada */}
-      <header className="relative isolate overflow-hidden bg-grad-noche px-5 pb-20 pt-8 text-white sm:px-10 print:-mx-[14mm] print:-mt-[14mm] print:h-[297mm] print:w-[210mm] print:break-after-page print:px-[16mm]">
+      <header className="relative isolate overflow-hidden bg-grad-noche px-5 pb-20 pt-8 text-white sm:px-10 print:h-[266mm] print:break-after-page print:rounded-3xl print:px-[10mm]">
         <CieloEstrellado densidad={1.2} className="print:hidden" />
         <img
           src="/brand/anillo.svg"
