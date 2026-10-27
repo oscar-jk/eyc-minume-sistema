@@ -469,12 +469,19 @@ export function ManualPage() {
                 <IcoLuna className="size-5" />
               )}
             </button>
+            <a
+              href="/Manual-de-usuario-EyC-MINUME-XVII.pdf"
+              download
+              className="inline-flex min-h-11 items-center rounded-xl bg-white/10 px-4 font-bold text-white ring-1 ring-white/25 hover:bg-white/20"
+            >
+              Descargar PDF
+            </a>
             <button
               type="button"
               onClick={() => window.print()}
               className="min-h-11 rounded-xl bg-white px-4 font-bold text-[#0043c5]"
             >
-              Imprimir / PDF
+              Imprimir
             </button>
           </div>
         </div>
