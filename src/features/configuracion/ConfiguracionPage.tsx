@@ -26,7 +26,7 @@ export function ConfiguracionPage() {
         onCambio={setTab}
         opciones={[
           { valor: 'fases', etiqueta: 'Fases y evento' },
-          { valor: 'pesos', etiqueta: 'Pesos A–F' },
+          { valor: 'pesos', etiqueta: 'Pesos' },
           { valor: 'cortes', etiqueta: 'Cortes y umbrales' },
           { valor: 'criterios', etiqueta: 'Criterios' },
           { valor: 'catalogos', etiqueta: 'Comisiones y catálogos' },

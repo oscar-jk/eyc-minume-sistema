@@ -69,6 +69,9 @@ Las migraciones versionadas están en [`supabase/migrations/`](supabase/migratio
 | 014 | `rubrica_notas` | Rúbrica de la mesa: 9 criterios con nota de 0 a sus puntos (suman 100), en secciones, con descripción siempre obligatoria |
 | 016 | `calificacion_inicial` | Calificación inicial (examen 50 %, institucional 30 %, pares 20 %) y puntuación por día para decidir las rotaciones |
 | 017 | `feedback_sin_puntaje_y_personas` | El feedback de los formularios no puntúa a nadie (lo analiza EyC); nuevo campo «personas» (integrantes de la comisión u «Otro»); puntuación de rotación = calificación inicial + valoración de EyC |
+| 018 | `formularios_comision_fija_y_copia` | Formularios fijados a una comisión y copia de formularios |
+| 019 | `dashboard_monitoreo` | RPC con todas las agregaciones del dashboard de Monitoreo (Resumen) |
+| 020 | `modo_mantenimiento` | Modo mantenimiento (apagado por defecto) y RPC pública `estado_sitio` |
 | 018 | `formularios_comision_fija_y_copia` | Un formulario puede quedar fijado a una comisión (el servidor la fuerza) y se puede duplicar con sus preguntas, cerrado y sin respuestas |
 | 015 | `formularios` | Formularios sin cuenta: campos de varios tipos, página pública de respuesta, resultados y límites contra abuso |
 | 013 | `sesiones_y_cortes` | Evento 14–19 de noviembre con sesiones desde el lunes 16; Corte 2 = sesiones 16–17, Final = 18–19; reglas de rotación |
