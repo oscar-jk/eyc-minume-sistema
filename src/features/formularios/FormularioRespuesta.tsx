@@ -193,7 +193,7 @@ export function FormularioRespuesta({
   codigo?: string
 }) {
   const [rol, setRol] = useState<string | null>(def.roles.length === 1 ? def.roles[0] : null)
-  const [comision, setComision] = useState('')
+  const [comision, setComision] = useState(def.comision_fija != null ? String(def.comision_fija) : '')
   const [referencia, setReferencia] = useState('')
   const [valores, setValores] = useState<Valores>({})
   const [web, setWeb] = useState('')
@@ -244,7 +244,14 @@ export function FormularioRespuesta({
           ))}
         </Selector>
       )}
-      {def.pide_comision && (
+      {def.pide_comision && def.comision_fija != null && (
+        <p className="rounded-xl border border-line bg-surface px-4 py-3 dark:bg-white/[0.04]">
+          <span className="text-sm font-bold">Comisión</span>
+          <br />
+          {def.comisiones.map((c) => `${c.sigla} · ${c.nombre}`).join('')}
+        </p>
+      )}
+      {def.pide_comision && def.comision_fija == null && (
         <Selector etiqueta="Comisión" requerido value={comision} error={errores.comision} onChange={(e) => setComision(e.target.value)}>
           <option value="">Elige…</option>
           {def.comisiones.map((c) => (

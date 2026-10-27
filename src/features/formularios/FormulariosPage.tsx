@@ -9,7 +9,7 @@ import { Acento, Aviso, Insignia, Tarjeta, Titulo } from '@/components/Ui'
 import { useSesion } from '@/features/auth/AuthProvider'
 import { mensajeError } from '@/lib/errores'
 import { fecha, plural } from '@/lib/formato'
-import { useActivarFormulario, useBorrarFormulario, useCrearFormulario, useFormularios } from './api'
+import { useActivarFormulario, useBorrarFormulario, useCrearFormulario, useDuplicarFormulario, useFormularios } from './api'
 import { enlacePublico } from './tipos'
 
 /** Lista de formularios: cada quien ve los suyos; Subsecretaría, Secretaría General y administración ven todos. */
@@ -19,6 +19,7 @@ export function FormulariosPage() {
   const crear = useCrearFormulario()
   const activar = useActivarFormulario()
   const borrar = useBorrarFormulario()
+  const duplicar = useDuplicarFormulario()
   const avisar = useAvisar()
   const nav = useNavigate()
   const [nuevo, setNuevo] = useState<string | null>(null)
@@ -69,6 +70,18 @@ export function FormulariosPage() {
                     }
                   >
                     Copiar enlace
+                  </Boton>
+                  <Boton
+                    variante="fantasma"
+                    cargando={duplicar.isPending && duplicar.variables?.id === f.id}
+                    onClick={() =>
+                      duplicar.mutate(
+                        { id: f.id },
+                        { onSuccess: (id) => (avisar('Copia creada: está cerrada hasta que la abras. Cambia el título y la comisión si hace falta.'), nav(`/formularios/${id}`)), onError: (e) => avisar(mensajeError(e), 'error') },
+                      )
+                    }
+                  >
+                    Duplicar
                   </Boton>
                   <Boton
                     variante="fantasma"

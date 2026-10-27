@@ -6,6 +6,7 @@ import { Boton } from '@/components/Boton'
 import { AreaTexto, Campo, Selector } from '@/components/Campo'
 import { Cargando, EstadoError } from '@/components/Estados'
 import { Aviso, Tarjeta } from '@/components/Ui'
+import { siglaDe, useComisiones } from '@/features/comisiones/api'
 import { mensajeError } from '@/lib/errores'
 import { useFormulario, useGuardarFormulario } from './api'
 import { FormularioRespuesta } from './FormularioRespuesta'
@@ -145,6 +146,8 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
   const [roles, setRoles] = useState<string[]>(f.roles)
   const [pideComision, setPideComision] = useState(f.pide_comision)
   const [pideRef, setPideRef] = useState(f.pide_referencia)
+  const [comisionFija, setComisionFija] = useState<number | null>(f.comision_fija)
+  const comisiones = useComisiones()
   const [activo, setActivo] = useState(f.activo)
   const [sucio, setSucio] = useState(false)
   const [guardado, setGuardado] = useState(false)
@@ -184,7 +187,8 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
       roles,
       pide_comision: pideComision,
       pide_referencia: pideRef,
-      comisiones: [{ id: 0, sigla: 'CTD', nombre: 'Comisión de ejemplo' }],
+      comision_fija: comisionFija,
+      comisiones: comisionFija != null ? (comisiones.data ?? []).filter((c) => c.id === comisionFija).map((c) => ({ id: c.id, sigla: siglaDe(c), nombre: c.nombre })) : [{ id: 0, sigla: 'CTD', nombre: 'Comisión de ejemplo' }],
       campos: campos.map<CampoDef>((c) => ({
         id: c.clave,
         tipo: c.tipo,
@@ -197,7 +201,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
         roles: c.roles,
       })),
     }),
-    [titulo, descripcion, roles, pideComision, pideRef, campos],
+    [titulo, descripcion, roles, pideComision, pideRef, comisionFija, comisiones.data, campos],
   )
 
   const enlace = enlacePublico(f.codigo)
@@ -205,7 +209,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
 
   const alGuardar = () =>
     guardar.mutate(
-      { id: f.id, titulo, descripcion, roles, pide_comision: pideComision, pide_referencia: pideRef, activo, campos, quitados },
+      { id: f.id, titulo, descripcion, roles, pide_comision: pideComision, comision_fija: comisionFija, pide_referencia: pideRef, activo, campos, quitados },
       {
         onSuccess: () => {
           avisar('Formulario guardado.')
@@ -264,6 +268,21 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
               Recibiendo respuestas
             </label>
           </div>
+          {pideComision && (
+            <Selector
+              etiqueta="Comisión del formulario"
+              value={comisionFija ?? ''}
+              onChange={(e) => cambiar(setComisionFija)(e.target.value ? Number(e.target.value) : null)}
+              ayuda="«La elige quien responde» sirve para un formulario compartido. Si lo fijas a una comisión, el enlace ya trae la comisión y no se pregunta."
+            >
+              <option value="">La elige quien responde</option>
+              {comisiones.data?.filter((c) => c.activa).map((c) => (
+                <option key={c.id} value={c.id}>
+                  Solo {siglaDe(c)} · {c.nombre}
+                </option>
+              ))}
+            </Selector>
+          )}
         </div>
       </Tarjeta>
 

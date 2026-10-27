@@ -5,6 +5,7 @@
 //   → crea la cuenta (sin contraseña conocida) y devuelve un enlace para que la persona defina la suya.
 // POST { accion: "enlace", email, redirect_to }   → nuevo enlace de acceso / recuperación.
 // POST { accion: "activar", user_id, activo }     → activa o bloquea la cuenta.
+// POST { accion: "eliminar", user_id }            → elimina la cuenta si no tiene actividad registrada (si la tiene, se bloquea).
 // POST { accion: "correo", user_id, email }       → cambia el correo si la cuenta aún no se activó.
 import { createClient } from "npm:@supabase/supabase-js@2";
 
@@ -87,6 +88,27 @@ Deno.serve(async (req) => {
         const { error } = await service.auth.admin.updateUserById(userId, { ban_duration: activo ? "none" : "876000h" });
         if (error) return json({ error: error.message }, 400);
         await service.from("perfiles").update({ activo }).eq("id", userId);
+        return json({ ok: true });
+      }
+      case "eliminar": {
+        const userId = String(body.user_id ?? "");
+        if (userId === caller.user.id) return json({ error: "No puedes eliminar tu propia cuenta" }, 400);
+        const { data: objetivo } = await service.from("perfiles").select("rol, activo").eq("id", userId).single();
+        if (!objetivo) return json({ error: "Cuenta no encontrada" }, 404);
+        if (objetivo.rol === "admin") {
+          const { count } = await service.from("perfiles").select("id", { count: "exact", head: true }).eq("rol", "admin").eq("activo", true).neq("id", userId);
+          if (!count) return json({ error: "No se puede eliminar al último administrador" }, 400);
+        }
+        // Los formularios vacíos que creó no cuentan como actividad: se quitan con la cuenta.
+        const { data: forms } = await service.from("formularios").select("id").eq("creado_por", userId);
+        for (const f of forms ?? []) {
+          const { count } = await service.from("formulario_envios").select("id", { count: "exact", head: true }).eq("formulario_id", f.id);
+          if (!count) await service.from("formularios").delete().eq("id", f.id);
+        }
+        const { error } = await service.auth.admin.deleteUser(userId);
+        if (error) {
+          return json({ error: "Esta cuenta ya tiene actividad registrada (evaluaciones, decisiones, actividades o formularios con respuestas). Bloquéala en lugar de eliminarla para conservar el historial." }, 409);
+        }
         return json({ ok: true });
       }
       case "correo": {

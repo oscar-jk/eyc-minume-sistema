@@ -49,6 +49,7 @@ export interface CambiosFormulario {
   roles: string[]
   pide_comision: boolean
   pide_referencia: boolean
+  comision_fija: number | null
   activo: boolean
   campos: CampoBorrador[]
   /** Ids de campos que existían y ya no están en el borrador. */
@@ -68,6 +69,7 @@ export function useGuardarFormulario() {
             descripcion: p.descripcion.trim() || null,
             roles: p.roles,
             pide_comision: p.pide_comision,
+            comision_fija: p.pide_comision ? p.comision_fija : null,
             pide_referencia: p.pide_referencia,
             activo: p.activo,
           })
@@ -100,6 +102,15 @@ export function useGuardarFormulario() {
         else datos(await supabase.from('formulario_campos').insert({ ...fila, formulario_id: p.id }).select('id').single())
       }
     },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['formularios'] }),
+  })
+}
+
+/** Copia un formulario (datos y preguntas) a uno nuevo, cerrado y sin respuestas. Devuelve el id de la copia. */
+export function useDuplicarFormulario() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (p: { id: string; titulo?: string }) => datos(await supabase.rpc('duplicar_formulario', { p_id: p.id, p_titulo: p.titulo })) as string,
     onSuccess: () => qc.invalidateQueries({ queryKey: ['formularios'] }),
   })
 }

@@ -256,6 +256,14 @@ export function useActivarCuenta() {
   })
 }
 
+export function useEliminarCuenta() {
+  const inv = useInvalidar(['perfiles'])
+  return useMutation({
+    mutationFn: (user_id: string) => invocar<{ ok: true }>({ accion: 'eliminar', user_id }),
+    onSuccess: inv,
+  })
+}
+
 export function useActualizarPerfil() {
   const inv = useInvalidar(['perfiles'], ['perfil'])
   return useMutation({

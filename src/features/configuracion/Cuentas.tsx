@@ -12,7 +12,7 @@ import { usePersonas } from '@/features/personas/api'
 import { mensajeError } from '@/lib/errores'
 import { ROL, fechaHora } from '@/lib/formato'
 import type { Perfil, Rol } from '@/lib/tipos'
-import { useActivarCuenta, useActualizarPerfil, useAuditoria, useCambiarCorreo, useCrearCuenta, useCuentasAdmin, useEnlaceAcceso, usePerfiles } from './api'
+import { useActivarCuenta, useActualizarPerfil, useAuditoria, useCambiarCorreo, useCrearCuenta, useCuentasAdmin, useEliminarCuenta, useEnlaceAcceso, usePerfiles } from './api'
 
 const ROLES: Rol[] = ['eyc', 'subsecretario', 'secretario', 'admin']
 
@@ -55,6 +55,8 @@ export function CuentasPanel() {
   const crear = useCrearCuenta()
   const enlace = useEnlaceAcceso()
   const activar = useActivarCuenta()
+  const eliminar = useEliminarCuenta()
+  const [porEliminar, setPorEliminar] = useState<Perfil | null>(null)
   const actualizar = useActualizarPerfil()
   const avisar = useAvisar()
   const personas = usePersonas()
@@ -192,6 +194,11 @@ export function CuentasPanel() {
                             {p.activo ? 'Bloquear' : 'Activar'}
                           </Boton>
                         )}
+                        {p.id !== yo?.id && (
+                          <Boton variante="fantasma" className="text-danger" onClick={() => setPorEliminar(p)}>
+                            Eliminar
+                          </Boton>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -202,6 +209,39 @@ export function CuentasPanel() {
         </Consulta>
       </Tarjeta>
       <EnlaceModal enlace={link} onCerrar={() => setLink(null)} />
+      <Modal
+        abierto={!!porEliminar}
+        titulo="Eliminar cuenta"
+        onCerrar={() => setPorEliminar(null)}
+        acciones={
+          <>
+            <Boton variante="secundario" onClick={() => setPorEliminar(null)}>
+              Cancelar
+            </Boton>
+            <Boton
+              variante="peligro"
+              cargando={eliminar.isPending}
+              onClick={() =>
+                porEliminar &&
+                eliminar.mutate(porEliminar.id, {
+                  onSuccess: () => {
+                    avisar('Cuenta eliminada.')
+                    setPorEliminar(null)
+                  },
+                  onError: (e) => avisar(mensajeError(e), 'error'),
+                })
+              }
+            >
+              Eliminar definitivamente
+            </Boton>
+          </>
+        }
+      >
+        <p className="text-sm text-ink-2">
+          Se eliminará la cuenta de <strong>{porEliminar?.nombre}</strong> ({porEliminar?.email}) y la persona ya no podrá entrar. No se puede deshacer.
+        </p>
+        <p className="mt-2 text-sm text-ink-3">Si la cuenta ya tiene evaluaciones, decisiones o actividades, no se elimina: bloquéala para conservar el historial.</p>
+      </Modal>
       {editar && (
         <EditarPerfil
           key={editar.id}

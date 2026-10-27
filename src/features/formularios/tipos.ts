@@ -44,6 +44,8 @@ export interface FormularioPublicoDef {
   roles: string[]
   pide_comision: boolean
   pide_referencia: boolean
+  /** Si el formulario es de una sola comisión, su id: quien responde no la elige. */
+  comision_fija?: number | null
   comisiones: { id: number; sigla: string; nombre: string }[]
   campos: CampoDef[]
 }

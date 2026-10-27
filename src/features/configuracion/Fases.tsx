@@ -8,7 +8,8 @@ import { Aviso, Insignia, Tarjeta } from '@/components/Ui'
 import { mensajeError } from '@/lib/errores'
 import { ESTADO_FASE, fecha } from '@/lib/formato'
 import type { EstadoFase, Fase } from '@/lib/tipos'
-import { useActualizarConfig, useActualizarFase, useConfig, useCortes, useFases, useReprogramarEvento } from './api'
+import { SESIONES_DIAS_POR_DEFECTO, SESIONES_INICIO_POR_DEFECTO } from '@/features/asignaciones/rotacion'
+import { useActualizarConfig, useActualizarFase, useConfig, useCortes, useFases, useGuardarConfig, useReprogramarEvento } from './api'
 
 export function FasesPanel() {
   const fases = useFases()
@@ -120,8 +121,16 @@ function EventoPanel() {
   const avisar = useAvisar()
   const inicio = (config.data?.evento_inicio?.valor as string | undefined) ?? ''
   const dias = Number(config.data?.evento_dias?.valor ?? 6)
-  const [f, setF] = useState<{ inicio: string; dias: number } | null>(null)
-  const v = f ?? { inicio, dias }
+  const sesionesInicio = typeof config.data?.sesiones_inicio?.valor === 'string' ? (config.data.sesiones_inicio.valor as string) : SESIONES_INICIO_POR_DEFECTO
+  const sesionesDias = typeof config.data?.sesiones_dias?.valor === 'number' ? (config.data.sesiones_dias.valor as number) : SESIONES_DIAS_POR_DEFECTO
+  const guardarConfig = useGuardarConfig()
+  const [f, setF] = useState<{ inicio: string; dias: number; sesiones: string; sesionesDias: number } | null>(null)
+  const v = f ?? { inicio, dias, sesiones: sesionesInicio, sesionesDias }
+  const dia = (n: number) => {
+    const d = new Date(`${v.sesiones || sesionesInicio}T00:00:00Z`)
+    d.setUTCDate(d.getUTCDate() + n)
+    return d.toISOString().slice(0, 10)
+  }
   const provisional = config.data?.evento_inicio?.provisional || config.data?.evento_dias?.provisional
   const metodo = (config.data?.metodo_promedio?.valor as string | undefined) ?? 'simple'
 
@@ -134,26 +143,49 @@ function EventoPanel() {
           </Aviso>
         </div>
       )}
-      <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Campo etiqueta="Día 1 del evento" type="date" value={v.inicio} onChange={(e) => setF({ ...v, inicio: e.target.value })} />
         <Campo etiqueta="Días de evento" type="number" min={3} max={10} value={v.dias} onChange={(e) => setF({ ...v, dias: Number(e.target.value) })} />
+        <Campo
+          etiqueta="Primer día de sesiones"
+          type="date"
+          value={v.sesiones}
+          onChange={(e) => setF({ ...v, sesiones: e.target.value })}
+          ayuda="Los cortes cuentan desde este día."
+        />
+        <Campo
+          etiqueta="Días de sesiones con rotación"
+          type="number"
+          min={1}
+          max={10}
+          value={v.sesionesDias}
+          onChange={(e) => setF({ ...v, sesionesDias: Number(e.target.value) })}
+          ayuda="El Día 1 es la comisión original; del Día 2 en adelante se rota."
+        />
+      </div>
+      <div className="mt-3">
         <Boton
-          disabled={!f || !v.inicio || v.dias < 3}
-          cargando={reprogramar.isPending}
-          onClick={() =>
-            reprogramar.mutate(v, {
-              onSuccess: () => {
-                avisar('Evento reprogramado: fechas de las fases actualizadas.')
-                setF(null)
-              },
-              onError: (e) => avisar(mensajeError(e), 'error'),
-            })
-          }
+          disabled={!f || !v.inicio || !v.sesiones || v.dias < 3 || v.sesionesDias < 1}
+          cargando={reprogramar.isPending || guardarConfig.isPending}
+          onClick={async () => {
+            try {
+              await guardarConfig.mutateAsync({ clave: 'sesiones_inicio', valor: v.sesiones, descripcion: 'Fecha del Día 1 de sesiones de trabajo.' })
+              await guardarConfig.mutateAsync({ clave: 'sesiones_dias', valor: v.sesionesDias, descripcion: 'Días de sesiones con rotación a partir del Día 2.' })
+              await reprogramar.mutateAsync({ inicio: v.inicio, dias: v.dias })
+              avisar('Calendario guardado: fechas de las fases actualizadas.')
+              setF(null)
+            } catch (e) {
+              avisar(mensajeError(e), 'error')
+            }
+          }}
         >
-          Aplicar a las fases
+          Guardar calendario
         </Boton>
       </div>
-      <p className="mt-2 text-sm text-ink-3">Días 1–2 → Corte 2; días 3 en adelante → Evaluación Final; cierre el último día.</p>
+      <p className="mt-2 text-sm text-ink-3">
+        Sesiones: Día 1 {fecha(dia(0), true)} · Día 2 {fecha(dia(1), true)} · Día 3 {fecha(dia(2), true)}. Días 1–2 → Corte 2; Día 3 en adelante → Evaluación Final; cierre el último día
+        del evento. Las fechas de cada fase se pueden ajustar una por una abajo.
+      </p>
       <div className="mt-4 max-w-md">
         <Selector
           etiqueta="Promedio por corte"

@@ -990,6 +990,7 @@ export type Database = {
           activo: boolean
           actualizado_en: string
           codigo: string
+          comision_fija: number | null
           creado_en: string
           creado_por: string | null
           descripcion: string | null
@@ -1003,6 +1004,7 @@ export type Database = {
           activo?: boolean
           actualizado_en?: string
           codigo?: string
+          comision_fija?: number | null
           creado_en?: string
           creado_por?: string | null
           descripcion?: string | null
@@ -1016,6 +1018,7 @@ export type Database = {
           activo?: boolean
           actualizado_en?: string
           codigo?: string
+          comision_fija?: number | null
           creado_en?: string
           creado_por?: string | null
           descripcion?: string | null
@@ -1025,7 +1028,15 @@ export type Database = {
           roles?: string[]
           titulo?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "formularios_comision_fija_fkey"
+            columns: ["comision_fija"]
+            isOneToOne: false
+            referencedRelation: "comisiones"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       perfiles: {
         Row: {
@@ -2086,6 +2097,7 @@ export type Database = {
           motivo: string
         }[]
       }
+      duplicar_formulario: { Args: { p_comision?: number; p_id: string; p_titulo?: string }; Returns: string }
       formulario_enviar: { Args: { p: Json; p_codigo: string }; Returns: undefined }
       formulario_personas: { Args: { p_codigo: string; p_comision: number }; Returns: Json }
       formulario_publico: { Args: { p_codigo: string }; Returns: Json }

@@ -208,5 +208,46 @@ begin
   reset role;
   pruebas := pruebas + 1;
 
+  -- 10 · Comisión fija y copia de formularios (018).
+  declare f3 uuid; cod3 text; k3 uuid; f4 uuid; cod4 text; nuevo_cod text; n_campos int; n_env int; v_com smallint; v3 jsonb;
+  begin
+    perform set_config('request.jwt.claims', json_build_object('sub', u_eyc1, 'role', 'authenticated')::text, true);
+    set local role authenticated;
+    insert into public.formularios (titulo, roles, comision_fija) values ('Feedback PNUD', array['delegado'], c_pnud) returning id, codigo into f3, cod3;
+    insert into public.formulario_campos (formulario_id, orden, tipo, etiqueta, obligatorio) values (f3, 1, 'personas', '¿Quién dio el taller?', true) returning id into k3;
+    ok := false; begin insert into public.formularios (titulo, pide_comision, comision_fija) values ('Sin comisión', false, c_pnud);
+    exception when check_violation then ok := true; end;
+    if not ok then raise exception 'FALLO 10a: permitió comisión fija sin preguntar la comisión'; end if;
+    reset role;
+    perform set_config('request.headers', '{"x-forwarded-for":"10.0.0.10","user-agent":"Fija"}', true);
+    set local role anon;
+    v3 := public.formulario_publico(cod3);
+    if (v3 ->> 'comision_fija')::int <> c_pnud or jsonb_array_length(v3 -> 'comisiones') <> 1 then raise exception 'FALLO 10b: la definición pública = %', v3; end if;
+    v := public.formulario_personas(cod3, c_ctd);    -- aunque pidan otra comisión, salen las de la fija
+    if jsonb_array_length(v) <> 1 or v::text not like '%Otra Comisión%' then raise exception 'FALLO 10c: personas de la comisión fija = %', v; end if;
+    perform public.formulario_enviar(cod3, jsonb_build_object('rol', 'delegado', 'comision_id', c_ctd, 'referencia', 'Taller 1',
+      'respuestas', jsonb_build_object(k3::text, jsonb_build_object('persona_id', p_otra))));
+    reset role;
+    select e.comision_id into v_com from public.formulario_envios e where e.formulario_id = f3;
+    if v_com <> c_pnud then raise exception 'FALLO 10d: guardó la comisión % en vez de la fija', v_com; end if;
+    ok := false; begin set local role anon; perform public.formulario_enviar_base(cod3, '{}'::jsonb); exception when insufficient_privilege then ok := true; end;
+    reset role;
+    if not ok then raise exception 'FALLO 10e: anon pudo llamar a la función base'; end if;
+
+    perform set_config('request.jwt.claims', json_build_object('sub', u_eyc1, 'role', 'authenticated')::text, true);
+    set local role authenticated;
+    f4 := public.duplicar_formulario(f3, 'Feedback PNUD · Taller 2');
+    select codigo, comision_fija into cod4, v_com from public.formularios where id = f4;
+    select count(*) into n_campos from public.formulario_campos where formulario_id = f4;
+    select count(*) into n_env from public.formulario_envios where formulario_id = f4;
+    select activo::text into nuevo_cod from public.formularios where id = f4;
+    if cod4 = cod3 or n_campos <> 1 or n_env <> 0 or v_com <> c_pnud or nuevo_cod <> 'false' then raise exception 'FALLO 10f: copia incorrecta'; end if;
+    reset role;
+    ok := false; begin set local role anon; perform public.duplicar_formulario(f3); exception when insufficient_privilege then ok := true; end;
+    reset role;
+    if not ok then raise exception 'FALLO 10g: anon pudo duplicar'; end if;
+    pruebas := pruebas + 1;
+  end;
+
   raise exception 'FORMULARIOS_OK (%)', pruebas;
 end $$;
