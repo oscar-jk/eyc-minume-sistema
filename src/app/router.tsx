@@ -6,6 +6,7 @@ import { LoginPage, NuevaContrasenaPage, RecuperarPage } from '@/features/auth/p
 import { Inicio, RequiereRol, RequiereSesion } from './guards'
 import { ErrorPagina } from './ErrorPagina'
 import { Layout } from './Layout'
+import { Mantenimiento } from './Mantenimiento'
 
 // Carga diferida por sección: el EyC en el teléfono solo descarga lo que usa.
 const ComisionPage = lazy(() => import('@/features/comisiones/ComisionPage').then((m) => ({ default: m.ComisionPage })))
@@ -39,6 +40,7 @@ function NoEncontrada() {
 export const router = createBrowserRouter([
   {
     errorElement: <ErrorPagina />,
+    element: <Mantenimiento />,
     children: [
   { path: '/login', element: <LoginPage /> },
   { path: '/recuperar', element: <RecuperarPage /> },

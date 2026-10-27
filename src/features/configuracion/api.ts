@@ -306,3 +306,25 @@ export function useCambiarCorreo() {
     onSuccess: inv,
   })
 }
+
+// ───────────── Modo mantenimiento ─────────────
+export interface EstadoSitio {
+  mantenimiento: boolean
+  mensaje: string
+}
+
+/** Lo puede leer cualquiera (sin sesión). Se revisa cada 20 s; si falla, el sitio sigue funcionando como si no hubiera mantenimiento. */
+export function useEstadoSitio() {
+  return useQuery({
+    queryKey: ['estado-sitio'],
+    refetchInterval: 20_000,
+    refetchOnWindowFocus: true,
+    retry: false,
+    staleTime: 10_000,
+    queryFn: async (): Promise<EstadoSitio> => {
+      const { data, error } = await supabase.rpc('estado_sitio')
+      if (error || !data) return { mantenimiento: false, mensaje: '' }
+      return data as unknown as EstadoSitio
+    },
+  })
+}

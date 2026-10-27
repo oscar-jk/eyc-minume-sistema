@@ -9,7 +9,8 @@ import { mensajeError } from '@/lib/errores'
 import { ESTADO_FASE, fecha } from '@/lib/formato'
 import type { EstadoFase, Fase } from '@/lib/tipos'
 import { SESIONES_DIAS_POR_DEFECTO, SESIONES_INICIO_POR_DEFECTO } from '@/features/asignaciones/rotacion'
-import { useActualizarConfig, useActualizarFase, useConfig, useCortes, useFases, useGuardarConfig, useReprogramarEvento } from './api'
+import { useSesion } from '@/features/auth/AuthProvider'
+import { useActualizarConfig, useActualizarFase, useConfig, useCortes, useFases, useGuardarConfig, useReprogramarEvento, useEstadoSitio } from './api'
 
 export function FasesPanel() {
   const fases = useFases()
@@ -28,6 +29,7 @@ export function FasesPanel() {
   return (
     <div className="flex flex-col gap-5">
       <EventoPanel />
+      <MantenimientoPanel />
       <Tarjeta titulo="Fases">
         <p className="mb-3 text-sm text-ink-2">Una fase cerrada bloquea toda escritura de ese período en la base de datos, para cualquier rol.</p>
         <Consulta q={fases}>
@@ -197,6 +199,69 @@ function EventoPanel() {
           <option value="ponderado_dias">Ponderado por días asignados</option>
         </Selector>
       </div>
+    </Tarjeta>
+  )
+}
+
+/** Prende y apaga el aviso de «sitio en mantenimiento». Viene apagado; solo lo cambia un administrador. */
+function MantenimientoPanel() {
+  const { perfil } = useSesion()
+  const estado = useEstadoSitio()
+  const guardar = useGuardarConfig()
+  const avisar = useAvisar()
+  const [mensaje, setMensaje] = useState<string | null>(null)
+  const [confirmar, setConfirmar] = useState(false)
+  if (perfil?.rol !== 'admin') return null
+  const activo = !!estado.data?.mantenimiento
+  const texto = mensaje ?? estado.data?.mensaje ?? ''
+  const cambiar = (nuevo: boolean) =>
+    guardar.mutate(
+      { clave: 'mantenimiento', valor: { activo: nuevo, mensaje: texto.trim() }, descripcion: 'Modo mantenimiento: si está activo, el sitio muestra un aviso de espera a todos menos a los administradores.' },
+      {
+        onSuccess: () => {
+          avisar(nuevo ? 'Modo mantenimiento activado: el resto de las personas ve la pantalla de espera.' : 'Modo mantenimiento apagado: el sitio vuelve a estar disponible.')
+          setConfirmar(false)
+          void estado.refetch()
+        },
+        onError: (e) => avisar(mensajeError(e), 'error'),
+      },
+    )
+  return (
+    <Tarjeta titulo="Modo mantenimiento">
+      <p className="mb-3 text-sm text-ink-2">
+        Úsalo cuando vayas a hacer cambios: todas las personas (menos los administradores) ven una pantalla de «espera unos momentos» que se actualiza sola cuando lo apagas. Los
+        formularios públicos también se pausan.
+      </p>
+      <Campo etiqueta="Mensaje opcional" value={texto} maxLength={200} onChange={(e) => setMensaje(e.target.value)} placeholder="Estamos aplicando mejoras. Volvemos en unos minutos." />
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <Insignia tono={activo ? 'peligro' : 'exito'}>{activo ? 'Activo ahora' : 'Apagado'}</Insignia>
+        {activo ? (
+          <Boton cargando={guardar.isPending} onClick={() => cambiar(false)}>
+            Apagar y reabrir el sitio
+          </Boton>
+        ) : (
+          <Boton variante="peligro" onClick={() => setConfirmar(true)}>
+            Activar mantenimiento
+          </Boton>
+        )}
+      </div>
+      <Modal
+        abierto={confirmar}
+        titulo="Activar el modo mantenimiento"
+        onCerrar={() => setConfirmar(false)}
+        acciones={
+          <>
+            <Boton variante="secundario" onClick={() => setConfirmar(false)}>
+              Cancelar
+            </Boton>
+            <Boton variante="peligro" cargando={guardar.isPending} onClick={() => cambiar(true)}>
+              Sí, activar
+            </Boton>
+          </>
+        }
+      >
+        <p>Las personas conectadas verán la pantalla de espera en menos de 20 segundos, y quien esté llenando un formulario no podrá enviarlo hasta que lo apagues. Tú sigues dentro con un aviso arriba.</p>
+      </Modal>
     </Tarjeta>
   )
 }
