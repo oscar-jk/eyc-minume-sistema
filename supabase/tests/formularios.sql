@@ -249,5 +249,19 @@ begin
     pruebas := pruebas + 1;
   end;
 
+  -- 10. Eliminar un formulario CON respuestas: lo puede quien lo creó; otro EyC no.
+  perform set_config('request.jwt.claims', json_build_object('sub', u_eyc2, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  ok := false; begin perform public.eliminar_formulario(f2); exception when insufficient_privilege then ok := true; end;
+  if not ok then raise exception 'FALLO 10a: otro EyC eliminó un formulario ajeno'; end if;
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('sub', u_eyc1, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  perform public.eliminar_formulario(f2);
+  reset role;
+  select count(*) into n from public.formularios where id = f2; if n <> 0 then raise exception 'FALLO 10b: el formulario sigue existiendo'; end if;
+  select count(*) into n from public.formulario_envios where formulario_id = f2; if n <> 0 then raise exception 'FALLO 10c: quedaron envíos'; end if;
+  pruebas := pruebas + 1;
+
   raise exception 'FORMULARIOS_OK (%)', pruebas;
 end $$;

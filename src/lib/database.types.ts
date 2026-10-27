@@ -2100,6 +2100,7 @@ export type Database = {
       duplicar_formulario: { Args: { p_comision?: number; p_id: string; p_titulo?: string }; Returns: string }
       formulario_enviar: { Args: { p: Json; p_codigo: string }; Returns: undefined }
       dashboard_monitoreo: { Args: { p_ambito?: string; p_corte: number }; Returns: Json }
+      eliminar_formulario: { Args: { p_id: string }; Returns: undefined }
       estado_sitio: { Args: never; Returns: Json }
       formulario_personas: { Args: { p_codigo: string; p_comision: number }; Returns: Json }
       formulario_publico: { Args: { p_codigo: string }; Returns: Json }

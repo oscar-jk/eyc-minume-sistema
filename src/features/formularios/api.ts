@@ -127,7 +127,7 @@ export function useBorrarFormulario() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('formularios').delete().eq('id', id)
+      const { error } = await supabase.rpc('eliminar_formulario', { p_id: id })
       if (error) throw error
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['formularios'] }),
