@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { Boton } from '@/components/Boton'
 import { Campo } from '@/components/Campo'
@@ -8,7 +8,7 @@ import { Destello, Estrella8 } from '@/components/Elementos'
 import { Marca } from '@/components/Marca'
 import { Acento, Aviso } from '@/components/Ui'
 import { mensajeError } from '@/lib/errores'
-import { cambiarContrasena, entrar, solicitarRecuperacion } from './api'
+import { cambiarContrasena, entrar, solicitarRecuperacion, verificarEnlace } from './api'
 import { useSesion } from './AuthProvider'
 
 /** Pantallas de acceso: cielo nocturno con estrellas reales y la identidad «MINUME de Estrellas». */
@@ -139,6 +139,9 @@ export function RecuperarPage() {
 export function NuevaContrasenaPage() {
   const { sesion, cargando, terminarRecuperacion } = useSesion()
   const nav = useNavigate()
+  const [params] = useSearchParams()
+  const tokenHash = params.get('token_hash')
+  const verificar = useMutation({ mutationFn: () => verificarEnlace(tokenHash!) })
   const [p1, setP1] = useState('')
   const [p2, setP2] = useState('')
   const m = useMutation({ mutationFn: () => cambiarContrasena(p1), onSuccess: () => {
@@ -147,6 +150,25 @@ export function NuevaContrasenaPage() {
     } })
   const corta = p1.length > 0 && p1.length < 10
   const distinta = p2.length > 0 && p1 !== p2
+
+  // Enlace nuevo: no se canjea al abrir la página (un revisor automático lo gastaría), sino al tocar «Continuar».
+  if (tokenHash && !sesion && !verificar.isSuccess) {
+    return (
+      <Marco titulo={<>Bienvenido <Acento>al</Acento> sistema</>}>
+        <p className="mb-4 text-center text-ink-2">Toca el botón para definir tu contraseña personal y entrar.</p>
+        {verificar.isError && (
+          <div className="mb-4">
+            <Aviso tono="alerta" titulo="Este enlace ya no sirve" accion={{ texto: 'Pedir un enlace nuevo', a: '/recuperar' }}>
+              Los enlaces son de un solo uso y caducan. Pide uno nuevo con tu correo.
+            </Aviso>
+          </div>
+        )}
+        <Boton className="min-h-12 w-full text-base" cargando={verificar.isPending} onClick={() => verificar.mutate()}>
+          Continuar
+        </Boton>
+      </Marco>
+    )
+  }
 
   if (!cargando && !sesion) {
     return (

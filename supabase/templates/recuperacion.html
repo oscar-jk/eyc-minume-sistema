@@ -36,7 +36,7 @@
           <!-- Botón: degradado sobrio de marca, con color sólido de respaldo para Outlook -->
           <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 26px;"><tr>
             <td style="border-radius:14px;background:#0043c5;background-image:linear-gradient(180deg,#0a4fd6,#0043c5);box-shadow:0 4px 12px -6px rgba(0,33,147,.45);">
-              <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 30px;font-family:Barlow,'Segoe UI',Arial,sans-serif;font-size:17px;font-weight:800;color:#ffffff;text-decoration:none;border-radius:14px;">Definir mi contraseña</a>
+              <a href="https://eyc-minume-xvii.vercel.app/nueva-contrasena?token_hash={{ .TokenHash }}&type=recovery" style="display:inline-block;padding:16px 30px;font-family:Barlow,'Segoe UI',Arial,sans-serif;font-size:17px;font-weight:800;color:#ffffff;text-decoration:none;border-radius:14px;">Definir mi contraseña</a>
             </td>
           </tr></table>
 
@@ -54,7 +54,7 @@
           </table>
 
           <p style="margin:22px 0 0;font-size:13px;line-height:1.5;color:#51668a;">¿El botón no funciona? Copia y pega este enlace en tu navegador:<br>
-            <a href="{{ .ConfirmationURL }}" style="color:#0043c5;word-break:break-all;">{{ .ConfirmationURL }}</a>
+            <a href="https://eyc-minume-xvii.vercel.app/nueva-contrasena?token_hash={{ .TokenHash }}&type=recovery" style="color:#0043c5;word-break:break-all;">https://eyc-minume-xvii.vercel.app/nueva-contrasena?token_hash={{ .TokenHash }}&type=recovery</a>
           </p>
         </td></tr>
 

@@ -37,3 +37,9 @@ export async function cambiarContrasena(password: string) {
   const { error } = await supabase.auth.updateUser({ password })
   if (error) throw error
 }
+
+/** Canjea el enlace de acceso (de un solo uso) cuando la persona toca «Continuar». Así los correos que «abren» los enlaces para revisarlos no los gastan. */
+export async function verificarEnlace(tokenHash: string) {
+  const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' })
+  if (error) throw error
+}

@@ -2076,6 +2076,9 @@ export type Database = {
         Args: never
         Returns: {
           activada: boolean
+          correo_enviado_en: string
+          creada_en: string
+          enlace_consumido: boolean
           id: string
           ultimo_acceso: string
         }[]

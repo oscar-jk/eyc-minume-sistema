@@ -328,3 +328,15 @@ export function useEstadoSitio() {
     },
   })
 }
+
+/** Reenvía el correo de acceso (el mismo de «¿Olvidaste tu contraseña?»). Solo se puede pedir uno por minuto por persona. */
+export function useReenviarCorreo() {
+  const inv = useInvalidar(['perfiles'])
+  return useMutation({
+    mutationFn: async (email: string) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/nueva-contrasena` })
+      if (error) throw error
+    },
+    onSuccess: inv,
+  })
+}

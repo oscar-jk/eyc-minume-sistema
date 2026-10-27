@@ -1,24 +1,41 @@
-import { useState } from 'react'
-import { useAvisar } from '@/components/Avisos'
-import { Boton } from '@/components/Boton'
-import { Campo, Selector } from '@/components/Campo'
-import { Consulta, EstadoVacio } from '@/components/Estados'
-import { Modal } from '@/components/Modal'
-import { Aviso, Insignia, Tabla, Tarjeta } from '@/components/Ui'
-import { useSesion } from '@/features/auth/AuthProvider'
-import { useVigentes } from '@/features/asignaciones/api'
-import { siglaDe, useComisiones } from '@/features/comisiones/api'
-import { usePersonas } from '@/features/personas/api'
-import { mensajeError } from '@/lib/errores'
-import { ROL, fechaHora } from '@/lib/formato'
-import type { Perfil, Rol } from '@/lib/tipos'
-import { useActivarCuenta, useActualizarPerfil, useAuditoria, useCambiarCorreo, useCrearCuenta, useCuentasAdmin, useEliminarCuenta, useEnlaceAcceso, usePerfiles } from './api'
+import { useState } from "react";
+import { useAvisar } from "@/components/Avisos";
+import { Boton } from "@/components/Boton";
+import { Campo, Selector } from "@/components/Campo";
+import { Consulta, EstadoVacio } from "@/components/Estados";
+import { Modal } from "@/components/Modal";
+import { Aviso, Insignia, Tabla, Tarjeta } from "@/components/Ui";
+import { useSesion } from "@/features/auth/AuthProvider";
+import { useVigentes } from "@/features/asignaciones/api";
+import { siglaDe, useComisiones } from "@/features/comisiones/api";
+import { usePersonas } from "@/features/personas/api";
+import { mensajeError } from "@/lib/errores";
+import { ROL, fechaHora } from "@/lib/formato";
+import type { Perfil, Rol } from "@/lib/tipos";
+import {
+  useActivarCuenta,
+  useActualizarPerfil,
+  useAuditoria,
+  useCambiarCorreo,
+  useCrearCuenta,
+  useCuentasAdmin,
+  useEliminarCuenta,
+  useEnlaceAcceso,
+  useReenviarCorreo,
+  usePerfiles,
+} from "./api";
 
-const ROLES: Rol[] = ['eyc', 'subsecretario', 'secretario', 'admin']
+const ROLES: Rol[] = ["eyc", "subsecretario", "secretario", "admin"];
 
 /** Muestra un enlace de acceso para compartir por un canal privado (no viaja por correo si no hay SMTP). */
-function EnlaceModal({ enlace, onCerrar }: { enlace: string | null; onCerrar: () => void }) {
-  const avisar = useAvisar()
+function EnlaceModal({
+  enlace,
+  onCerrar,
+}: {
+  enlace: string | null;
+  onCerrar: () => void;
+}) {
+  const avisar = useAvisar();
   return (
     <Modal
       abierto={!!enlace}
@@ -29,9 +46,13 @@ function EnlaceModal({ enlace, onCerrar }: { enlace: string | null; onCerrar: ()
           <Boton
             variante="secundario"
             onClick={() =>
-              navigator.clipboard.writeText(enlace ?? '').then(
-                () => avisar('Enlace copiado.'),
-                () => avisar('No se pudo copiar; selecciónalo manualmente.', 'error'),
+              navigator.clipboard.writeText(enlace ?? "").then(
+                () => avisar("Enlace copiado."),
+                () =>
+                  avisar(
+                    "No se pudo copiar; selecciónalo manualmente.",
+                    "error",
+                  ),
               )
             }
           >
@@ -41,56 +62,101 @@ function EnlaceModal({ enlace, onCerrar }: { enlace: string | null; onCerrar: ()
         </>
       }
     >
-      <p className="mb-2 text-sm text-ink-2">Envíalo solo a la persona dueña de la cuenta. Con él define su contraseña personal. Es de un solo uso y caduca.</p>
-      <textarea readOnly rows={4} value={enlace ?? ''} className="w-full rounded-lg border border-line-strong bg-surface-2 p-2 font-mono text-xs" onFocus={(e) => e.target.select()} />
+      <p className="mb-2 text-sm text-ink-2">
+        Envíalo solo a la persona dueña de la cuenta. Con él define su
+        contraseña personal. Es de un solo uso y caduca.
+      </p>
+      <textarea
+        readOnly
+        rows={4}
+        value={enlace ?? ""}
+        className="w-full rounded-lg border border-line-strong bg-surface-2 p-2 font-mono text-xs"
+        onFocus={(e) => e.target.select()}
+      />
     </Modal>
-  )
+  );
 }
 
 export function CuentasPanel() {
-  const { perfil: yo } = useSesion()
-  const perfiles = usePerfiles()
-  const activacion = useCuentasAdmin()
-  const comisiones = useComisiones()
-  const crear = useCrearCuenta()
-  const enlace = useEnlaceAcceso()
-  const activar = useActivarCuenta()
-  const eliminar = useEliminarCuenta()
-  const [porEliminar, setPorEliminar] = useState<Perfil | null>(null)
-  const actualizar = useActualizarPerfil()
-  const avisar = useAvisar()
-  const personas = usePersonas()
-  const vigentes = useVigentes()
-  const [nueva, setNueva] = useState({ email: '', nombre: '', rol: 'eyc' as Rol, comision: '', persona: '' })
+  const { perfil: yo } = useSesion();
+  const perfiles = usePerfiles();
+  const activacion = useCuentasAdmin();
+  const comisiones = useComisiones();
+  const crear = useCrearCuenta();
+  const enlace = useEnlaceAcceso();
+  const activar = useActivarCuenta();
+  const eliminar = useEliminarCuenta();
+  const reenviar = useReenviarCorreo();
+  const [filtro, setFiltro] = useState<"todas" | "sin" | "accedieron">("todas");
+  const [porEliminar, setPorEliminar] = useState<Perfil | null>(null);
+  const actualizar = useActualizarPerfil();
+  const avisar = useAvisar();
+  const personas = usePersonas();
+  const vigentes = useVigentes();
+  const [nueva, setNueva] = useState({
+    email: "",
+    nombre: "",
+    rol: "eyc" as Rol,
+    comision: "",
+    persona: "",
+  });
   // Miembros de EyC ya registrados que todavía no tienen cuenta: al elegirlos se hereda su comisión y su correo.
-  const vinculadas = new Set((perfiles.data ?? []).map((p) => p.persona_id).filter(Boolean))
-  const disponibles = (personas.data ?? []).filter((p) => p.activa && p.ambito === 'eyc' && !vinculadas.has(p.id))
+  const vinculadas = new Set(
+    (perfiles.data ?? []).map((p) => p.persona_id).filter(Boolean),
+  );
+  const disponibles = (personas.data ?? []).filter(
+    (p) => p.activa && p.ambito === "eyc" && !vinculadas.has(p.id),
+  );
   const elegirPersona = (id: string) => {
-    const p = disponibles.find((x) => x.id === id)
-    if (!p) return setNueva({ ...nueva, persona: '' })
-    const comision = vigentes.data?.find((v) => v.persona_id === p.id)?.comision_id ?? p.comision_origen_id
-    setNueva({ persona: p.id, nombre: p.nombre, email: p.correo ?? nueva.email, rol: 'eyc', comision: comision ? String(comision) : '' })
-  }
-  const [link, setLink] = useState<string | null>(null)
-  const [editar, setEditar] = useState<Perfil | null>(null)
+    const p = disponibles.find((x) => x.id === id);
+    if (!p) return setNueva({ ...nueva, persona: "" });
+    const comision =
+      vigentes.data?.find((v) => v.persona_id === p.id)?.comision_id ??
+      p.comision_origen_id;
+    setNueva({
+      persona: p.id,
+      nombre: p.nombre,
+      email: p.correo ?? nueva.email,
+      rol: "eyc",
+      comision: comision ? String(comision) : "",
+    });
+  };
+  const [link, setLink] = useState<string | null>(null);
+  const [editar, setEditar] = useState<Perfil | null>(null);
 
   return (
     <div className="flex flex-col gap-5">
       <Tarjeta titulo="Crear cuenta individual">
-        <p className="mb-3 text-sm text-ink-2">Una cuenta por persona, nunca compartida por comisión. La persona define su propia contraseña con el enlace que se genera.</p>
+        <p className="mb-3 text-sm text-ink-2">
+          Una cuenta por persona, nunca compartida por comisión. La persona
+          define su propia contraseña con el enlace que se genera.
+        </p>
         <form
           className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1.4fr_1.4fr_1fr_1fr_auto] lg:items-end"
           onSubmit={(e) => {
-            e.preventDefault()
+            e.preventDefault();
             crear.mutate(
-              { email: nueva.email, nombre: nueva.nombre, rol: nueva.rol, comision_id: nueva.rol === 'eyc' ? Number(nueva.comision) : null, persona_id: nueva.persona || null },
+              {
+                email: nueva.email,
+                nombre: nueva.nombre,
+                rol: nueva.rol,
+                comision_id:
+                  nueva.rol === "eyc" ? Number(nueva.comision) : null,
+                persona_id: nueva.persona || null,
+              },
               {
                 onSuccess: (r) => {
-                  setLink(r.enlace)
-                  setNueva({ email: '', nombre: '', rol: nueva.rol, comision: nueva.persona ? '' : nueva.comision, persona: '' })
+                  setLink(r.enlace);
+                  setNueva({
+                    email: "",
+                    nombre: "",
+                    rol: nueva.rol,
+                    comision: nueva.persona ? "" : nueva.comision,
+                    persona: "",
+                  });
                 },
               },
-            )
+            );
           }}
         >
           <div className="sm:col-span-2 lg:col-span-5">
@@ -105,31 +171,66 @@ export function CuentasPanel() {
                 <option key={p.id} value={p.id}>
                   {p.nombre}
                   {(() => {
-                    const c = comisiones.data?.find((x) => x.id === (vigentes.data?.find((v) => v.persona_id === p.id)?.comision_id ?? p.comision_origen_id))
-                    return c ? ` · ${siglaDe(c)}` : ''
+                    const c = comisiones.data?.find(
+                      (x) =>
+                        x.id ===
+                        (vigentes.data?.find((v) => v.persona_id === p.id)
+                          ?.comision_id ?? p.comision_origen_id),
+                    );
+                    return c ? ` · ${siglaDe(c)}` : "";
                   })()}
                 </option>
               ))}
             </Selector>
           </div>
-          <Campo etiqueta="Nombre" value={nueva.nombre} onChange={(e) => setNueva({ ...nueva, nombre: e.target.value })} requerido />
-          <Campo etiqueta="Correo" type="email" value={nueva.email} onChange={(e) => setNueva({ ...nueva, email: e.target.value })} requerido />
-          <Selector etiqueta="Rol" value={nueva.rol} onChange={(e) => setNueva({ ...nueva, rol: e.target.value as Rol })}>
+          <Campo
+            etiqueta="Nombre"
+            value={nueva.nombre}
+            onChange={(e) => setNueva({ ...nueva, nombre: e.target.value })}
+            requerido
+          />
+          <Campo
+            etiqueta="Correo"
+            type="email"
+            value={nueva.email}
+            onChange={(e) => setNueva({ ...nueva, email: e.target.value })}
+            requerido
+          />
+          <Selector
+            etiqueta="Rol"
+            value={nueva.rol}
+            onChange={(e) => setNueva({ ...nueva, rol: e.target.value as Rol })}
+          >
             {ROLES.map((r) => (
               <option key={r} value={r}>
                 {ROL[r]}
               </option>
             ))}
           </Selector>
-          <Selector etiqueta="Comisión" value={nueva.comision} disabled={nueva.rol !== 'eyc'} onChange={(e) => setNueva({ ...nueva, comision: e.target.value })}>
-            <option value="">{nueva.rol === 'eyc' ? 'Elige…' : 'No aplica'}</option>
+          <Selector
+            etiqueta="Comisión"
+            value={nueva.comision}
+            disabled={nueva.rol !== "eyc"}
+            onChange={(e) => setNueva({ ...nueva, comision: e.target.value })}
+          >
+            <option value="">
+              {nueva.rol === "eyc" ? "Elige…" : "No aplica"}
+            </option>
             {comisiones.data?.map((c) => (
               <option key={c.id} value={c.id}>
                 {siglaDe(c)}
               </option>
             ))}
           </Selector>
-          <Boton type="submit" cargando={crear.isPending} disabled={!nueva.email || nueva.nombre.trim().length < 2 || (nueva.rol === 'eyc' && !nueva.comision)}>
+          <Boton
+            type="submit"
+            cargando={crear.isPending}
+            disabled={
+              !nueva.email ||
+              nueva.nombre.trim().length < 2 ||
+              (nueva.rol === "eyc" && !nueva.comision)
+            }
+          >
             Crear
           </Boton>
           {crear.isError && (
@@ -142,70 +243,188 @@ export function CuentasPanel() {
 
       <Tarjeta titulo="Cuentas">
         <Consulta q={perfiles} vacio={<EstadoVacio titulo="Sin cuentas" />}>
-          {(ps) => (
-            <Tabla etiqueta="Cuentas del sistema">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Correo</th>
-                  <th>Rol</th>
-                  <th>Comisión</th>
-                  <th>Estado</th>
-                  <th>
-                    <span className="sr-only">Acciones</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {ps.map((p) => (
-                  <tr key={p.id}>
-                    <td className="font-semibold">{p.nombre}</td>
-                    <td>{p.email}</td>
-                    <td>{p.rol ? ROL[p.rol] : <Insignia tono="alerta">Sin rol</Insignia>}</td>
-                    <td>{siglaDe(comisiones.data?.find((c) => c.id === p.comision_id))}</td>
-                    <td>
-                      <div className="flex flex-wrap gap-1">
-                        {p.activo ? <Insignia tono="exito">Activa</Insignia> : <Insignia tono="peligro">Bloqueada</Insignia>}
-                        {activacion.data && !activacion.data.get(p.id)?.activada && <Insignia tono="alerta">Sin activar</Insignia>}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="flex justify-end gap-1 whitespace-nowrap">
-                        <Boton variante="fantasma" onClick={() => setEditar(p)}>
-                          Editar
-                        </Boton>
-                        <Boton
-                          variante="fantasma"
-                          cargando={enlace.isPending && enlace.variables === p.email}
-                          onClick={() => enlace.mutate(p.email, { onSuccess: (r) => setLink(r.enlace), onError: (e) => avisar(mensajeError(e), 'error') })}
-                        >
-                          Enlace
-                        </Boton>
-                        {p.id !== yo?.id && (
-                          <Boton
-                            variante="fantasma"
-                            onClick={() =>
-                              activar.mutate(
-                                { user_id: p.id, activo: !p.activo },
-                                { onSuccess: () => avisar(p.activo ? 'Cuenta bloqueada.' : 'Cuenta activada.'), onError: (e) => avisar(mensajeError(e), 'error') },
-                              )
-                            }
-                          >
-                            {p.activo ? 'Bloquear' : 'Activar'}
-                          </Boton>
-                        )}
-                        {p.id !== yo?.id && (
-                          <Boton variante="fantasma" className="text-danger" onClick={() => setPorEliminar(p)}>
-                            Eliminar
-                          </Boton>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Tabla>
-          )}
+          {(todas) => {
+            const act = (id: string) => activacion.data?.get(id);
+            const accedieron = todas.filter((p) => act(p.id)?.activada).length;
+            const sinActivar = todas.filter(
+              (p) => activacion.data && !act(p.id)?.activada,
+            ).length;
+            const ps = todas.filter(
+              (p) =>
+                filtro === "todas" ||
+                (filtro === "sin"
+                  ? !act(p.id)?.activada
+                  : !!act(p.id)?.activada),
+            );
+            return (
+              <>
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                  <Insignia tono="exito">{accedieron} ya accedieron</Insignia>
+                  <Insignia tono="alerta">{sinActivar} sin activar</Insignia>
+                  <Selector
+                    etiqueta="Mostrar"
+                    value={filtro}
+                    onChange={(e) => setFiltro(e.target.value as typeof filtro)}
+                    className="ml-auto min-w-52"
+                  >
+                    <option value="todas">Todas las cuentas</option>
+                    <option value="sin">Solo las que no han accedido</option>
+                    <option value="accedieron">
+                      Solo las que ya accedieron
+                    </option>
+                  </Selector>
+                </div>
+                <Tabla etiqueta="Cuentas del sistema">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Correo</th>
+                      <th>Rol</th>
+                      <th>Comisión</th>
+                      <th>Estado</th>
+                      <th>
+                        <span className="sr-only">Acciones</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ps.map((p) => (
+                      <tr key={p.id}>
+                        <td className="font-semibold">{p.nombre}</td>
+                        <td>{p.email}</td>
+                        <td>
+                          {p.rol ? (
+                            ROL[p.rol]
+                          ) : (
+                            <Insignia tono="alerta">Sin rol</Insignia>
+                          )}
+                        </td>
+                        <td>
+                          {siglaDe(
+                            comisiones.data?.find(
+                              (c) => c.id === p.comision_id,
+                            ),
+                          )}
+                        </td>
+                        <td>
+                          {(() => {
+                            const a = activacion.data?.get(p.id);
+                            return (
+                              <div className="flex flex-col gap-1">
+                                <div className="flex flex-wrap gap-1">
+                                  {!p.activo && (
+                                    <Insignia tono="peligro">
+                                      Bloqueada
+                                    </Insignia>
+                                  )}
+                                  {a?.activada ? (
+                                    <Insignia tono="exito">Ya accedió</Insignia>
+                                  ) : a ? (
+                                    <Insignia tono="alerta">
+                                      Sin activar
+                                    </Insignia>
+                                  ) : null}
+                                </div>
+                                <span className="text-xs text-ink-3">
+                                  {!a
+                                    ? ""
+                                    : a.activada
+                                      ? `Último acceso: ${fechaHora(a.ultimo_acceso)}`
+                                      : a.enlace_consumido
+                                        ? "Su enlace se gastó solo (revisión del correo). Envíale uno nuevo."
+                                        : a.correo_enviado_en
+                                          ? `Correo enviado: ${fechaHora(a.correo_enviado_en)}`
+                                          : "Aún sin correo de acceso"}
+                                </span>
+                              </div>
+                            );
+                          })()}
+                        </td>
+                        <td>
+                          <div className="flex justify-end gap-1 whitespace-nowrap">
+                            <Boton
+                              variante="fantasma"
+                              onClick={() => setEditar(p)}
+                            >
+                              Editar
+                            </Boton>
+                            {activacion.data &&
+                              !activacion.data.get(p.id)?.activada && (
+                                <Boton
+                                  variante="fantasma"
+                                  cargando={
+                                    reenviar.isPending &&
+                                    reenviar.variables === p.email
+                                  }
+                                  onClick={() =>
+                                    reenviar.mutate(p.email, {
+                                      onSuccess: () =>
+                                        avisar(
+                                          `Correo de acceso reenviado a ${p.email}.`,
+                                        ),
+                                      onError: (e) =>
+                                        avisar(mensajeError(e), "error"),
+                                    })
+                                  }
+                                >
+                                  Reenviar correo
+                                </Boton>
+                              )}
+                            <Boton
+                              variante="fantasma"
+                              cargando={
+                                enlace.isPending && enlace.variables === p.email
+                              }
+                              onClick={() =>
+                                enlace.mutate(p.email, {
+                                  onSuccess: (r) => setLink(r.enlace),
+                                  onError: (e) =>
+                                    avisar(mensajeError(e), "error"),
+                                })
+                              }
+                            >
+                              Enlace
+                            </Boton>
+                            {p.id !== yo?.id && (
+                              <Boton
+                                variante="fantasma"
+                                onClick={() =>
+                                  activar.mutate(
+                                    { user_id: p.id, activo: !p.activo },
+                                    {
+                                      onSuccess: () =>
+                                        avisar(
+                                          p.activo
+                                            ? "Cuenta bloqueada."
+                                            : "Cuenta activada.",
+                                        ),
+                                      onError: (e) =>
+                                        avisar(mensajeError(e), "error"),
+                                    },
+                                  )
+                                }
+                              >
+                                {p.activo ? "Bloquear" : "Activar"}
+                              </Boton>
+                            )}
+                            {p.id !== yo?.id && (
+                              <Boton
+                                variante="fantasma"
+                                className="text-danger"
+                                onClick={() => setPorEliminar(p)}
+                              >
+                                Eliminar
+                              </Boton>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Tabla>
+              </>
+            );
+          }}
         </Consulta>
       </Tarjeta>
       <EnlaceModal enlace={link} onCerrar={() => setLink(null)} />
@@ -225,10 +444,10 @@ export function CuentasPanel() {
                 porEliminar &&
                 eliminar.mutate(porEliminar.id, {
                   onSuccess: () => {
-                    avisar('Cuenta eliminada.')
-                    setPorEliminar(null)
+                    avisar("Cuenta eliminada.");
+                    setPorEliminar(null);
                   },
-                  onError: (e) => avisar(mensajeError(e), 'error'),
+                  onError: (e) => avisar(mensajeError(e), "error"),
                 })
               }
             >
@@ -238,9 +457,14 @@ export function CuentasPanel() {
         }
       >
         <p className="text-sm text-ink-2">
-          Se eliminará la cuenta de <strong>{porEliminar?.nombre}</strong> ({porEliminar?.email}) y la persona ya no podrá entrar. No se puede deshacer.
+          Se eliminará la cuenta de <strong>{porEliminar?.nombre}</strong> (
+          {porEliminar?.email}) y la persona ya no podrá entrar. No se puede
+          deshacer.
         </p>
-        <p className="mt-2 text-sm text-ink-3">Si la cuenta ya tiene evaluaciones, decisiones o actividades, no se elimina: bloquéala para conservar el historial.</p>
+        <p className="mt-2 text-sm text-ink-3">
+          Si la cuenta ya tiene evaluaciones, decisiones o actividades, no se
+          elimina: bloquéala para conservar el historial.
+        </p>
       </Modal>
       {editar && (
         <EditarPerfil
@@ -252,17 +476,17 @@ export function CuentasPanel() {
           onGuardar={(p) =>
             actualizar.mutate(p, {
               onSuccess: () => {
-                avisar('Cuenta actualizada.')
-                setEditar(null)
+                avisar("Cuenta actualizada.");
+                setEditar(null);
               },
-              onError: (e) => avisar(mensajeError(e), 'error'),
+              onError: (e) => avisar(mensajeError(e), "error"),
             })
           }
           guardando={actualizar.isPending}
         />
       )}
     </div>
-  )
+  );
 }
 
 function EditarPerfil({
@@ -273,34 +497,48 @@ function EditarPerfil({
   onEnlace,
   guardando,
 }: {
-  perfil: Perfil
-  activada: boolean
-  onCerrar: () => void
-  onGuardar: (p: { id: string; nombre: string; rol: Rol | null; comision_id: number | null }) => void
-  onEnlace: (enlace: string) => void
-  guardando: boolean
+  perfil: Perfil;
+  activada: boolean;
+  onCerrar: () => void;
+  onGuardar: (p: {
+    id: string;
+    nombre: string;
+    rol: Rol | null;
+    comision_id: number | null;
+  }) => void;
+  onEnlace: (enlace: string) => void;
+  guardando: boolean;
 }) {
-  const comisiones = useComisiones()
-  const cambiarCorreo = useCambiarCorreo()
+  const comisiones = useComisiones();
+  const cambiarCorreo = useCambiarCorreo();
   const [p, setP] = useState({
     nombre: perfil.nombre,
     email: perfil.email,
-    rol: perfil.rol ?? ('' as Rol | ''),
-    comision: perfil.comision_id ? String(perfil.comision_id) : '',
-  })
-  const correoCambio = p.email.trim().toLowerCase() !== perfil.email.toLowerCase()
+    rol: perfil.rol ?? ("" as Rol | ""),
+    comision: perfil.comision_id ? String(perfil.comision_id) : "",
+  });
+  const correoCambio =
+    p.email.trim().toLowerCase() !== perfil.email.toLowerCase();
 
   const guardar = async () => {
     if (correoCambio) {
       try {
-        const r = await cambiarCorreo.mutateAsync({ user_id: perfil.id, email: p.email.trim() })
-        onEnlace(r.enlace)
+        const r = await cambiarCorreo.mutateAsync({
+          user_id: perfil.id,
+          email: p.email.trim(),
+        });
+        onEnlace(r.enlace);
       } catch {
-        return // el error se muestra en el aviso del formulario
+        return; // el error se muestra en el aviso del formulario
       }
     }
-    onGuardar({ id: perfil.id, nombre: p.nombre.trim(), rol: p.rol || null, comision_id: p.rol === 'eyc' ? Number(p.comision) : null })
-  }
+    onGuardar({
+      id: perfil.id,
+      nombre: p.nombre.trim(),
+      rol: p.rol || null,
+      comision_id: p.rol === "eyc" ? Number(p.comision) : null,
+    });
+  };
 
   return (
     <Modal
@@ -312,14 +550,25 @@ function EditarPerfil({
           <Boton variante="secundario" onClick={onCerrar}>
             Cancelar
           </Boton>
-          <Boton cargando={guardando || cambiarCorreo.isPending} disabled={(p.rol === 'eyc' && !p.comision) || p.nombre.trim().length < 2} onClick={guardar}>
+          <Boton
+            cargando={guardando || cambiarCorreo.isPending}
+            disabled={
+              (p.rol === "eyc" && !p.comision) || p.nombre.trim().length < 2
+            }
+            onClick={guardar}
+          >
             Guardar
           </Boton>
         </>
       }
     >
       <div className="flex flex-col gap-4">
-        <Campo etiqueta="Nombre" value={p.nombre} onChange={(e) => setP({ ...p, nombre: e.target.value })} requerido />
+        <Campo
+          etiqueta="Nombre"
+          value={p.nombre}
+          onChange={(e) => setP({ ...p, nombre: e.target.value })}
+          requerido
+        />
         <Campo
           etiqueta="Correo"
           type="email"
@@ -328,13 +577,17 @@ function EditarPerfil({
           onChange={(e) => setP({ ...p, email: e.target.value })}
           ayuda={
             activada
-              ? 'La persona ya activó su cuenta: el correo queda fijo para proteger su acceso.'
+              ? "La persona ya activó su cuenta: el correo queda fijo para proteger su acceso."
               : correoCambio
-                ? 'Al guardar se genera un enlace nuevo para el correo corregido.'
-                : 'Puedes corregirlo mientras la persona no haya activado su cuenta.'
+                ? "Al guardar se genera un enlace nuevo para el correo corregido."
+                : "Puedes corregirlo mientras la persona no haya activado su cuenta."
           }
         />
-        <Selector etiqueta="Rol" value={p.rol} onChange={(e) => setP({ ...p, rol: e.target.value as Rol | '' })}>
+        <Selector
+          etiqueta="Rol"
+          value={p.rol}
+          onChange={(e) => setP({ ...p, rol: e.target.value as Rol | "" })}
+        >
           <option value="">Sin rol (sin acceso)</option>
           {ROLES.map((r) => (
             <option key={r} value={r}>
@@ -342,8 +595,13 @@ function EditarPerfil({
             </option>
           ))}
         </Selector>
-        {p.rol === 'eyc' && (
-          <Selector etiqueta="Comisión" value={p.comision} onChange={(e) => setP({ ...p, comision: e.target.value })} requerido>
+        {p.rol === "eyc" && (
+          <Selector
+            etiqueta="Comisión"
+            value={p.comision}
+            onChange={(e) => setP({ ...p, comision: e.target.value })}
+            requerido
+          >
             <option value="">Elige…</option>
             {comisiones.data?.map((c) => (
               <option key={c.id} value={c.id}>
@@ -352,26 +610,52 @@ function EditarPerfil({
             ))}
           </Selector>
         )}
-        {cambiarCorreo.isError && <Aviso tono="peligro">{mensajeError(cambiarCorreo.error)}</Aviso>}
+        {cambiarCorreo.isError && (
+          <Aviso tono="peligro">{mensajeError(cambiarCorreo.error)}</Aviso>
+        )}
       </div>
     </Modal>
-  )
+  );
 }
 
-const ACCION: Record<string, string> = { insert: 'Alta', update: 'Cambio', delete: 'Baja' }
+const ACCION: Record<string, string> = {
+  insert: "Alta",
+  update: "Cambio",
+  delete: "Baja",
+};
 
 export function AuditoriaPanel() {
-  const [tabla, setTabla] = useState('')
-  const q = useAuditoria(tabla || undefined)
-  const perfiles = usePerfiles()
-  const nombre = (id: string | null) => perfiles.data?.find((p) => p.id === id)?.nombre ?? (id ? 'Usuario' : 'Sistema')
+  const [tabla, setTabla] = useState("");
+  const q = useAuditoria(tabla || undefined);
+  const perfiles = usePerfiles();
+  const nombre = (id: string | null) =>
+    perfiles.data?.find((p) => p.id === id)?.nombre ??
+    (id ? "Usuario" : "Sistema");
   return (
     <Tarjeta
       titulo="Auditoría (últimos 100 cambios)"
       accion={
-        <Selector etiqueta="Tabla" value={tabla} onChange={(e) => setTabla(e.target.value)} className="min-w-52">
+        <Selector
+          etiqueta="Tabla"
+          value={tabla}
+          onChange={(e) => setTabla(e.target.value)}
+          className="min-w-52"
+        >
           <option value="">Todas</option>
-          {['evaluaciones', 'respuestas', 'recomendaciones', 'decisiones', 'asignaciones', 'personas', 'fases', 'cortes', 'pesos_dimension', 'criterios', 'config', 'perfiles'].map((t) => (
+          {[
+            "evaluaciones",
+            "respuestas",
+            "recomendaciones",
+            "decisiones",
+            "asignaciones",
+            "personas",
+            "fases",
+            "cortes",
+            "pesos_dimension",
+            "criterios",
+            "config",
+            "perfiles",
+          ].map((t) => (
             <option key={t} value={t}>
               {t}
             </option>
@@ -383,15 +667,26 @@ export function AuditoriaPanel() {
         {(filas) => (
           <ul className="flex flex-col gap-2">
             {filas.map((a) => (
-              <li key={a.id} className="rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04] text-sm">
+              <li
+                key={a.id}
+                className="rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04] text-sm"
+              >
                 <p>
-                  <strong>{ACCION[a.accion] ?? a.accion}</strong> en <code className="font-cond">{a.tabla}</code> · {nombre(a.autor)} · {fechaHora(a.fecha)}
+                  <strong>{ACCION[a.accion] ?? a.accion}</strong> en{" "}
+                  <code className="font-cond">{a.tabla}</code> ·{" "}
+                  {nombre(a.autor)} · {fechaHora(a.fecha)}
                 </p>
                 <details className="mt-1">
-                  <summary className="cursor-pointer text-accent">Valores</summary>
+                  <summary className="cursor-pointer text-accent">
+                    Valores
+                  </summary>
                   <div className="mt-2 grid gap-2 md:grid-cols-2">
-                    <pre className="overflow-x-auto rounded-lg bg-surface-2 p-2 text-xs">{a.antes ? JSON.stringify(a.antes, null, 1) : '—'}</pre>
-                    <pre className="overflow-x-auto rounded-lg bg-surface-2 p-2 text-xs">{a.despues ? JSON.stringify(a.despues, null, 1) : '—'}</pre>
+                    <pre className="overflow-x-auto rounded-lg bg-surface-2 p-2 text-xs">
+                      {a.antes ? JSON.stringify(a.antes, null, 1) : "—"}
+                    </pre>
+                    <pre className="overflow-x-auto rounded-lg bg-surface-2 p-2 text-xs">
+                      {a.despues ? JSON.stringify(a.despues, null, 1) : "—"}
+                    </pre>
                   </div>
                 </details>
               </li>
@@ -400,5 +695,5 @@ export function AuditoriaPanel() {
         )}
       </Consulta>
     </Tarjeta>
-  )
+  );
 }

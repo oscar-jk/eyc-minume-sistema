@@ -48,7 +48,10 @@ Deno.serve(async (req) => {
   const enlace = async (email: string) => {
     const { data, error } = await service.auth.admin.generateLink({ type: "recovery", email, options: { redirectTo } });
     if (error) throw error;
-    return data.properties.action_link;
+    // Enlace propio con el token: el correo, WhatsApp o un antivirus que «abre» el enlace para revisarlo no lo gastan;
+    // el token solo se canjea cuando la persona toca «Continuar» en el sitio.
+    const base = redirectTo ?? '';
+    return base ? `${base}?token_hash=${data.properties.hashed_token}&type=recovery` : data.properties.action_link;
   };
 
   try {

@@ -15,7 +15,7 @@ export async function crear({ hasta = 999, extra = [] } = {}) {
     create schema extensions; create extension if not exists pgcrypto with schema extensions;
     create schema auth;
     create table auth.users (id uuid primary key default gen_random_uuid(), email text, encrypted_password text,
-      raw_app_meta_data jsonb default '{}', raw_user_meta_data jsonb default '{}', last_sign_in_at timestamptz, created_at timestamptz default now());
+      raw_app_meta_data jsonb default '{}', raw_user_meta_data jsonb default '{}', last_sign_in_at timestamptz, recovery_sent_at timestamptz, created_at timestamptz default now());
     create function auth.uid() returns uuid language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claim.sub', true), ''), nullif((nullif(current_setting('request.jwt.claims', true), '')::jsonb) ->> 'sub', ''))::uuid $$;
     create function auth.role() returns text language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claim.role', true), ''), 'anon') $$;
     grant usage on schema public, extensions to anon, authenticated, service_role;
