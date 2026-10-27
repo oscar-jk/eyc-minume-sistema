@@ -1,6 +1,17 @@
 {
   "rewrites": [
     {
+      "source": "/((?!api/|assets/|manual/|og/|brand/|email/|presentacion/|favicon|apple-touch|icon-)[^.]*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(WhatsApp|facebookexternalhit|Facebot|Twitterbot|TelegramBot|Slackbot|LinkedInBot|Discordbot|SkypeUriPreview|Signal|Viber|Googlebot|bingbot|Applebot).*"
+        }
+      ],
+      "destination": "/api/og?path=/$1"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
