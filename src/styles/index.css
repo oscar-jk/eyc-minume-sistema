@@ -275,11 +275,20 @@
   h3 {
     break-after: avoid;
   }
-  /* Sin margen de página el navegador no imprime su encabezado y pie (título, dirección, fecha, «n de N»);
-     los márgenes reales los da la tabla espaciadora del manual. */
+  /* Margen de página normal: es la forma más segura de que el navegador imprima TODO el manual.
+     Los encabezados del navegador se quitan descargando el PDF o desmarcando «Encabezados y pies de página». */
   @page {
     size: A4;
-    margin: 0;
+    margin: 14mm;
+  }
+  /* En papel y PDF no hay sombras: se ven como manchas grises alrededor de tarjetas, botones e imágenes. */
+  .manual,
+  .manual *,
+  .manual *::before,
+  .manual *::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
   }
   /* Figuras, pasos, notas y preguntas no se parten entre páginas; las imágenes altas se contienen en la hoja. */
   .manual figure,
