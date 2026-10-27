@@ -8,6 +8,16 @@ import { ESTATUS, fecha } from '@/lib/formato'
 import { useCobertura, useDashboard, type DashboardMonitoreo } from './api'
 
 type Ambito = 'mesa' | 'eyc'
+/** Rellenos de estado (marcas): más vivos que los tonos de texto del semáforo, iguales en claro y oscuro. */
+const RELLENO = { verde: '#16a34a', amarillo: '#f5a300', rojo: '#e53535', gris: '#8a9ab5' } as const
+const DEGRADADO = {
+  verde: 'bg-gradient-to-r from-[#14a34a] to-[#6ee7a0]',
+  amarillo: 'bg-gradient-to-r from-[#f5a300] to-[#ffd84d]',
+  rojo: 'bg-gradient-to-r from-[#e53535] to-[#ff7aa8]',
+  gris: 'bg-gradient-to-r from-[#6b7c99] to-[#b6c5de]',
+  marca: 'bg-grad-celeste',
+} as const
+const bandaDe = (v: number | null, verde: number, amarillo: number) => (v == null ? 'gris' : v >= verde ? 'verde' : v >= amarillo ? 'amarillo' : 'rojo')
 const num = (v: number | null | undefined, d = 1) => (v == null ? '—' : Number(v).toLocaleString('es-DO', { maximumFractionDigits: d, minimumFractionDigits: 0 }))
 
 /* ───────────── Marcas gráficas (SVG/CSS, sin librerías) ───────────── */
@@ -43,7 +53,7 @@ function Kpi({ etiqueta, valor, sub, ayuda, aro, tono }: { etiqueta: string; val
 }
 
 /** Rosquilla del semáforo con el total al centro. */
-function Rosquilla({ partes, total }: { partes: { etiqueta: string; n: number; clase: string; trazo: string }[]; total: number }) {
+function Rosquilla({ partes, total }: { partes: { etiqueta: string; n: number; color: keyof typeof RELLENO }[]; total: number }) {
   const tam = 168
   const trazo = 22
   const r = (tam - trazo) / 2
@@ -60,7 +70,7 @@ function Rosquilla({ partes, total }: { partes: { etiqueta: string; n: number; c
               .map((p) => {
                 const largo = (p.n / total) * c
                 const el = (
-                  <circle key={p.etiqueta} cx={tam / 2} cy={tam / 2} r={r} fill="none" strokeWidth={trazo} strokeDasharray={`${Math.max(largo - 3, 0.5)} ${c}`} strokeDashoffset={-acum} className={p.trazo}>
+                  <circle key={p.etiqueta} cx={tam / 2} cy={tam / 2} r={r} fill="none" strokeWidth={trazo} strokeDasharray={`${Math.max(largo - 3, 0.5)} ${c}`} strokeDashoffset={-acum} stroke={RELLENO[p.color]}>
                     <title>{`${p.etiqueta}: ${p.n}`}</title>
                   </circle>
                 )
@@ -76,7 +86,7 @@ function Rosquilla({ partes, total }: { partes: { etiqueta: string; n: number; c
       <ul className="flex flex-col gap-2">
         {partes.map((p) => (
           <li key={p.etiqueta} className="flex items-center gap-3">
-            <span aria-hidden className={`size-3 rounded-full ${p.clase}`} />
+            <span aria-hidden className="size-3 rounded-full" style={{ background: RELLENO[p.color] }} />
             <span className="w-28 text-sm font-semibold">{p.etiqueta}</span>
             <span className="font-cond text-xl font-extrabold tabular">{p.n}</span>
             <span className="w-12 text-right text-sm text-ink-3 tabular">{total ? `${Math.round((p.n / total) * 100)} %` : '—'}</span>
@@ -95,12 +105,12 @@ function Histograma({ datos, verde, amarillo }: { datos: DashboardMonitoreo['dis
     <div>
       <div className="flex items-end gap-1.5 sm:gap-2" style={{ height: alto + 22 }} role="img" aria-label={`Distribución de puntajes: ${datos.map((d) => `${d.desde} a ${d.hasta}: ${d.n}`).join(', ')}`}>
         {datos.map((d) => {
-          const clase = d.desde >= verde ? 'bg-verde' : d.desde >= amarillo ? 'bg-amarillo' : 'bg-rojo'
+          const color = RELLENO[bandaDe(d.desde, verde, amarillo)]
           const h = d.n ? Math.max(6, (d.n / max) * alto) : 3
           return (
             <div key={d.desde} className="flex flex-1 flex-col items-center justify-end gap-1" title={`${d.desde}–${d.hasta}: ${d.n} persona(s)`}>
               <span className="font-cond text-sm font-bold tabular text-ink-2">{d.n || ''}</span>
-              <span className={`w-full rounded-t-md ${d.n ? clase : 'bg-surface-2'}`} style={{ height: h }} />
+              <span className="w-full rounded-t-md" style={{ height: h, background: d.n ? color : 'var(--surface-2)' }} />
             </div>
           )
         })}
@@ -114,13 +124,13 @@ function Histograma({ datos, verde, amarillo }: { datos: DashboardMonitoreo['dis
       </div>
       <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3">
         <span className="flex items-center gap-1.5">
-          <span className="size-2.5 rounded-full bg-rojo" /> &lt; {amarillo}
+          <span className="size-2.5 rounded-full" style={{ background: RELLENO.rojo }} /> &lt; {amarillo}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="size-2.5 rounded-full bg-amarillo" /> {amarillo} – {verde - 1}
+          <span className="size-2.5 rounded-full" style={{ background: RELLENO.amarillo }} /> {amarillo} – {verde - 1}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="size-2.5 rounded-full bg-verde" /> ≥ {verde}
+          <span className="size-2.5 rounded-full" style={{ background: RELLENO.verde }} /> ≥ {verde}
         </span>
       </p>
     </div>
@@ -128,16 +138,16 @@ function Histograma({ datos, verde, amarillo }: { datos: DashboardMonitoreo['dis
 }
 
 /** Barra horizontal con valor visible y marca opcional del promedio general. */
-function BarraFila({ etiqueta, sub, valor, texto, marca, clase = 'bg-grad-celeste', enlace, extra }: { etiqueta: ReactNode; sub?: ReactNode; valor: number | null; texto?: string; marca?: number | null; clase?: string; enlace?: string; extra?: ReactNode }) {
+function BarraFila({ etiqueta, sub, valor, texto, marca, clase = DEGRADADO.marca, enlace, extra }: { etiqueta: ReactNode; sub?: ReactNode; valor: number | null; texto?: string; marca?: number | null; clase?: string; enlace?: string; extra?: ReactNode }) {
   const v = valor == null ? 0 : Math.max(0, Math.min(100, valor))
   const cuerpo = (
     <>
-      <span className="truncate text-sm font-bold">{etiqueta}</span>
-      {sub && <span className="block truncate text-xs text-ink-3">{sub}</span>}
+      <span className="block text-sm font-bold leading-tight">{etiqueta}</span>
+      {sub && <span className="block text-xs text-ink-3">{sub}</span>}
     </>
   )
   return (
-    <li className="grid grid-cols-[minmax(4.5rem,9rem)_1fr_auto] items-center gap-x-3 gap-y-0.5">
+    <li className="grid grid-cols-[minmax(6rem,12rem)_1fr_auto] items-center gap-x-3 gap-y-0.5 max-sm:grid-cols-[minmax(5rem,8rem)_1fr_auto]">
       <div className="min-w-0">{enlace ? <Link to={enlace} className="block hover:underline">{cuerpo}</Link> : cuerpo}</div>
       <div className="relative h-3 rounded-full bg-surface-2" role="img" aria-label={`${typeof etiqueta === 'string' ? etiqueta : ''}: ${valor == null ? 'sin datos' : valor}`}>
         <span className={`absolute inset-y-0 left-0 rounded-full ${clase}`} style={{ width: `${v}%` }} />
@@ -153,9 +163,9 @@ function BarraFila({ etiqueta, sub, valor, texto, marca, clase = 'bg-grad-celest
 
 /** Línea de la evolución del promedio por día, con las bandas del semáforo como referencia. */
 function Tendencia({ datos, verde, amarillo }: { datos: DashboardMonitoreo['tendencia']; verde: number; amarillo: number }) {
-  const W = 640
-  const H = 210
-  const m = { l: 34, r: 14, t: 12, b: 28 }
+  const W = 460
+  const H = 230
+  const m = { l: 30, r: 16, t: 22, b: 30 }
   const x = (i: number) => (datos.length === 1 ? (W + m.l - m.r) / 2 : m.l + (i / (datos.length - 1)) * (W - m.l - m.r))
   const y = (v: number) => m.t + (1 - v / 100) * (H - m.t - m.b)
   const linea = datos.map((d, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(d.promedio).toFixed(1)}`).join(' ')
@@ -178,7 +188,7 @@ function Tendencia({ datos, verde, amarillo }: { datos: DashboardMonitoreo['tend
       ))}
       {[verde, amarillo].map((t, i) => (
         <g key={t}>
-          <line x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} strokeDasharray="4 4" strokeWidth="1.2" className={i === 0 ? 'stroke-verde' : 'stroke-amarillo'} />
+          <line x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} strokeDasharray="4 4" strokeWidth="1.2" stroke={i === 0 ? RELLENO.verde : RELLENO.amarillo} />
         </g>
       ))}
       {datos.length > 1 && <path d={area} fill="url(#trend-area)" />}
@@ -270,10 +280,10 @@ export function DashboardPanel() {
                   <Rosquilla
                     total={r.personas}
                     partes={[
-                      { etiqueta: 'Cumple', n: r.verde, clase: 'bg-verde', trazo: 'stroke-verde' },
-                      { etiqueta: 'Seguimiento', n: r.amarillo, clase: 'bg-amarillo', trazo: 'stroke-amarillo' },
-                      { etiqueta: 'En riesgo', n: r.rojo, clase: 'bg-rojo', trazo: 'stroke-rojo' },
-                      { etiqueta: 'No evaluado', n: r.gris, clase: 'bg-gris', trazo: 'stroke-gris' },
+                      { etiqueta: 'Cumple', n: r.verde, color: 'verde' },
+                      { etiqueta: 'Seguimiento', n: r.amarillo, color: 'amarillo' },
+                      { etiqueta: 'En riesgo', n: r.rojo, color: 'rojo' },
+                      { etiqueta: 'No evaluado', n: r.gris, color: 'gris' },
                     ]}
                   />
                   <p className="mt-4 text-center text-sm text-ink-3">
@@ -296,7 +306,7 @@ export function DashboardPanel() {
                         valor={c.promedio}
                         marca={r.promedio}
                         enlace={`/comisiones/${c.comision_id}`}
-                        clase={c.promedio == null ? 'bg-gris' : c.promedio >= verde ? 'bg-grad-celeste' : c.promedio >= amarillo ? 'bg-amarillo' : 'bg-rojo'}
+                        clase={DEGRADADO[bandaDe(c.promedio, verde, amarillo)]}
                         extra={
                           <span className="hidden items-center gap-1 sm:flex" aria-label={`${c.verde} cumple, ${c.amarillo} seguimiento, ${c.rojo} en riesgo`}>
                             {c.verde > 0 && <Insignia tono="exito">{c.verde}</Insignia>}
@@ -352,10 +362,10 @@ export function DashboardPanel() {
                               <BarraFila
                                 key={x.clave}
                                 etiqueta={`${x.clave}. ${x.nombre}`}
-                                sub={`${x.observaciones} observación(es)${x.puntos ? ` · vale ${num(x.puntos, 0)} pts` : ''}`}
+                                sub={`${x.observaciones} obs.${x.puntos ? ` · ${num(x.puntos, 0)} pts` : ''}`}
                                 valor={x.promedio}
                                 texto={`${num(x.promedio, 0)} %`}
-                                clase={x === peorDim ? 'bg-amarillo' : 'bg-grad-celeste'}
+                                clase={x === peorDim ? DEGRADADO.amarillo : DEGRADADO.marca}
                               />
                             ))}
                         </ul>
