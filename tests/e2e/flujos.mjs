@@ -96,11 +96,12 @@ console.log('\nADMIN')
   await paso('Pesos que no suman 100 no se pueden guardar', async () => {
     await p.goto(B + '/configuracion?tab=pesos')
     const inp = p.locator('fieldset', { hasText: 'Mesa directiva' }).locator('input[type=number]').first()
-    await inp.fill('25')
+    const original = await inp.inputValue()
+    await inp.fill(String(Number(original) + 5))
     await p.getByText(/sobran 5/).first().waitFor()
     const dis = await p.locator('fieldset', { hasText: 'Mesa directiva' }).getByRole('button', { name: 'Guardar' }).isDisabled()
     if (!dis) throw new Error('el botón Guardar no se deshabilitó')
-    await inp.fill('20')
+    await inp.fill(original)
   })
   await paso('Página inexistente muestra la pantalla amigable', async () => {
     await p.goto(B + '/no-existe-xyz')
@@ -129,28 +130,29 @@ console.log('\nEYC (teléfono)')
     await dlg(p).getByRole('button', { name: 'Guardar' }).click()
     await toast(p, 'Actividad actualizada.')
   })
-  await paso('Evaluar: falta comentario bloquea completar (criterio negativo B1)', async () => {
+  await paso('Evaluar: sin la descripción de un criterio no se puede completar', async () => {
     await p.getByRole('tab', { name: 'Evaluar' }).click()
     await p.locator('li', { hasText: '[E2E] Ana Uno' }).getByRole('link', { name: 'Evaluar' }).click()
     await p.waitForURL(/\/evaluar/)
-    await p.locator('fieldset[id^=criterio-]').first().waitFor({ state: 'attached' })
-    const cerradas = p.locator('section h3 button[aria-expanded="false"]')
-    while (await cerradas.count()) await cerradas.first().click()
-    for (const fs of await p.locator('fieldset[id^=criterio-]').all()) {
-      const cod = (await fs.locator('legend').textContent()).split('.')[0].trim()
-      const neg = await fs.getByText('lo esperado es «No»').count()
-      const val = cod === 'B1' ? 'Sí' : neg ? 'No' : 'Sí'
-      await fs.locator(`input[value=${val === 'Sí' ? 'si' : 'no'}]`).dispatchEvent('click')
+    const cab = p.locator('button[aria-expanded]')
+    await cab.first().waitFor({ state: 'attached' })
+    // Nueve criterios en tres secciones; nota al 80 % de cada criterio y descripción en todos menos en el 9.
+    const pts = [15, 15, 10, 10, 10, 10, 10, 10, 10]
+    for (let i = 0; i < 9; i++) {
+      const c = p.locator('button[aria-expanded]', { hasText: new RegExp('^\s*' + (i + 1)) }).first()
+      if ((await c.getAttribute('aria-expanded')) !== 'true') await c.click()
+      await p.getByLabel(new RegExp(`Nota de ${i + 1}, de 0 a`)).fill(String(pts[i] * 0.8))
+      if (i < 8) await p.getByLabel(/Descripción de lo observado/).last().fill('Observado en el taller.')
     }
     await p.getByRole('button', { name: 'Marcar completa' }).click()
     await toast(p, 'No se puede completar')
     await p.getByText('Lo que falta para marcarla completa').waitFor()
   })
-  await paso('Con el comentario, la evaluación queda completa y con puntaje', async () => {
-    await p.getByPlaceholder('Describe lo observado').first().fill('Confundió el orden de las mociones.')
+  await paso('Con la descripción, la evaluación queda completa y vale 80', async () => {
+    await p.getByLabel(/Descripción de lo observado/).last().fill('Dominio de las mociones.')
     await p.getByRole('button', { name: 'Marcar completa' }).click()
     await toast(p, 'Evaluación completa.')
-    await p.getByText(/Puntaje \d/).waitFor()
+    await p.getByText(/Puntaje 80/).waitFor()
   })
   await paso('EyC no ve personas de otra comisión (PNUD)', async () => {
     await p.goto(B + '/comision')

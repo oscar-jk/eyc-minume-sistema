@@ -18,3 +18,9 @@ E2E_PASSWORD=... node tests/e2e/flujos.mjs
 ```
 
 Al terminar, borra los datos `[E2E]` y las cuentas `@prueba.test`. Resultado esperado: `RESUMEN: 25 OK · 0 FALLOS`.
+
+## Nota (rúbrica de 9 criterios)
+Los pasos de evaluación y de pesos ya usan la rúbrica nueva (nota por criterio, descripción obligatoria, 9 criterios que suman 100).
+**No se ha vuelto a ejecutar completo** desde el cambio: los pasos posteriores que dependían de un puntaje bajo (recomendación elevada, decisión) pueden
+necesitar ajustar las notas. Además asume una base **vacía** (comisiones sin mesa, fases en «pendiente»): no correrlo contra producción con personas reales;
+usar una rama de Supabase o un proyecto de pruebas.
