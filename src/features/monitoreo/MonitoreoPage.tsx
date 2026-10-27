@@ -15,17 +15,18 @@ import { RecomendacionModal, type FilaRecomendable } from '@/features/continuida
 import { AMBITO, ESTATUS, SEMAFORO, fecha } from '@/lib/formato'
 import type { Ambito, Estatus, Semaforo as TSemaforo } from '@/lib/tipos'
 import { useCobertura, useMonitoreo } from './api'
+import { DashboardPanel } from './Dashboard'
 
-type Tab = 'semaforo' | 'cobertura' | 'eyc'
+type Tab = 'resumen' | 'semaforo' | 'cobertura' | 'eyc'
 const ORDEN: TSemaforo[] = ['rojo', 'amarillo', 'verde', 'gris']
 
 export function MonitoreoPage() {
   const { perfil } = useSesion()
-  const [tab, setTab] = useState<Tab>('semaforo')
+  const [tab, setTab] = useState<Tab>('resumen')
   const evaluaEyc = perfil?.rol === 'subsecretario' || perfil?.rol === 'admin'
   return (
     <>
-      <Titulo sobre="Subsecretaría" adorno="circulos" sub="Desempeño por corte, cobertura de evaluación y recomendaciones">
+      <Titulo sobre="Subsecretaría" adorno="circulos" sub="Panel de indicadores, semáforo por persona, cobertura de evaluación y recomendaciones">
         Monitoreo <Acento>del</Acento> desempeño
       </Titulo>
       <AvisoPesos />
@@ -34,11 +35,13 @@ export function MonitoreoPage() {
         valor={tab}
         onCambio={setTab}
         opciones={[
+          { valor: 'resumen', etiqueta: 'Resumen' },
           { valor: 'semaforo', etiqueta: 'Semáforo' },
           { valor: 'cobertura', etiqueta: 'Cobertura' },
           ...(evaluaEyc ? [{ valor: 'eyc' as const, etiqueta: 'Evaluar EyC' }] : []),
         ]}
       />
+      {tab === 'resumen' && <DashboardPanel />}
       {tab === 'semaforo' && <SemaforoPanel />}
       {tab === 'cobertura' && <CoberturaPanel />}
       {tab === 'eyc' && <EvaluarEycPanel />}
