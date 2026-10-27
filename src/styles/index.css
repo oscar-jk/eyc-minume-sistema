@@ -275,7 +275,27 @@
   h3 {
     break-after: avoid;
   }
+  /* Sin margen de página el navegador no imprime su encabezado y pie (título, dirección, fecha, «n de N»);
+     los márgenes reales los da la tabla espaciadora del manual. */
   @page {
-    margin: 14mm;
+    size: A4;
+    margin: 0;
+  }
+  /* Figuras, pasos, notas y preguntas no se parten entre páginas; las imágenes altas se contienen en la hoja. */
+  .manual figure,
+  .manual details,
+  .manual li,
+  .manual .grid > *,
+  .manual p {
+    break-inside: avoid;
+  }
+  .manual figure img {
+    max-height: 205mm;
+    width: auto;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+  .manual figure[class*="max-w"] img {
+    max-height: 175mm;
   }
 }
