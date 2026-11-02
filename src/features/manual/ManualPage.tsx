@@ -1362,9 +1362,14 @@ export function ManualPage() {
                 EyC</strong>.
               </p>
               <Figura
-                src="monitoreo-evaluar-eyc"
-                alt="Evaluar al equipo de EyC"
-                pie="Evaluación de evaluadores: el directorio de miembros de EyC con su semáforo."
+                src="evaluadores-directorio"
+                alt="Directorio de evaluadores"
+                pie="Evaluación de evaluadores: el directorio de miembros de EyC con su estado y su semáforo."
+              />
+              <Figura
+                src="evaluadores-ficha"
+                alt="Ficha de un evaluador"
+                pie="Ficha del evaluador: sus datos, su monitoreo del corte y el historial de evaluaciones."
               />
             </Seccion>
 
