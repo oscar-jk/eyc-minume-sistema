@@ -1,10 +1,10 @@
 import type { RemixiconComponentType } from '@remixicon/react'
 import { Suspense, useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { CieloEstrellado } from '@/components/CieloEstrellado'
 import { Cargando } from '@/components/Estados'
 import { Destello } from '@/components/Elementos'
-import { IcoComision, IcoComisiones, IcoConfig, IcoDecisiones, IcoFormularios, IcoManual, IcoLuna, IcoMas, IcoMonitoreo, IcoPersonas, IcoSalir, IcoSol } from '@/components/Iconos'
+import { IcoComision, IcoComisiones, IcoConfig, IcoDecisiones, IcoEvaluadores, IcoManual, IcoLuna, IcoMas, IcoMonitoreo, IcoPersonas, IcoSalir, IcoSol } from '@/components/Iconos'
 import { Marca } from '@/components/Marca'
 import { Modal } from '@/components/Modal'
 import { useSesion } from '@/features/auth/AuthProvider'
@@ -15,16 +15,26 @@ import { useMomento } from './fase'
 import { useTema } from './tema'
 
 type Ico = RemixiconComponentType
-const NAV: { a: string; texto: string; corto: string; ico: Ico; roles: Rol[] }[] = [
-  { a: '/comision', texto: 'Mi comisión', corto: 'Comisión', ico: IcoComision, roles: ['eyc'] },
-  { a: '/monitoreo', texto: 'Monitoreo', corto: 'Monitoreo', ico: IcoMonitoreo, roles: ['subsecretario', 'secretario', 'admin'] },
-  { a: '/decisiones', texto: 'Decisiones', corto: 'Decisiones', ico: IcoDecisiones, roles: ['subsecretario', 'secretario', 'admin'] },
-  { a: '/comisiones', texto: 'Comisiones', corto: 'Comisiones', ico: IcoComisiones, roles: ['subsecretario', 'secretario', 'admin'] },
-  { a: '/personas', texto: 'Personas', corto: 'Personas', ico: IcoPersonas, roles: ['subsecretario', 'admin'] },
-  { a: '/configuracion', texto: 'Configuración', corto: 'Ajustes', ico: IcoConfig, roles: ['subsecretario', 'admin'] },
-  { a: '/formularios', texto: 'Formularios', corto: 'Formularios', ico: IcoFormularios, roles: ['eyc', 'subsecretario', 'secretario', 'admin'] },
-  { a: '/manual', texto: 'Manual de usuario', corto: 'Manual', ico: IcoManual, roles: ['eyc', 'subsecretario', 'secretario', 'admin'] },
+const TODOS: Rol[] = ['eyc', 'subsecretario', 'secretario', 'admin']
+const PRIV: Rol[] = ['subsecretario', 'secretario', 'admin']
+const GRUPOS = ['Seguimiento y control', 'Evaluación', 'Administración', 'Documentación'] as const
+type Grupo = (typeof GRUPOS)[number]
+const NAV: { a: string; texto: string; corto: string; ico: Ico; roles: Rol[]; grupo: Grupo; tambien?: string[] }[] = [
+  { a: '/comision', texto: 'Mi comisión', corto: 'Comisión', ico: IcoComision, roles: ['eyc'], grupo: 'Seguimiento y control' },
+  { a: '/monitoreo', texto: 'Monitoreo', corto: 'Monitoreo', ico: IcoMonitoreo, roles: PRIV, grupo: 'Seguimiento y control' },
+  { a: '/decisiones', texto: 'Decisiones', corto: 'Decisiones', ico: IcoDecisiones, roles: PRIV, grupo: 'Seguimiento y control' },
+  { a: '/comisiones', texto: 'Comisiones', corto: 'Comisiones', ico: IcoComisiones, roles: PRIV, grupo: 'Seguimiento y control' },
+  { a: '/personas', texto: 'Personas', corto: 'Personas', ico: IcoPersonas, roles: ['subsecretario', 'admin'], grupo: 'Seguimiento y control' },
+  { a: '/evaluacion-evaluadores', texto: 'Evaluación de evaluadores', corto: 'Evaluadores', ico: IcoEvaluadores, roles: ['subsecretario', 'admin'], grupo: 'Evaluación' },
+  // Formularios vive dentro de Configuración: sus rutas cuentan como esta sección.
+  { a: '/configuracion', texto: 'Configuración', corto: 'Ajustes', ico: IcoConfig, roles: TODOS, grupo: 'Administración', tambien: ['/formularios'] },
+  { a: '/manual', texto: 'Manual de usuario', corto: 'Manual', ico: IcoManual, roles: TODOS, grupo: 'Documentación' },
 ]
+
+/** ¿Está activa esta sección? Incluye las rutas que viven dentro de ella. */
+function seccionActiva(i: { a: string; tambien?: string[] }, ruta: string) {
+  return [i.a, ...(i.tambien ?? [])].some((p) => ruta === p || ruta.startsWith(`${p}/`))
+}
 
 /** Chip de estado de fase + día del evento; al tocarlo muestra todas las fases. */
 function ChipFase({ compacto = false }: { compacto?: boolean }) {
@@ -97,6 +107,7 @@ function BotonTema({ conTexto = false }: { conTexto?: boolean }) {
 export function Layout() {
   const { perfil } = useSesion()
   const [mas, setMas] = useState(false)
+  const { pathname } = useLocation()
   const items = NAV.filter((n) => perfil?.rol && n.roles.includes(perfil.rol))
   // En el teléfono caben 4 destinos; el resto va en «Más».
   const principales = items.length > 4 ? items.slice(0, 3) : items
@@ -126,23 +137,36 @@ export function Layout() {
           <ChipFase />
         </div>
         <nav aria-label="Secciones" className="relative flex-1">
-          <ul className="flex flex-col gap-1">
-            {items.map((i) => (
-              <li key={i.a}>
-                <NavLink
-                  to={i.a}
-                  className={({ isActive }) =>
-                    `flex min-h-12 items-center gap-3 rounded-2xl px-3 font-bold transition ${
-                      isActive ? 'bg-white text-[#0043c5] shadow-[0_10px_30px_-10px_rgb(0_240_230/0.6)]' : 'text-white/80 hover:bg-white/10 hover:text-white'
-                    }`
-                  }
-                >
-                  <i.ico className="size-5" />
-                  {i.texto}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
+          <div className="flex flex-col gap-5">
+            {GRUPOS.map((g) => {
+              const delGrupo = items.filter((i) => i.grupo === g)
+              if (!delGrupo.length) return null
+              return (
+                <section key={g} aria-label={g}>
+                  <p className="sobretitulo mb-1.5 px-3 text-white/55">{g}</p>
+                  <ul className="flex flex-col gap-1">
+                    {delGrupo.map((i) => {
+                      const activo = seccionActiva(i, pathname)
+                      return (
+                        <li key={i.a}>
+                          <Link
+                            to={i.a}
+                            aria-current={activo ? 'page' : undefined}
+                            className={`flex min-h-12 items-center gap-3 rounded-2xl px-3 font-bold transition ${
+                              activo ? 'bg-white text-[#0043c5] shadow-[0_10px_30px_-10px_rgb(0_240_230/0.6)]' : 'text-white/80 hover:bg-white/10 hover:text-white'
+                            }`}
+                          >
+                            <i.ico className="size-5" />
+                            {i.texto}
+                          </Link>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </section>
+              )
+            })}
+          </div>
         </nav>
         <div className="relative rounded-2xl bg-white/10 p-3 ring-1 ring-white/15">
           <p className="truncate font-bold">{perfil?.nombre}</p>
@@ -198,21 +222,16 @@ export function Layout() {
           <ul className="mx-auto flex max-w-xl">
             {principales.map((i) => (
               <li key={i.a} className="flex-1">
-                <NavLink
+                <Link
                   to={i.a}
-                  className={({ isActive }) =>
-                    `flex min-h-[64px] flex-col items-center justify-center gap-1 text-[0.72rem] font-bold ${isActive ? 'text-acento' : 'text-ink-3'}`
-                  }
+                  aria-current={seccionActiva(i, pathname) ? 'page' : undefined}
+                  className={`flex min-h-[64px] flex-col items-center justify-center gap-1 text-[0.72rem] font-bold ${seccionActiva(i, pathname) ? 'text-acento' : 'text-ink-3'}`}
                 >
-                  {({ isActive }) => (
-                    <>
-                      <span className={`grid h-8 w-14 place-items-center rounded-full transition ${isActive ? 'bg-grad-primario text-white shadow-boton' : ''}`}>
-                        <i.ico className="size-5" />
-                      </span>
-                      {i.corto}
-                    </>
-                  )}
-                </NavLink>
+                  <span className={`grid h-8 w-14 place-items-center rounded-full transition ${seccionActiva(i, pathname) ? 'bg-grad-primario text-white shadow-boton' : ''}`}>
+                    <i.ico className="size-5" />
+                  </span>
+                  {i.corto}
+                </Link>
               </li>
             ))}
             <li className="flex-1">

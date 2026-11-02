@@ -13,7 +13,7 @@ import { useActivarFormulario, useBorrarFormulario, useCrearFormulario, useDupli
 import { enlacePublico } from './tipos'
 
 /** Lista de formularios: cada quien ve los suyos; Subsecretaría, Secretaría General y administración ven todos. */
-export function FormulariosPage() {
+export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
   const { perfil } = useSesion()
   const q = useFormularios()
   const crear = useCrearFormulario()
@@ -28,9 +28,16 @@ export function FormulariosPage() {
 
   return (
     <>
-      <Titulo sobre="Recoger opiniones" adorno="bloques" sub="Crea formularios con distintos tipos de campos y comparte un enlace: quien responde no necesita cuenta." accion={<Boton variante="claro" onClick={() => setNuevo('')}>Nuevo formulario</Boton>}>
-        Formula<Acento>rios</Acento>
-      </Titulo>
+      {embebido ? (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <p className="min-w-0 flex-1 basis-[16rem] text-ink-2">Crea formularios con distintos tipos de campos y comparte un enlace: quien responde no necesita cuenta.</p>
+          <Boton onClick={() => setNuevo('')}>Nuevo formulario</Boton>
+        </div>
+      ) : (
+        <Titulo sobre="Recoger opiniones" adorno="bloques" sub="Crea formularios con distintos tipos de campos y comparte un enlace: quien responde no necesita cuenta." accion={<Boton variante="claro" onClick={() => setNuevo('')}>Nuevo formulario</Boton>}>
+          Formula<Acento>rios</Acento>
+        </Titulo>
+      )}
 
       <Consulta
         q={q}

@@ -23,4 +23,5 @@ export {
   RiCloseLine as IcoCerrar,
   RiCheckLine as IcoCheck,
   RiFileList3Line as IcoFormularios,
+  RiUserSearchLine as IcoEvaluadores,
 } from '@remixicon/react'

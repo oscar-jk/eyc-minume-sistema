@@ -153,7 +153,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
   const [guardado, setGuardado] = useState(false)
   // Se sale cuando ya se dibujó sin «cambios pendientes»; si no, el aviso de salida lo frena.
   useEffect(() => {
-    if (guardado && !sucio) nav('/formularios')
+    if (guardado && !sucio) nav('/configuracion?tab=formularios')
   }, [guardado, sucio, nav])
   const [campos, setCampos] = useState<CampoBorrador[]>(() =>
     datos.campos
@@ -223,7 +223,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-5">
       <nav className="text-sm">
-        <Link to="/formularios" className="font-bold text-acento">
+        <Link to="/configuracion?tab=formularios" className="font-bold text-acento">
           ← Formularios
         </Link>
       </nav>
@@ -372,7 +372,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
       <div className="sticky bottom-[calc(64px+env(safe-area-inset-bottom))] z-20 -mx-4 flex flex-col gap-2 border-t border-line bg-surface/95 px-4 pb-3 pt-3 shadow-card backdrop-blur-xl sm:mx-0 sm:rounded-2xl sm:border lg:bottom-4 dark:bg-[#0b1a6b]/95">
         {guardar.isError && <Aviso tono="peligro">{mensajeError(guardar.error)}</Aviso>}
         <div className="flex gap-2">
-          <Boton variante="secundario" className="flex-1" onClick={() => nav('/formularios')}>
+          <Boton variante="secundario" className="flex-1" onClick={() => nav('/configuracion?tab=formularios')}>
             Cancelar
           </Boton>
           <Boton className="flex-1" onClick={alGuardar} cargando={guardar.isPending} disabled={!valido}>

@@ -657,7 +657,7 @@ export function ManualPage() {
               <p>
                 En computadora, el menú está en la{" "}
                 <strong>barra lateral izquierda</strong>: Monitoreo, Decisiones,
-                Comisiones, Personas, Configuración, Formularios y Manual de
+                Comisiones, Personas, Evaluación de evaluadores, Configuración (con Formularios) y Manual de
                 usuario (cada rol ve solo lo suyo). En el teléfono aparece una{" "}
                 <strong>barra inferior</strong> con las secciones principales y
                 un botón «Más».
@@ -1068,7 +1068,7 @@ export function ManualPage() {
 
             <Seccion
               titulo="Formularios: recoger opiniones"
-              donde="Formularios"
+              donde="Configuración › Formularios"
             >
               <p>
                 Cualquier rol puede crear un formulario para recoger feedback de
@@ -1086,7 +1086,7 @@ export function ManualPage() {
               <Pasos
                 items={[
                   <>
-                    Entra a <Ruta>Formularios</Ruta> y toca{" "}
+                    Entra a <Ruta>Configuración</Ruta>, pestaña <Ruta>Formularios</Ruta>, y toca{" "}
                     <B>Nuevo formulario</B>. Ponle un título y toca{" "}
                     <B>Crear y diseñar</B>.
                   </>,
@@ -1349,17 +1349,22 @@ export function ManualPage() {
 
             <Seccion
               titulo="Evaluar al equipo de EyC"
-              donde="Monitoreo › Evaluar EyC"
+              donde="Evaluación de evaluadores"
             >
               <p>
-                Funciona igual que la evaluación de la mesa: por actividad antes
-                del evento (crea actividades de EyC ahí mismo) y por jornada
-                durante el evento.
+                Es un módulo propio. En <strong>Directorio</strong> eliges a la
+                persona, ves su ficha y su historial de monitoreo y aplicas la
+                rúbrica de EyC; no hace falta una actividad ni una jornada, solo
+                una fase de evaluación abierta. Hay una evaluación directa por
+                persona y corte: se continúa, no se duplica. Las evaluadas
+                antes quedan en <strong>Evaluaciones realizadas</strong>, y las
+                actividades de EyC (opcionales) en <strong>Actividades de
+                EyC</strong>.
               </p>
               <Figura
                 src="monitoreo-evaluar-eyc"
                 alt="Evaluar al equipo de EyC"
-                pie="Evaluar EyC: la lista de miembros de EyC con su semáforo."
+                pie="Evaluación de evaluadores: el directorio de miembros de EyC con su semáforo."
               />
             </Seccion>
 

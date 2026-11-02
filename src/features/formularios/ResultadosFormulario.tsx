@@ -132,7 +132,7 @@ export function ResultadosFormulario() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-5">
       <nav className="text-sm">
-        <Link to="/formularios" className="font-bold text-acento">
+        <Link to="/configuracion?tab=formularios" className="font-bold text-acento">
           ← Formularios
         </Link>
       </nav>

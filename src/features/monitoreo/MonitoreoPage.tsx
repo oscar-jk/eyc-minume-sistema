@@ -7,23 +7,19 @@ import { Consulta, EstadoVacio } from '@/components/Estados'
 import { Semaforo } from '@/components/Semaforo'
 import { Acento, Aviso, Insignia, Pestanas, Tabla, Tarjeta, Titulo } from '@/components/Ui'
 import { useSesion } from '@/features/auth/AuthProvider'
-import { ActividadesPanel } from '@/features/actividades/ActividadesPanel'
-import { useActividades } from '@/features/actividades/api'
 import { useCargos, useComisiones } from '@/features/comisiones/api'
 import { useValidezPesos } from '@/features/configuracion/api'
 import { RecomendacionModal, type FilaRecomendable } from '@/features/continuidad/Modales'
-import { AMBITO, ESTATUS, SEMAFORO, fecha } from '@/lib/formato'
+import { AMBITO, ESTATUS, SEMAFORO } from '@/lib/formato'
 import type { Ambito, Estatus, Semaforo as TSemaforo } from '@/lib/tipos'
 import { useCobertura, useMonitoreo } from './api'
 import { DashboardPanel } from './Dashboard'
 
-type Tab = 'resumen' | 'semaforo' | 'cobertura' | 'eyc'
+type Tab = 'resumen' | 'semaforo' | 'cobertura'
 const ORDEN: TSemaforo[] = ['rojo', 'amarillo', 'verde', 'gris']
 
 export function MonitoreoPage() {
-  const { perfil } = useSesion()
   const [tab, setTab] = useState<Tab>('resumen')
-  const evaluaEyc = perfil?.rol === 'subsecretario' || perfil?.rol === 'admin'
   return (
     <>
       <Titulo sobre="Subsecretaría" adorno="circulos" sub="Panel de indicadores, semáforo por persona, cobertura de evaluación y recomendaciones">
@@ -38,13 +34,11 @@ export function MonitoreoPage() {
           { valor: 'resumen', etiqueta: 'Resumen' },
           { valor: 'semaforo', etiqueta: 'Semáforo' },
           { valor: 'cobertura', etiqueta: 'Cobertura' },
-          ...(evaluaEyc ? [{ valor: 'eyc' as const, etiqueta: 'Evaluar EyC' }] : []),
         ]}
       />
       {tab === 'resumen' && <DashboardPanel />}
       {tab === 'semaforo' && <SemaforoPanel />}
       {tab === 'cobertura' && <CoberturaPanel />}
-      {tab === 'eyc' && <EvaluarEycPanel />}
     </>
   )
 }
@@ -331,63 +325,5 @@ function CoberturaPanel() {
         }}
       </Consulta>
     </Tarjeta>
-  )
-}
-
-/** La Subsecretaría evalúa a los miembros de EyC (por actividad antes del evento, por jornada durante el evento). */
-function EvaluarEycPanel() {
-  const m = useMomento()
-  const corte = m.corteActivo
-  const q = useMonitoreo(corte?.id)
-  const actividades = useActividades({ ambito: 'eyc' })
-  const faseEvento = m.abiertas.find((f) => f.es_evento && f.tipo === 'evaluacion')
-  const [actividad, setActividad] = useState('')
-  const abiertas = (actividades.data ?? []).filter((a) => !a.cerrada && a.fase?.estado === 'abierta')
-  const ref = faseEvento ? `fecha=${m.hoy}` : actividad ? `actividad=${actividad}` : ''
-
-  return (
-    <div className="flex flex-col gap-5">
-      <Tarjeta titulo="Miembros de Evaluación y Control">
-        {faseEvento ? (
-          <p className="mb-3 text-sm text-ink-2">Evaluación de la jornada de hoy ({fecha(m.hoy)}).</p>
-        ) : (
-          <Selector etiqueta="Actividad a evaluar" value={actividad} onChange={(e) => setActividad(e.target.value)} className="mb-3">
-            <option value="">Elige una actividad de EyC…</option>
-            {abiertas.map((a) => (
-              <option key={a.id} value={a.id}>
-                {fecha(a.fecha)} · {a.nombre}
-              </option>
-            ))}
-          </Selector>
-        )}
-        <Consulta q={q}>
-          {(filas) => {
-            const eyc = filas.filter((r) => r.ambito === 'eyc' && r.activa)
-            if (!eyc.length) return <EstadoVacio titulo="No hay miembros de EyC registrados">Regístralos en «Personas» con el ámbito «Miembro de EyC».</EstadoVacio>
-            return (
-              <ul className="flex flex-col gap-2">
-                {eyc.map((r) => (
-                  <li key={r.persona_id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04]">
-                    <div className="min-w-0 flex-1 basis-[13rem]">
-                      <Link to={`/personas/${r.persona_id}`} className="font-semibold hover:underline">
-                        {r.nombre}
-                      </Link>
-                      <p className="font-cond text-sm text-ink-3">{r.comision_sigla ?? 'Sin comisión'}</p>
-                    </div>
-                    <Semaforo semaforo={r.semaforo} puntaje={r.puntaje} n={r.n_evaluaciones} compacto />
-                    {ref && (
-                      <Link to={`/evaluar?persona=${r.persona_id}&${ref}`} className="inline-flex min-h-11 items-center rounded-xl bg-grad-primario px-5 text-sm font-bold text-white shadow-boton transition hover:-translate-y-px hover:brightness-110">
-                        Evaluar
-                      </Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )
-          }}
-        </Consulta>
-      </Tarjeta>
-      {!faseEvento && <ActividadesPanel comisionId={null} ambito="eyc" />}
-    </div>
   )
 }

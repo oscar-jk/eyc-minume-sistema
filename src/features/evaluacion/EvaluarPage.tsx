@@ -20,20 +20,22 @@ import { buscarExistente, obtenerFaltantes, useEvaluacion, useGuardarEvaluacion 
 import { DimensionAcordeon, type Respuestas } from './FormularioRubrica'
 import { agruparPorSeccion, esDeNota, exigeComentario } from './reglas'
 
-/** /evaluar?persona=…&actividad=…  |  /evaluar?persona=…&fecha=…  →  crea o retoma la evaluación. */
+/** /evaluar?persona=…&actividad=…  |  &fecha=…  |  &directa=1  →  crea o retoma la evaluación. */
 export function NuevaEvaluacionPage() {
   const [sp] = useSearchParams()
   const nav = useNavigate()
   const persona = sp.get('persona') ?? undefined
   const actividad = sp.get('actividad') ?? undefined
   const fecha = sp.get('fecha') ?? undefined
+  const directa = sp.get('directa') === '1' && !actividad && !fecha
+  const momento = useMomento()
   const [error, setError] = useState<unknown>(null)
   const [revisado, setRevisado] = useState(false)
 
   useEffect(() => {
-    if (!persona || (!actividad && !fecha)) return
+    if (!persona || (!actividad && !fecha && !directa) || (directa && momento.cargando)) return
     let vivo = true
-    buscarExistente(persona, { actividadId: actividad, fecha })
+    buscarExistente(persona, { actividadId: actividad, fecha, directa, corteId: momento.faseEvaluacionAbierta?.corte_id })
       .then((id) => {
         if (!vivo) return
         if (id) nav(`/evaluaciones/${id}`, { replace: true })
@@ -43,9 +45,9 @@ export function NuevaEvaluacionPage() {
     return () => {
       vivo = false
     }
-  }, [persona, actividad, fecha, nav])
+  }, [persona, actividad, fecha, directa, momento.cargando, momento.faseEvaluacionAbierta?.corte_id, nav])
 
-  if (!persona || (!actividad && !fecha)) return (
+  if (!persona || (!actividad && !fecha && !directa)) return (
       <Aviso tono="peligro" titulo="Falta elegir a quién evaluar" accion={{ texto: 'Elegir desde mi comisión', a: '/' }}>
         Entra a evaluar desde la lista de personas de la comisión.
       </Aviso>
@@ -100,11 +102,14 @@ function Evaluar({
     ? momento.fases.find((f) => f.id === actividad.data.fase_id)
     : existente.data
       ? momento.fases.find((f) => f.id === existente.data.cabecera.fase_id)
-      : momento.fases.find((f) => f.es_evento && f.tipo === 'evaluacion' && f.inicio && f.fin && fechaJornada! >= f.inicio && fechaJornada! <= f.fin)
+      : !fechaJornada
+        ? momento.faseEvaluacionAbierta ?? undefined // evaluación directa: la fase de evaluación abierta
+        : momento.fases.find((f) => f.es_evento && f.tipo === 'evaluacion' && f.inicio && f.fin && fechaJornada >= f.inicio && fechaJornada <= f.fin)
 
   const cab = existente.data?.cabecera
   const ajena = !!cab && cab.evaluador_id !== perfil?.id && perfil?.rol !== 'admin'
-  const contexto = actividad.data ? actividad.data.nombre : `Jornada del ${fmtFecha(fechaJornada ?? null)}`
+  const directa = !actividadId && !fechaJornada && (cab ? !cab.actividad_id && !cab.fecha_jornada : true)
+  const contexto = actividad.data ? actividad.data.nombre : directa ? 'Evaluación directa' : `Jornada del ${fmtFecha(fechaJornada ?? null)}`
 
   const formulario = (soloLectura: boolean) => (
     <Formulario
@@ -122,7 +127,7 @@ function Evaluar({
   return (
     <div className="mx-auto max-w-3xl">
       <nav className="mb-2 text-sm">
-        <Link to={perfil?.rol === 'eyc' ? '/comision' : '/monitoreo'} className="font-bold text-acento">
+        <Link to={perfil?.rol === 'eyc' ? '/comision' : persona.data.ambito === 'eyc' ? '/evaluacion-evaluadores' : '/monitoreo'} className="font-bold text-acento">
           ← Volver
         </Link>
       </nav>

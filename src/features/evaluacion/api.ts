@@ -53,8 +53,15 @@ export function useEvaluacion(id: string | undefined) {
 }
 
 /** Evaluación existente de una persona para una actividad o jornada (para no duplicar). */
-export async function buscarExistente(personaId: string, ref: { actividadId?: string; fecha?: string }) {
+export async function buscarExistente(personaId: string, ref: { actividadId?: string; fecha?: string; directa?: boolean; corteId?: number }) {
   let q = supabase.from('evaluaciones').select('id').eq('persona_id', personaId)
+  if (ref.directa) {
+    // Evaluación directa: sin actividad ni jornada; una por persona y corte.
+    q = q.is('actividad_id', null).is('fecha_jornada', null).order('creado_en', { ascending: false }).limit(1)
+    if (ref.corteId) q = q.eq('corte_id', ref.corteId)
+    const r = datos(await q)
+    return r[0]?.id ?? null
+  }
   q = ref.actividadId ? q.eq('actividad_id', ref.actividadId) : q.eq('fecha_jornada', ref.fecha!)
   const r = datos(await q.maybeSingle())
   return r?.id ?? null
