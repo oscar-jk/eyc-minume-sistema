@@ -75,8 +75,15 @@ Deno.serve(async (req) => {
           app_metadata: { rol, comision_id: comision },
         });
         if (error) return json({ error: error.message.includes("already") ? "Ya existe una cuenta con ese correo" : error.message }, 400);
+        // El servicio de autenticación escribe app_metadata después de insertar al usuario: el perfil puede nacer sin rol.
+        // Se fija aquí explícitamente (y la base lo sincroniza también, migración 024) para que nadie entre sin acceso.
+        const { error: errPerfil } = await service.from("perfiles").update({ rol, comision_id: comision }).eq("id", data.user.id);
+        if (errPerfil) return json({ error: "La cuenta se creó pero no se pudo asignar su rol: " + errPerfil.message }, 500);
         if (body.persona_id) {
-          await service.from("perfiles").update({ persona_id: String(body.persona_id) }).eq("id", data.user.id);
+          const personaId = String(body.persona_id);
+          await service.from("perfiles").update({ persona_id: personaId }).eq("id", data.user.id);
+          // Si la persona no tenía correo, queda con el de su cuenta.
+          await service.from("personas").update({ correo: email }).eq("id", personaId).is("correo", null);
         }
         return json({ user_id: data.user.id, enlace: await enlace(email) });
       }
