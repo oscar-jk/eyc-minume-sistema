@@ -10,7 +10,8 @@ import { mensajeError } from '@/lib/errores'
 import { TIPO_ACTIVIDAD, fecha } from '@/lib/formato'
 import type { Actividad, Ambito, TipoActividad } from '@/lib/tipos'
 import { RubricaVista } from '@/features/evaluacion/RubricaVista'
-import { useActividades, useCerrarActividad, useCrearActividad } from './api'
+import { Modal } from '@/components/Modal'
+import { useActividades, useCerrarActividad, useCrearActividad, useEliminarActividad } from './api'
 import { EditarActividad } from './EditarActividad'
 
 /** Actividades previas al evento (taller, capacitación, reunión): crear, cerrar y reabrir. */
@@ -22,6 +23,8 @@ export function ActividadesPanel({ comisionId, ambito = 'mesa' }: { comisionId: 
   const cerrar = useCerrarActividad()
   const fasePrevia = m.abiertas.find((f) => f.tipo === 'evaluacion' && !f.es_evento) ?? m.fases.find((f) => f.tipo === 'evaluacion' && !f.es_evento)
   const [editar, setEditar] = useState<Actividad | null>(null)
+  const [aEliminar, setAEliminar] = useState<Actividad | null>(null)
+  const eliminar = useEliminarActividad()
   const [rubrica, setRubrica] = useState<Ambito | null>(null)
   const [form, setForm] = useState({ nombre: '', tipo: 'taller' as TipoActividad, fecha: m.hoy ?? '' })
 
@@ -111,6 +114,11 @@ export function ActividadesPanel({ comisionId, ambito = 'mesa' }: { comisionId: 
                         {a.cerrada ? 'Reabrir' : 'Cerrar'}
                       </Boton>
                     )}
+                    {editable && (
+                      <Boton variante="fantasma" className="text-danger" onClick={() => setAEliminar(a)}>
+                        Eliminar
+                      </Boton>
+                    )}
                   </li>
                 )
               })}
@@ -119,6 +127,37 @@ export function ActividadesPanel({ comisionId, ambito = 'mesa' }: { comisionId: 
         </Consulta>
       </Tarjeta>
       <RubricaVista ambito={rubrica ?? ambito} abierto={rubrica !== null} onCerrar={() => setRubrica(null)} />
+      <Modal
+        abierto={!!aEliminar}
+        titulo="Eliminar actividad"
+        onCerrar={() => setAEliminar(null)}
+        acciones={
+          <>
+            <Boton variante="secundario" onClick={() => setAEliminar(null)}>
+              Cancelar
+            </Boton>
+            <Boton
+              variante="peligro"
+              cargando={eliminar.isPending}
+              onClick={() =>
+                eliminar.mutate(aEliminar!.id, {
+                  onSuccess: () => (avisar('Actividad eliminada.'), setAEliminar(null)),
+                  onError: (e) => avisar(mensajeError(e), 'error'),
+                })
+              }
+            >
+              Eliminar actividad
+            </Boton>
+          </>
+        }
+      >
+        <p>
+          Vas a eliminar <strong>{aEliminar?.nombre}</strong>. Úsalo solo si la creaste por error; esto no se puede deshacer.
+        </p>
+        <div className="mt-3">
+          <Aviso tono="alerta">Si ya tiene evaluaciones no se puede eliminar: usa «Cerrar» para que no reciba más y conservar el historial.</Aviso>
+        </div>
+      </Modal>
       {editar && <EditarActividad key={editar.id} actividad={editar} max={m.hoy ?? undefined} onCerrar={() => setEditar(null)} />}
     </div>
   )

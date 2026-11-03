@@ -42,6 +42,26 @@ export function useCerrarActividad() {
   })
 }
 
+/**
+ * Elimina una actividad creada por error. Solo si no tiene evaluaciones (de ningún estado): con evaluaciones se cierra, no se borra,
+ * para conservar el historial. La fase abierta y los permisos los valida la base.
+ */
+export function useEliminarActividad() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { count, error: errCuenta } = await supabase.from('evaluaciones').select('id', { count: 'exact', head: true }).eq('actividad_id', id)
+      if (errCuenta) throw errCuenta
+      if (count) {
+        throw { code: 'P0001', message: 'Esta actividad ya tiene evaluaciones registradas, así que no se puede eliminar. Ciérrala para que no reciba más.' }
+      }
+      const borradas = datos(await supabase.from('actividades').delete().eq('id', id).select('id'))
+      if (!borradas.length) throw { code: 'P0001', message: 'No se pudo eliminar la actividad: ya no existe o no tienes permiso.' }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['actividades'] }),
+  })
+}
+
 /** Edición de una actividad (solo mientras su fase esté abierta; lo valida la base). */
 export function useEditarActividad() {
   const qc = useQueryClient()

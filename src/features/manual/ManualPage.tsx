@@ -867,7 +867,7 @@ export function ManualPage() {
                   ],
                   [
                     "Actividades",
-                    "Crear, editar, cerrar y reabrir talleres, capacitaciones y reuniones.",
+                    "Crear, editar, cerrar, reabrir y eliminar (solo si se creó por error y no tiene evaluaciones) talleres, capacitaciones y reuniones.",
                   ],
                   [
                     "Histórico",
