@@ -102,14 +102,15 @@ begin
   select count(*) into n from public.formulario_envios where formulario_id = f; if n <> 2 then raise exception 'FALLO 4h: los intentos inválidos dejaron % envíos', n; end if;
   pruebas := pruebas + 1;
 
-  -- 5. Límite de envíos repetidos desde el mismo dispositivo (5 por 10 minutos).
+  -- 5. Envíos repetidos desde el mismo dispositivo: sin límite.
   set local role anon;
   for i in 1..3 loop
     perform public.formulario_enviar(cod, jsonb_build_object('rol', 'mesa', 'comision_id', c_ctd, 'referencia', 'S2', 'respuestas', jsonb_build_object(k_radio::text, 'Sí', k_escala::text, 5)));
   end loop;
-  ok := false; begin perform public.formulario_enviar(cod, jsonb_build_object('rol', 'mesa', 'comision_id', c_ctd, 'referencia', 'S2', 'respuestas', jsonb_build_object(k_radio::text, 'Sí', k_escala::text, 5)));
-  exception when others then ok := sqlerrm like '%Espera unos minutos%'; end;
-  if not ok then raise exception 'FALLO 5a: no limitó los envíos repetidos'; end if;
+  -- Ya no hay límite por dispositivo (sesiones con cientos de personas en la misma red): el 4.º y 5.º envío pasan.
+  for i in 1..3 loop
+    perform public.formulario_enviar(cod, jsonb_build_object('rol', 'mesa', 'comision_id', c_ctd, 'referencia', 'S2', 'respuestas', jsonb_build_object(k_radio::text, 'Sí', k_escala::text, 5)));
+  end loop;
   -- Otro dispositivo sí puede enviar.
   perform set_config('request.headers', '{"x-forwarded-for":"10.0.0.2","user-agent":"Otra"}', true);
   perform public.formulario_enviar(cod, jsonb_build_object('rol', 'mesa', 'comision_id', c_ctd, 'referencia', 'S2', 'respuestas', jsonb_build_object(k_radio::text, 'No', k_escala::text, 1)));
@@ -120,10 +121,10 @@ begin
   perform set_config('request.jwt.claims', json_build_object('sub', u_eyc1, 'role', 'authenticated')::text, true);
   set local role authenticated;
   res := public.formulario_resultados(f);
-  if (res ->> 'envios')::int <> 6 then raise exception 'FALLO 6a: envíos = %', res ->> 'envios'; end if;
-  -- Escala: 4, 2, 5, 5, 5, 1 → promedio 3.67
+  if (res ->> 'envios')::int <> 9 then raise exception 'FALLO 6a: envíos = %', res ->> 'envios'; end if;
+  -- Escala: 4, 2, 5, 5, 5, 1, 5, 5, 5 → promedio 4.11
   select (c -> 'resumen' ->> 'promedio')::numeric into vn from jsonb_array_elements(res -> 'campos') c where c ->> 'etiqueta' = 'Imparcialidad';
-  if vn is distinct from 3.67 then raise exception 'FALLO 6b: promedio de la escala = %', vn; end if;
+  if vn is distinct from 4.11 then raise exception 'FALLO 6b: promedio de la escala = %', vn; end if;
   select (c -> 'resumen' ->> 'Sí')::int into n from jsonb_array_elements(res -> 'campos') c where c ->> 'etiqueta' = 'La mesa fue clara';
   if n <> 4 then raise exception 'FALLO 6c: votos «Sí» = %', n; end if;
   select (c -> 'resumen' ->> 'Trato')::int into n from jsonb_array_elements(res -> 'campos') c where c ->> 'etiqueta' = 'Qué funcionó';

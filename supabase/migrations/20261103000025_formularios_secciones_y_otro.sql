@@ -38,7 +38,7 @@ declare
   f public.formularios; k public.formulario_campos; v jsonb; r jsonb := coalesce(p -> 'respuestas', '{}'::jsonb);
   v_rol text := nullif(trim(p ->> 'rol'), ''); v_ref text := nullif(trim(p ->> 'referencia'), '');
   v_com smallint := nullif(p ->> 'comision_id', '')::smallint;
-  v_hdr jsonb; v_huella text; v_envio uuid; n int; v_nom text;
+  v_hdr jsonb; v_huella text; v_envio uuid; v_nom text;
 begin
   if coalesce(p ->> 'web', '') <> '' then return; end if;                       -- trampa para bots: se ignora en silencio
   select * into f from public.formularios where codigo = lower(trim(p_codigo)) and activo;
@@ -52,12 +52,10 @@ begin
   if f.pide_referencia and v_ref is null then raise exception 'Escribe la sesión o el taller.' using errcode = 'P0001'; end if;
   if length(coalesce(v_ref, '')) > 120 then raise exception 'La sesión o el taller es demasiado largo.' using errcode = 'P0001'; end if;
 
-  -- Límite: pocas respuestas seguidas desde el mismo dispositivo.
+  -- Sin límite de respuestas por dispositivo: en una sesión con cientos de personas en la misma red
+  -- compartirían la misma huella. Se conserva la huella solo para estadísticas y la trampa anti-bots (campo «web»).
   v_hdr := coalesce(nullif(current_setting('request.headers', true), '')::jsonb, '{}'::jsonb);
   v_huella := md5(coalesce(v_hdr ->> 'x-forwarded-for', '') || '|' || coalesce(v_hdr ->> 'user-agent', ''));
-  select count(*) into n from public.formulario_envios e
-   where e.formulario_id = f.id and e.huella = v_huella and e.creado_en > now() - interval '10 minutes';
-  if n >= 5 then raise exception 'Enviaste varias respuestas seguidas. Espera unos minutos y vuelve a intentarlo.' using errcode = 'P0001'; end if;
 
   insert into public.formulario_envios (formulario_id, rol, comision_id, referencia, huella)
   values (f.id, v_rol, case when f.pide_comision then v_com end, v_ref, v_huella) returning id into v_envio;
