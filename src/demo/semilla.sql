@@ -2,15 +2,17 @@
 -- Todos los nombres son inventados.
 set session_replication_role = replica;
 
--- Usuarios de la demostración: EyC (comisión CTD), Subsecretaría y Secretaría General (autora de las decisiones).
+-- Usuarios de la demostración: EyC (comisión CTD), Subsecretaría, Secretaría General (autora de las decisiones) y Administración.
 insert into auth.users (id, email, raw_app_meta_data, raw_user_meta_data) values
   ('de000000-0000-4000-8000-00000000e001', 'eyc@demostracion.invalid', '{"rol":"eyc","comision_id":1}', '{"nombre":"Equipo de EyC"}'),
   ('de000000-0000-4000-8000-00000000e002', 'subse@demostracion.invalid', '{"rol":"subsecretario"}', '{"nombre":"Subsecretaría"}'),
-  ('de000000-0000-4000-8000-00000000e003', 'sg@demostracion.invalid', '{"rol":"secretario"}', '{"nombre":"Secretaría General"}');
+  ('de000000-0000-4000-8000-00000000e003', 'sg@demostracion.invalid', '{"rol":"secretario"}', '{"nombre":"Secretaría General"}'),
+  ('de000000-0000-4000-8000-00000000e004', 'admin@demostracion.invalid', '{"rol":"admin"}', '{"nombre":"Administración"}');
 insert into public.perfiles (id, email, nombre, rol, comision_id, activo) values
   ('de000000-0000-4000-8000-00000000e001', 'eyc@demostracion.invalid', 'Equipo de EyC', 'eyc', 1, true),
   ('de000000-0000-4000-8000-00000000e002', 'subse@demostracion.invalid', 'Subsecretaría', 'subsecretario', null, true),
-  ('de000000-0000-4000-8000-00000000e003', 'sg@demostracion.invalid', 'Secretaría General', 'secretario', null, true)
+  ('de000000-0000-4000-8000-00000000e003', 'sg@demostracion.invalid', 'Secretaría General', 'secretario', null, true),
+  ('de000000-0000-4000-8000-00000000e004', 'admin@demostracion.invalid', 'Administración', 'admin', null, true)
 on conflict (id) do update set rol = excluded.rol, comision_id = excluded.comision_id, nombre = excluded.nombre, activo = true;
 
 -- La fase de preparación abierta: se puede crear actividades y evaluar durante la demostración.

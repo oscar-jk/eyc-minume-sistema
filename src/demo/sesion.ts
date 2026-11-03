@@ -1,9 +1,11 @@
 /** Usuarios ficticios de la demostración y su «sesión». Ligero: no importa la base. */
-export type RolDemo = 'eyc' | 'subse'
+export type RolDemo = 'eyc' | 'subse' | 'sg' | 'admin'
 
 export const DEMO_USUARIOS: Record<RolDemo, { id: string; email: string; nombre: string }> = {
   eyc: { id: 'de000000-0000-4000-8000-00000000e001', email: 'eyc@demostracion.invalid', nombre: 'Equipo de EyC' },
   subse: { id: 'de000000-0000-4000-8000-00000000e002', email: 'subse@demostracion.invalid', nombre: 'Subsecretaría' },
+  sg: { id: 'de000000-0000-4000-8000-00000000e003', email: 'sg@demostracion.invalid', nombre: 'Secretaría General' },
+  admin: { id: 'de000000-0000-4000-8000-00000000e004', email: 'admin@demostracion.invalid', nombre: 'Administración' },
 }
 
 function b64url(s: string) {

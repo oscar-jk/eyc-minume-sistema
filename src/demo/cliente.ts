@@ -12,18 +12,21 @@ import { DEMO_USUARIOS, sesionDemo, type RolDemo } from './sesion'
 
 const CLAVE = 'eyc-demo'
 
+const ROLES: RolDemo[] = ['eyc', 'subse', 'sg', 'admin']
+const esRol = (v: string | null): v is RolDemo => !!v && (ROLES as string[]).includes(v)
+
 function leerRol(): RolDemo | null {
   try {
     const url = new URL(window.location.href)
     const p = url.searchParams.get('demo')
-    if (p === 'eyc' || p === 'subse') sessionStorage.setItem(CLAVE, p)
+    if (esRol(p)) sessionStorage.setItem(CLAVE, p)
     if (p === 'salir') sessionStorage.removeItem(CLAVE)
     if (p) {
       url.searchParams.delete('demo')
       window.history.replaceState(null, '', url.pathname + (url.search ? url.search : '') + url.hash)
     }
     const r = sessionStorage.getItem(CLAVE)
-    return r === 'eyc' || r === 'subse' ? r : null
+    return esRol(r) ? r : null
   } catch {
     return null
   }
@@ -50,8 +53,7 @@ export function almacenDemo() {
   }
 }
 
-export function otroRol(): RolDemo {
-  return rolDemo === 'eyc' ? 'subse' : 'eyc'
-}
-export const NOMBRE_ROL: Record<RolDemo, string> = { eyc: 'Equipo de EyC', subse: 'Subsecretaría' }
+/** Los demás perfiles de la demostración, para cambiar de uno a otro. */
+export const otrosRoles = (): RolDemo[] => ROLES.filter((r) => r !== rolDemo)
+export const NOMBRE_ROL: Record<RolDemo, string> = { eyc: 'Equipo de EyC', subse: 'Subsecretaría', sg: 'Secretaría General', admin: 'Administración' }
 export { DEMO_USUARIOS }
