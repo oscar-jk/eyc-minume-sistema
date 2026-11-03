@@ -895,6 +895,7 @@ export type Database = {
           ayuda: string | null
           creado_en: string
           escala_max: number | null
+          con_otro: boolean
           escala_min: number | null
           etiqueta: string
           formulario_id: string
@@ -910,6 +911,7 @@ export type Database = {
           ayuda?: string | null
           creado_en?: string
           escala_max?: number | null
+          con_otro?: boolean
           escala_min?: number | null
           etiqueta: string
           formulario_id: string
@@ -925,6 +927,7 @@ export type Database = {
           ayuda?: string | null
           creado_en?: string
           escala_max?: number | null
+          con_otro?: boolean
           escala_min?: number | null
           etiqueta?: string
           formulario_id?: string

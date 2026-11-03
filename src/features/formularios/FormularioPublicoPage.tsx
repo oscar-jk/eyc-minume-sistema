@@ -32,7 +32,7 @@ export function FormularioPublicoPage() {
         <div className="relative mx-auto mt-8 max-w-xl">
           <p className="sobretitulo text-cian">Tu opinión cuenta</p>
           <h1 className="mt-1 text-[clamp(1.8rem,7vw,2.6rem)] font-black leading-tight tracking-tight">{q.data?.titulo ?? <Acento>Formulario</Acento>}</h1>
-          {q.data?.descripcion && <p className="mt-2 text-white/80">{q.data.descripcion}</p>}
+          {q.data?.descripcion && <p className="mt-2 whitespace-pre-line text-white/80">{q.data.descripcion}</p>}
         </div>
       </header>
 

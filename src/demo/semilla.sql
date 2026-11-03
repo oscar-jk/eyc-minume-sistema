@@ -106,9 +106,12 @@ from public.recomendaciones r where r.id::text like 'de0c%' and r.recomendacion 
 insert into public.formularios (id, codigo, titulo, descripcion, roles, pide_comision, pide_referencia, activo, creado_por)
 values ('de0f1000-0000-4000-8000-000000000001', 'demo-feedback', 'Feedback de la sesión de ejemplo', 'Cuéntanos cómo te fue en la sesión.',
         array['delegado', 'mesa'], true, true, true, 'de000000-0000-4000-8000-00000000e002');
-insert into public.formulario_campos (formulario_id, orden, tipo, etiqueta, obligatorio, escala_min, escala_max) values
-  ('de0f1000-0000-4000-8000-000000000001', 1, 'escala', '¿Qué tan satisfecho quedaste con la sesión?', true, 1, 5),
-  ('de0f1000-0000-4000-8000-000000000001', 2, 'parrafo', '¿Qué mejorarías?', false, null, null);
+insert into public.formulario_campos (formulario_id, orden, tipo, etiqueta, ayuda, obligatorio, escala_min, escala_max) values
+  ('de0f1000-0000-4000-8000-000000000001', 1, 'seccion', 'PARTE 1 · TU EXPERIENCIA', 'Responde pensando en la última sesión.', false, null, null),
+  ('de0f1000-0000-4000-8000-000000000001', 2, 'escala', '¿Qué tan satisfecho quedaste con la sesión?', null, true, 1, 5),
+  ('de0f1000-0000-4000-8000-000000000001', 3, 'parrafo', '¿Qué mejorarías?', null, false, null, null);
+insert into public.formulario_campos (formulario_id, orden, tipo, etiqueta, obligatorio, opciones, con_otro) values
+  ('de0f1000-0000-4000-8000-000000000001', 4, 'checkbox', '¿Qué materiales usaste?', true, '["Videos","Guías","Grabaciones"]', true);
 
 drop table _ev;
 set session_replication_role = origin;

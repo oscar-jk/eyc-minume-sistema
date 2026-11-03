@@ -1,6 +1,6 @@
 /** Formularios sin cuenta: tipos compartidos por el constructor, la página pública y los resultados. */
 
-export type TipoCampo = 'texto' | 'parrafo' | 'numero' | 'fecha' | 'radio' | 'checkbox' | 'lista' | 'escala' | 'si_no' | 'personas'
+export type TipoCampo = 'texto' | 'parrafo' | 'numero' | 'fecha' | 'radio' | 'checkbox' | 'lista' | 'escala' | 'si_no' | 'personas' | 'seccion'
 
 export const TIPOS_CAMPO: Record<TipoCampo, { nombre: string; descripcion: string }> = {
   texto: { nombre: 'Texto corto', descripcion: 'Una línea de texto' },
@@ -13,7 +13,11 @@ export const TIPOS_CAMPO: Record<TipoCampo, { nombre: string; descripcion: strin
   escala: { nombre: 'Escala', descripcion: 'Un valor de menos a más (por ejemplo 1 a 5)' },
   si_no: { nombre: 'Sí o no', descripcion: 'Una pregunta de dos respuestas' },
   personas: { nombre: 'Persona de la comisión', descripcion: 'Se elige a alguien registrado en la comisión, o «Otro» si es externo' },
+  seccion: { nombre: 'Sección (título e indicaciones)', descripcion: 'Un encabezado para separar partes del formulario; no se responde' },
 }
+
+/** Prefijo con el que se guarda una respuesta escrita en la opción «Otro». */
+export const PREFIJO_OTRO = 'Otro: '
 
 /** Quién puede estar respondiendo. La persona elige su rol al entrar al formulario. */
 export const ROLES_RESPUESTA: Record<string, string> = {
@@ -35,6 +39,8 @@ export interface CampoDef {
   escala_max: number
   /** Vacío = lo responden todos. */
   roles: string[]
+  /** Opción única o casillas con una opción «Otro: …» escrita por quien responde. */
+  con_otro?: boolean
 }
 
 /** Lo que devuelve `formulario_publico`: lo justo para dibujar el formulario. */
@@ -82,6 +88,7 @@ export interface CampoBorrador {
   escala_min: number
   escala_max: number
   roles: string[]
+  con_otro: boolean
 }
 
 /** Enlace público de un formulario: lo abre cualquier persona, sin cuenta. */

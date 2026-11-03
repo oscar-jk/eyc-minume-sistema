@@ -70,7 +70,7 @@ function EditorCampo({
         </div>
       </div>
       <div className="grid gap-3 sm:grid-cols-[1fr_12rem]">
-        <Campo etiqueta="Pregunta" requerido value={campo.etiqueta} onChange={(e) => onCambio({ ...campo, etiqueta: e.target.value })} />
+        <Campo etiqueta={campo.tipo === 'seccion' ? 'Título de la sección' : 'Pregunta'} requerido value={campo.etiqueta} onChange={(e) => onCambio({ ...campo, etiqueta: e.target.value })} />
         <Selector etiqueta="Tipo de campo" value={campo.tipo} onChange={(e) => onCambio({ ...campo, tipo: e.target.value as TipoCampo })}>
           {(Object.keys(TIPOS_CAMPO) as TipoCampo[]).map((t) => (
             <option key={t} value={t}>
@@ -79,7 +79,7 @@ function EditorCampo({
           ))}
         </Selector>
       </div>
-      <Campo etiqueta="Ayuda (opcional)" value={campo.ayuda} onChange={(e) => onCambio({ ...campo, ayuda: e.target.value })} />
+      <Campo etiqueta={campo.tipo === 'seccion' ? 'Indicaciones de la sección (opcional)' : 'Ayuda (opcional)'} value={campo.ayuda} onChange={(e) => onCambio({ ...campo, ayuda: e.target.value })} />
       {ESCOGE(campo.tipo) && (
         <AreaTexto
           etiqueta="Opciones (una por línea)"
@@ -89,6 +89,15 @@ function EditorCampo({
           onChange={(e) => onCambio({ ...campo, opcionesTexto: e.target.value })}
           error={campo.opcionesTexto.trim() ? null : 'Escribe al menos una opción.'}
         />
+      )}
+      {(campo.tipo === 'radio' || campo.tipo === 'checkbox') && (
+        <label className="flex min-h-11 items-center gap-3">
+          <input type="checkbox" className="size-5 accent-[var(--accent)]" checked={campo.con_otro} onChange={(e) => onCambio({ ...campo, con_otro: e.target.checked })} />
+          Agregar la opción «Otro» para que escriban su respuesta
+        </label>
+      )}
+      {campo.tipo === 'seccion' && (
+        <p className="rounded-xl bg-accent-soft px-3 py-2 text-sm text-ink-2">Una sección separa las preguntas con un título y unas indicaciones. Quien responde la ve como un encabezado; no tiene respuesta.</p>
       )}
       {campo.tipo === 'personas' && (
         <p className="rounded-xl bg-accent-soft px-3 py-2 text-sm text-ink-2">
@@ -101,10 +110,12 @@ function EditorCampo({
           <Campo etiqueta="Hasta" type="number" value={campo.escala_max} onChange={(e) => onCambio({ ...campo, escala_max: Number(e.target.value) })} error={campo.escala_max > campo.escala_min ? null : 'Debe ser mayor que «Desde».'} />
         </div>
       )}
-      <label className="flex min-h-11 items-center gap-3">
-        <input type="checkbox" className="size-5 accent-[var(--accent)]" checked={campo.obligatorio} onChange={(e) => onCambio({ ...campo, obligatorio: e.target.checked })} />
-        Respuesta obligatoria
-      </label>
+      {campo.tipo !== 'seccion' && (
+        <label className="flex min-h-11 items-center gap-3">
+          <input type="checkbox" className="size-5 accent-[var(--accent)]" checked={campo.obligatorio} onChange={(e) => onCambio({ ...campo, obligatorio: e.target.checked })} />
+          Respuesta obligatoria
+        </label>
+      )}
       {rolesForm.length > 0 && (
         <fieldset>
           <legend className="mb-1 text-sm font-bold">¿Quién la responde?</legend>
@@ -171,6 +182,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
         escala_min: c.escala_min ?? 1,
         escala_max: c.escala_max ?? 5,
         roles: c.roles,
+        con_otro: c.con_otro,
       })),
   )
   const [originales] = useState(() => datos.campos.map((c) => c.id))
@@ -201,6 +213,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
         escala_min: c.escala_min,
         escala_max: c.escala_max,
         roles: c.roles,
+        con_otro: c.con_otro,
       })),
     }),
     [titulo, descripcion, roles, pideComision, pideRef, comisionFija, comisiones.data, campos],
@@ -314,7 +327,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
           ))}
         </ol>
         <div className="mt-4">
-          <p className="mb-2 text-sm font-bold">Agregar una pregunta</p>
+          <p className="mb-2 text-sm font-bold">Agregar una pregunta o una sección</p>
           <div className="flex flex-wrap gap-2">
             {(Object.keys(TIPOS_CAMPO) as TipoCampo[]).map((t) => (
               <Boton
@@ -325,7 +338,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
                 onClick={() =>
                   cambiar(setCampos)([
                     ...campos,
-                    { clave: nuevaClave(), tipo: t, etiqueta: '', ayuda: '', obligatorio: false, opcionesTexto: ESCOGE(t) ? 'Opción 1\nOpción 2' : '', escala_min: 1, escala_max: 5, roles: [] },
+                    { clave: nuevaClave(), tipo: t, etiqueta: '', ayuda: '', obligatorio: false, opcionesTexto: ESCOGE(t) ? 'Opción 1\nOpción 2' : '', escala_min: 1, escala_max: 5, roles: [], con_otro: false },
                   ])
                 }
               >

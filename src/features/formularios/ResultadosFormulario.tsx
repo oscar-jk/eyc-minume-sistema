@@ -41,7 +41,23 @@ function Resumen({ c }: { c: ResumenCampo }) {
     case 'radio':
     case 'lista':
     case 'checkbox':
-      return <Barras datos={Object.entries(r).map(([k, v]) => [k, num(v)] as [string, number])} total={c.respuestas} />
+      return (
+        <div className="flex flex-col gap-3">
+          <Barras datos={Object.entries(r).map(([k, v]) => [k, num(v)] as [string, number])} total={c.respuestas} />
+          {(c.otros?.length ?? 0) > 0 && (
+            <div>
+              <p className="mb-1 text-sm font-bold">Respuestas escritas en «Otro» ({c.otros!.length})</p>
+              <ul className="flex flex-wrap gap-1.5 text-sm">
+                {c.otros!.map((o, i) => (
+                  <li key={i} className="rounded-xl bg-surface-2 px-3 py-1.5 dark:bg-white/[0.05]">
+                    {o}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )
     case 'si_no':
       return (
         <Barras
@@ -110,7 +126,7 @@ export function ResultadosFormulario() {
   const res = useResultados(id)
   const envios = useEnviosFormulario(id)
   const comisiones = useComisiones()
-  const campos = useMemo(() => form.data?.campos ?? [], [form.data])
+  const campos = useMemo(() => (form.data?.campos ?? []).filter((c) => c.tipo !== 'seccion'), [form.data])
 
   if (form.isPending || res.isPending) return <Cargando filas={4} />
   if (form.isError) return <EstadoError error={form.error} onReintentar={() => form.refetch()} />

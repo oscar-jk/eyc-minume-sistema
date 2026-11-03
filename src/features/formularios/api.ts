@@ -91,11 +91,12 @@ export function useGuardarFormulario() {
           tipo: c.tipo,
           etiqueta: c.etiqueta.trim(),
           ayuda: c.ayuda.trim() || null,
-          obligatorio: c.obligatorio,
+          obligatorio: c.tipo === 'seccion' ? false : c.obligatorio,
           opciones: c.opcionesTexto.split('\n').map((x) => x.trim()).filter(Boolean),
           escala_min: c.tipo === 'escala' ? c.escala_min : null,
           escala_max: c.tipo === 'escala' ? c.escala_max : null,
           roles: c.roles,
+          con_otro: (c.tipo === 'radio' || c.tipo === 'checkbox') && c.con_otro,
           activo: true,
         }
         if (c.id) datos(await supabase.from('formulario_campos').update(fila).eq('id', c.id).select('id').single())
@@ -143,6 +144,8 @@ export interface ResumenCampo {
   activo: boolean
   respuestas: number
   resumen: Record<string, unknown>
+  /** Lo que se escribió en «Otro» (solo si el campo lo admite). */
+  otros?: string[] | null
 }
 export interface Resultados {
   envios: number
