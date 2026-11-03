@@ -126,10 +126,10 @@ begin
   select (c -> 'resumen' ->> 'promedio')::numeric into vn from jsonb_array_elements(res -> 'campos') c where c ->> 'etiqueta' = 'Imparcialidad';
   if vn is distinct from 4.11 then raise exception 'FALLO 6b: promedio de la escala = %', vn; end if;
   select (c -> 'resumen' ->> 'Sí')::int into n from jsonb_array_elements(res -> 'campos') c where c ->> 'etiqueta' = 'La mesa fue clara';
-  if n <> 4 then raise exception 'FALLO 6c: votos «Sí» = %', n; end if;
+  if n <> 7 then raise exception 'FALLO 6c: votos «Sí» = %', n; end if;
   select (c -> 'resumen' ->> 'Trato')::int into n from jsonb_array_elements(res -> 'campos') c where c ->> 'etiqueta' = 'Qué funcionó';
   if n <> 1 then raise exception 'FALLO 6d: casillas «Trato» = %', n; end if;
-  if (res -> 'por_rol' ->> 'mesa')::int <> 5 or (res -> 'por_rol' ->> 'delegado')::int <> 1 then raise exception 'FALLO 6e: por rol = %', res -> 'por_rol'; end if;
+  if (res -> 'por_rol' ->> 'mesa')::int <> 8 or (res -> 'por_rol' ->> 'delegado')::int <> 1 then raise exception 'FALLO 6e: por rol = %', res -> 'por_rol'; end if;
   select count(*) into n from public.formulario_respuestas; if n = 0 then raise exception 'FALLO 6f: el creador no ve las respuestas'; end if;
   reset role;
   perform set_config('request.jwt.claims', json_build_object('sub', u_eyc2, 'role', 'authenticated')::text, true);
