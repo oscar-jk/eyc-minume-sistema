@@ -102,5 +102,13 @@ select ('de0d0000-0000-4000-8000-' || lpad(row_number() over (order by r.id)::te
        'Decisión de ejemplo.', true, 'de000000-0000-4000-8000-00000000e003'
 from public.recomendaciones r where r.id::text like 'de0c%' and r.recomendacion = 'sustitucion' limit 2;
 
+-- Un formulario de ejemplo para mostrar cómo se comparte (enlace, código QR e imagen).
+insert into public.formularios (id, codigo, titulo, descripcion, roles, pide_comision, pide_referencia, activo, creado_por)
+values ('de0f1000-0000-4000-8000-000000000001', 'demo-feedback', 'Feedback de la sesión de ejemplo', 'Cuéntanos cómo te fue en la sesión.',
+        array['delegado', 'mesa'], true, true, true, 'de000000-0000-4000-8000-00000000e002');
+insert into public.formulario_campos (formulario_id, orden, tipo, etiqueta, obligatorio, escala_min, escala_max) values
+  ('de0f1000-0000-4000-8000-000000000001', 1, 'escala', '¿Qué tan satisfecho quedaste con la sesión?', true, 1, 5),
+  ('de0f1000-0000-4000-8000-000000000001', 2, 'parrafo', '¿Qué mejorarías?', false, null, null);
+
 drop table _ev;
 set session_replication_role = origin;

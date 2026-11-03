@@ -10,6 +10,7 @@ import { useSesion } from '@/features/auth/AuthProvider'
 import { mensajeError } from '@/lib/errores'
 import { fecha, plural } from '@/lib/formato'
 import { useActivarFormulario, useBorrarFormulario, useCrearFormulario, useDuplicarFormulario, useFormularios } from './api'
+import { CompartirFormulario } from './CompartirFormulario'
 import { enlacePublico } from './tipos'
 
 /** Lista de formularios: cada quien ve los suyos; Subsecretaría, Secretaría General y administración ven todos. */
@@ -23,6 +24,7 @@ export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
   const avisar = useAvisar()
   const nav = useNavigate()
   const [nuevo, setNuevo] = useState<string | null>(null)
+  const [compartir, setCompartir] = useState<{ titulo: string; codigo: string } | null>(null)
   const [aBorrar, setABorrar] = useState<{ id: string; titulo: string; envios: number } | null>(null)
   const ve = perfil?.rol === 'subsecretario' || perfil?.rol === 'secretario' || perfil?.rol === 'admin'
 
@@ -67,6 +69,9 @@ export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
                   <Boton variante="fantasma" onClick={() => nav(`/formularios/${f.id}`)}>
                     Editar
                   </Boton>
+                  <Boton variante="secundario" onClick={() => setCompartir({ titulo: f.titulo, codigo: f.codigo })}>
+                    Compartir
+                  </Boton>
                   <Boton
                     variante="fantasma"
                     onClick={() =>
@@ -106,6 +111,8 @@ export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
           </Tarjeta>
         )}
       </Consulta>
+
+      {compartir && <CompartirFormulario titulo={compartir.titulo} codigo={compartir.codigo} onCerrar={() => setCompartir(null)} />}
 
       <Modal
         abierto={nuevo !== null}

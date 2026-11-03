@@ -10,6 +10,7 @@ import { siglaDe, useComisiones } from '@/features/comisiones/api'
 import { mensajeError } from '@/lib/errores'
 import { useFormulario, useGuardarFormulario } from './api'
 import { FormularioRespuesta } from './FormularioRespuesta'
+import { CompartirFormulario } from './CompartirFormulario'
 import { ROLES_RESPUESTA, TIPOS_CAMPO, enlacePublico, opcionesDe, type CampoBorrador, type CampoDef, type FormularioPublicoDef, type TipoCampo } from './tipos'
 
 const ESCOGE = (t: TipoCampo) => t === 'radio' || t === 'checkbox' || t === 'lista'
@@ -151,6 +152,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
   const [activo, setActivo] = useState(f.activo)
   const [sucio, setSucio] = useState(false)
   const [guardado, setGuardado] = useState(false)
+  const [compartiendo, setCompartiendo] = useState(false)
   // Se sale cuando ya se dibujó sin «cambios pendientes»; si no, el aviso de salida lo frena.
   useEffect(() => {
     if (guardado && !sucio) nav('/configuracion?tab=formularios')
@@ -357,6 +359,9 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
               >
                 Copiar enlace
               </Boton>
+              <Boton variante="secundario" onClick={() => setCompartiendo(true)}>
+                Imagen para compartir
+              </Boton>
               <a href={enlace} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center rounded-2xl px-4 font-bold text-acento">
                 Abrir ↗
               </a>
@@ -364,6 +369,8 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
           </div>
         </div>
       </Tarjeta>
+
+      {compartiendo && <CompartirFormulario titulo={titulo.trim() || f.titulo || 'Formulario'} codigo={f.codigo} onCerrar={() => setCompartiendo(false)} />}
 
       <Tarjeta titulo="Así lo verá quien responde">
         <FormularioRespuesta def={vistaPrevia} vistaPrevia />

@@ -1081,7 +1081,7 @@ export function ManualPage() {
               <Figura
                 src="formularios-lista"
                 alt="Lista de formularios"
-                pie="Formularios: cada uno con su enlace, número de respuestas y acciones (Copiar enlace, Duplicar, Cerrar, Eliminar)."
+                pie="Formularios: cada uno con su enlace, número de respuestas y acciones (Compartir con código QR e imagen, Copiar enlace, Duplicar, Cerrar, Eliminar)."
               />
               <Pasos
                 items={[
