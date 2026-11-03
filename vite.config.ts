@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // La demostración carga PGlite (Postgres en WebAssembly) bajo demanda; Vite no debe pre-empaquetarlo.
+  optimizeDeps: { exclude: ['@electric-sql/pglite'] },
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   test: {
     environment: 'jsdom',

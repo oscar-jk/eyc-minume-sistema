@@ -6,6 +6,7 @@ import { Cargando } from '@/components/Estados'
 import { Destello } from '@/components/Elementos'
 import { IcoComision, IcoComisiones, IcoConfig, IcoDecisiones, IcoEvaluadores, IcoManual, IcoLuna, IcoMas, IcoMonitoreo, IcoPersonas, IcoSalir, IcoSol } from '@/components/Iconos'
 import { Marca } from '@/components/Marca'
+import { modoDemo, NOMBRE_ROL, otroRol, rolDemo } from '@/demo/cliente'
 import { Modal } from '@/components/Modal'
 import { useSesion } from '@/features/auth/AuthProvider'
 import { salir } from '@/features/auth/api'
@@ -118,6 +119,17 @@ export function Layout() {
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 hidden opacity-60 dark:block">
         <CieloEstrellado densidad={0.45} />
       </div>
+      {modoDemo && rolDemo && (
+        <div role="status" className="fixed bottom-20 right-3 z-50 flex max-w-[calc(100vw-1.5rem)] flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl bg-grad-rosa px-4 py-2.5 text-sm font-bold text-white shadow-card lg:bottom-4 lg:right-4">
+          <span>Modo demostración · {NOMBRE_ROL[rolDemo]} · datos ficticios</span>
+          <a href={`/?demo=${otroRol()}`} className="underline underline-offset-2">
+            Ver como {NOMBRE_ROL[otroRol()]}
+          </a>
+          <a href="/?demo=salir" className="underline underline-offset-2">
+            Salir
+          </a>
+        </div>
+      )}
       <a href="#contenido" className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-white">
         Saltar al contenido
       </a>

@@ -1,4 +1,5 @@
 import type { Session } from '@supabase/supabase-js'
+import { modoDemo } from '@/demo/cliente'
 import { supabase } from '@/lib/supabase'
 import { datos } from '@/lib/consulta'
 import type { Perfil } from '@/lib/tipos'
@@ -23,6 +24,11 @@ export async function entrar(email: string, password: string) {
 }
 
 export async function salir() {
+  // En la demostración «Salir» vuelve a la app normal (la sesión de la demo no existe fuera de esta pestaña).
+  if (modoDemo) {
+    window.location.assign('/?demo=salir')
+    return
+  }
   await supabase.auth.signOut()
 }
 
