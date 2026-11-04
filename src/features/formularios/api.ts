@@ -9,13 +9,16 @@ export function useFormularios() {
   return useQuery({
     queryKey: ['formularios'],
     queryFn: async () => {
-      const [f, e] = await Promise.all([
+      const [f, e, p] = await Promise.all([
         supabase.from('formularios').select('*').order('creado_en', { ascending: false }),
         supabase.from('formulario_envios').select('formulario_id'),
+        supabase.from('perfiles').select('id, nombre, rol'),
       ])
       const conteo = new Map<string, number>()
       for (const x of datos(e)) conteo.set(x.formulario_id, (conteo.get(x.formulario_id) ?? 0) + 1)
-      return datos(f).map((x) => ({ ...x, envios: conteo.get(x.id) ?? 0 }))
+      // Si la cuenta no puede ver a las demás personas, el autor queda sin nombre (no es un error).
+      const autores = new Map((p.data ?? []).map((x) => [x.id, x]))
+      return datos(f).map((x) => ({ ...x, envios: conteo.get(x.id) ?? 0, autor: x.creado_por ? autores.get(x.creado_por) ?? null : null }))
     },
   })
 }

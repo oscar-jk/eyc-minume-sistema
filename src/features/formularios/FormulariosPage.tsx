@@ -1,17 +1,18 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAvisar } from '@/components/Avisos'
 import { Boton } from '@/components/Boton'
-import { Campo } from '@/components/Campo'
+import { Campo, Selector } from '@/components/Campo'
 import { Consulta, EstadoVacio } from '@/components/Estados'
 import { Modal } from '@/components/Modal'
 import { Acento, Aviso, Insignia, Tarjeta, Titulo } from '@/components/Ui'
 import { useSesion } from '@/features/auth/AuthProvider'
+import { useComisiones } from '@/features/comisiones/api'
 import { mensajeError } from '@/lib/errores'
-import { fecha, plural } from '@/lib/formato'
+import { ROL, fecha, plural } from '@/lib/formato'
 import { useActivarFormulario, useBorrarFormulario, useCrearFormulario, useDuplicarFormulario, useFormularios } from './api'
 import { CompartirFormulario } from './CompartirFormulario'
-import { enlacePublico } from './tipos'
+import { enlacePublico, ROLES_RESPUESTA } from './tipos'
 
 /** Lista de formularios: cada quien ve los suyos; Subsecretaría, Secretaría General y administración ven todos. */
 export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
@@ -27,6 +28,11 @@ export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
   const [compartir, setCompartir] = useState<{ titulo: string; codigo: string } | null>(null)
   const [aBorrar, setABorrar] = useState<{ id: string; titulo: string; envios: number } | null>(null)
   const ve = perfil?.rol === 'subsecretario' || perfil?.rol === 'secretario' || perfil?.rol === 'admin'
+  const comisiones = useComisiones()
+  const [filtro, setFiltro] = useState({ texto: '', autor: '', alcance: '', dirigido: '', estado: '' })
+  const cambiar = (k: keyof typeof filtro, v: string) => setFiltro((f) => ({ ...f, [k]: v }))
+  const siglaDe = useMemo(() => new Map((comisiones.data ?? []).map((c) => [c.id, c.sigla ?? c.clave.toUpperCase()])), [comisiones.data])
+  const hayFiltro = Object.values(filtro).some(Boolean)
 
   return (
     <>
@@ -49,8 +55,69 @@ export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
           </EstadoVacio>
         }
       >
-        {(fs) => (
+        {(todos) => {
+          const alcanceDe = (f: (typeof todos)[number]) => (f.comision_fija != null ? `Solo ${siglaDe.get(f.comision_fija) ?? 'una comisión'}` : f.pide_comision ? 'Cualquier comisión (la elige quien responde)' : 'Sin comisión')
+          const fs = todos.filter((f) => {
+            if (filtro.texto && !f.titulo.toLowerCase().includes(filtro.texto.trim().toLowerCase())) return false
+            if (filtro.autor && (f.autor?.rol ?? 'desconocido') !== filtro.autor) return false
+            if (filtro.alcance === 'libre' && !(f.comision_fija == null && f.pide_comision)) return false
+            if (filtro.alcance === 'sin' && !(f.comision_fija == null && !f.pide_comision)) return false
+            if (filtro.alcance.startsWith('c:') && String(f.comision_fija) !== filtro.alcance.slice(2)) return false
+            if (filtro.dirigido && !(f.roles.length === 0 ? filtro.dirigido === 'todos' : f.roles.includes(filtro.dirigido))) return false
+            if (filtro.estado === 'abiertos' && !f.activo) return false
+            if (filtro.estado === 'cerrados' && f.activo) return false
+            return true
+          })
+          return (
           <Tarjeta titulo={ve ? 'Todos los formularios' : 'Mis formularios'}>
+            <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <Campo etiqueta="Buscar por título" value={filtro.texto} onChange={(e) => cambiar('texto', e.target.value)} placeholder="Ej.: capacitaciones" />
+              {ve && (
+                <Selector etiqueta="Creado por" value={filtro.autor} onChange={(e) => cambiar('autor', e.target.value)}>
+                  <option value="">Cualquiera</option>
+                  {(Object.keys(ROL) as (keyof typeof ROL)[]).map((r) => (
+                    <option key={r} value={r}>
+                      {ROL[r]}
+                    </option>
+                  ))}
+                </Selector>
+              )}
+              <Selector etiqueta="Alcance (comisión)" value={filtro.alcance} onChange={(e) => cambiar('alcance', e.target.value)}>
+                <option value="">Todos</option>
+                <option value="libre">Cualquier comisión (la elige quien responde)</option>
+                <option value="sin">Sin comisión</option>
+                {(comisiones.data ?? []).map((c) => (
+                  <option key={c.id} value={`c:${c.id}`}>
+                    Solo {c.sigla ?? c.clave.toUpperCase()}
+                  </option>
+                ))}
+              </Selector>
+              <Selector etiqueta="Dirigido a" value={filtro.dirigido} onChange={(e) => cambiar('dirigido', e.target.value)}>
+                <option value="">Cualquiera</option>
+                <option value="todos">Sin restricción de rol</option>
+                {Object.entries(ROLES_RESPUESTA).map(([k, v]) => (
+                  <option key={k} value={k}>
+                    {v}
+                  </option>
+                ))}
+              </Selector>
+              <Selector etiqueta="Estado" value={filtro.estado} onChange={(e) => cambiar('estado', e.target.value)}>
+                <option value="">Todos</option>
+                <option value="abiertos">Recibiendo respuestas</option>
+                <option value="cerrados">Cerrados</option>
+              </Selector>
+              {hayFiltro && (
+                <div className="flex items-end">
+                  <Boton variante="fantasma" onClick={() => setFiltro({ texto: '', autor: '', alcance: '', dirigido: '', estado: '' })}>
+                    Quitar filtros
+                  </Boton>
+                </div>
+              )}
+            </div>
+            <p className="mb-2 font-cond text-sm text-ink-3" aria-live="polite">
+              {hayFiltro ? `${fs.length} de ${todos.length}` : plural(todos.length, 'formulario', 'formularios')}
+            </p>
+            {fs.length === 0 && <p className="rounded-2xl border border-dashed border-line p-6 text-center text-ink-2">Ningún formulario coincide con esos filtros.</p>}
             <ul className="flex flex-col gap-2">
               {fs.map((f) => (
                 <li key={f.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 transition-all hover:border-accent hover:shadow-card dark:bg-white/[0.04]">
@@ -60,6 +127,10 @@ export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
                     </Link>
                     <p className="font-cond text-sm text-ink-3">
                       Creado el {fecha(f.creado_en)} · {plural(f.envios, 'respuesta', 'respuestas')}
+                    </p>
+                    <p className="font-cond text-sm text-ink-3">
+                      {f.autor ? `Por ${f.autor.nombre} (${ROL[f.autor.rol as keyof typeof ROL] ?? f.autor.rol})` : 'Autor no disponible'} · {alcanceDe(f)} ·{' '}
+                      {f.roles.length ? `Para: ${f.roles.map((r) => ROLES_RESPUESTA[r] ?? r).join(', ')}` : 'Para cualquier rol'}
                     </p>
                   </div>
                   {f.activo ? <Insignia tono="exito">Recibiendo</Insignia> : <Insignia>Cerrado</Insignia>}
@@ -109,7 +180,8 @@ export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
               ))}
             </ul>
           </Tarjeta>
-        )}
+          )
+        }}
       </Consulta>
 
       {compartir && <CompartirFormulario titulo={compartir.titulo} codigo={compartir.codigo} onCerrar={() => setCompartir(null)} />}
