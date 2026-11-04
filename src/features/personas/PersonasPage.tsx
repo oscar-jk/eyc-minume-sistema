@@ -85,7 +85,7 @@ function AsignacionesPanel() {
       <Tarjeta
         titulo="Asignaciones vigentes"
         accion={
-          <Selector etiqueta="Comisión" value={comision} onChange={(e) => setComision(e.target.value)} className="min-w-52">
+          <Selector filtro etiqueta="Comisión" value={comision} onChange={(e) => setComision(e.target.value)} className="min-w-52">
             <option value="">Todas</option>
             {comisiones.data?.map((c) => (
               <option key={c.id} value={c.id}>

@@ -263,6 +263,7 @@ export function CuentasPanel() {
                   <Insignia tono="alerta">{sinActivar} sin activar</Insignia>
                   <Selector
                     etiqueta="Mostrar"
+                    filtro="todas"
                     value={filtro}
                     onChange={(e) => setFiltro(e.target.value as typeof filtro)}
                     className="ml-auto min-w-52"

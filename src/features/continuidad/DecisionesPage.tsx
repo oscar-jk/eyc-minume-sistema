@@ -40,7 +40,7 @@ export function DecisionesPage() {
         Decisiones <Acento>de</Acento> continuidad
       </Titulo>
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
-        <Selector etiqueta="Estado" value={estado} onChange={(e) => setEstado(e.target.value as typeof estado)}>
+        <Selector filtro="pendientes" etiqueta="Estado" value={estado} onChange={(e) => setEstado(e.target.value as typeof estado)}>
           <option value="pendientes">Pendientes</option>
           <option value="decididas">Decididas</option>
           <option value="todas">Todas</option>
@@ -51,7 +51,7 @@ export function DecisionesPage() {
           <option value="subse">Los que cierra la Subsecretaría</option>
           <option value="todas">Todos</option>
         </Selector>
-        <Selector etiqueta="Semáforo" value={sem} onChange={(e) => setSem(e.target.value as TSemaforo | '')}>
+        <Selector filtro etiqueta="Semáforo" value={sem} onChange={(e) => setSem(e.target.value as TSemaforo | '')}>
           <option value="">Todos</option>
           <option value="rojo">Rojo — En riesgo</option>
           <option value="amarillo">Amarillo — Seguimiento</option>

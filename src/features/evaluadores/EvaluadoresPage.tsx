@@ -83,7 +83,7 @@ function Directorio({ onElegir }: { onElegir: (id: string) => void }) {
               </option>
             ))}
           </Selector>
-          <Campo etiqueta="Buscar por nombre" value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Nombre del evaluador" />
+          <Campo filtro etiqueta="Buscar por nombre" value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Nombre del evaluador" />
         </div>
         <Consulta q={q}>
           {(filas) => {
@@ -184,7 +184,7 @@ function Historial() {
   const [texto, setTexto] = useState('')
   return (
     <Tarjeta titulo="Evaluaciones realizadas a integrantes de EyC">
-      <Campo etiqueta="Buscar por evaluado o evaluador" value={texto} onChange={(e) => setTexto(e.target.value)} className="mb-4" />
+      <Campo filtro etiqueta="Buscar por evaluado o evaluador" value={texto} onChange={(e) => setTexto(e.target.value)} className="mb-4" />
       <Consulta q={q} vacio={<EstadoVacio titulo="Todavía no hay evaluaciones">Aparecerán aquí las que se registren desde el directorio.</EstadoVacio>}>
         {(es) => {
           const t = texto.toLowerCase()

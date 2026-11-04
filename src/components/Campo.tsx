@@ -4,6 +4,17 @@ import { useId, useState, type InputHTMLAttributes, type ReactNode, type SelectH
 const control =
   'w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-base text-ink placeholder:text-ink-3 min-h-12 shadow-[inset_0_1px_2px_rgb(0_0_0/0.04)] transition-colors hover:border-line-strong focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/20 aria-[invalid=true]:border-danger dark:bg-white/[0.06]'
 
+/** Filtro con un valor elegido: se resalta con el azul de marca (como un botón, pero sigue siendo un campo). */
+const filtroActivo =
+  '!border-transparent bg-grad-primario font-semibold !text-white shadow-boton placeholder:!text-white/70 focus:ring-accent/30 [&_option]:text-ink [&_option]:bg-surface [&::-webkit-search-cancel-button]:invert'
+
+/** «filtro»: true = campo de filtro (activo si tiene valor); un texto = valor neutro que no cuenta como filtro (ej. «todas»). */
+function estiloFiltro(filtro: boolean | string | undefined, valor: unknown) {
+  if (filtro === undefined || filtro === false) return ''
+  const v = valor == null ? '' : String(valor)
+  return v !== '' && v !== (typeof filtro === 'string' ? filtro : '') ? ` ${filtroActivo}` : ''
+}
+
 interface Envoltura {
   etiqueta: ReactNode
   ayuda?: ReactNode
@@ -41,7 +52,7 @@ function aria(id: string, error?: string | null, ayuda?: ReactNode) {
   }
 }
 
-export function Campo({ etiqueta, ayuda, error, requerido, className, type, ...rest }: Envoltura & InputHTMLAttributes<HTMLInputElement>) {
+export function Campo({ etiqueta, ayuda, error, requerido, className, type, filtro, ...rest }: Envoltura & InputHTMLAttributes<HTMLInputElement> & { filtro?: boolean | string }) {
   const id = useId()
   const [ver, setVer] = useState(false)
   const esClave = type === 'password'
@@ -61,7 +72,7 @@ export function Campo({ etiqueta, ayuda, error, requerido, className, type, ...r
           </button>
         </div>
       ) : (
-        <input id={id} type={type} className={control} required={requerido} {...aria(id, error, ayuda)} {...rest} />
+        <input id={id} type={type} className={`${control}${estiloFiltro(filtro, rest.value)}`} required={requerido} {...aria(id, error, ayuda)} {...rest} />
       )}
     </Marco>
   )
@@ -83,12 +94,13 @@ export function Selector({
   requerido,
   className,
   children,
+  filtro,
   ...rest
-}: Envoltura & SelectHTMLAttributes<HTMLSelectElement> & { children: ReactNode }) {
+}: Envoltura & SelectHTMLAttributes<HTMLSelectElement> & { children: ReactNode; filtro?: boolean | string }) {
   const id = useId()
   return (
     <Marco id={id} etiqueta={etiqueta} ayuda={ayuda} error={error} requerido={requerido} className={className}>
-      <select id={id} className={control} required={requerido} {...aria(id, error, ayuda)} {...rest}>
+      <select id={id} className={`${control}${estiloFiltro(filtro, rest.value)}`} required={requerido} {...aria(id, error, ayuda)} {...rest}>
         {children}
       </select>
     </Marco>

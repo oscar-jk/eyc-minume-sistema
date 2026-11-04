@@ -29,7 +29,7 @@ export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
   const [aBorrar, setABorrar] = useState<{ id: string; titulo: string; envios: number } | null>(null)
   const ve = perfil?.rol === 'subsecretario' || perfil?.rol === 'secretario' || perfil?.rol === 'admin'
   const comisiones = useComisiones()
-  const [filtro, setFiltro] = useState({ texto: '', autor: '', alcance: '', dirigido: '', estado: '' })
+  const [filtro, setFiltro] = useState({ texto: '', autor: '', creador: '', alcance: '', dirigido: '', estado: '' })
   const cambiar = (k: keyof typeof filtro, v: string) => setFiltro((f) => ({ ...f, [k]: v }))
   const siglaDe = useMemo(() => new Map((comisiones.data ?? []).map((c) => [c.id, c.sigla ?? c.clave.toUpperCase()])), [comisiones.data])
   const hayFiltro = Object.values(filtro).some(Boolean)
@@ -60,6 +60,7 @@ export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
           const fs = todos.filter((f) => {
             if (filtro.texto && !f.titulo.toLowerCase().includes(filtro.texto.trim().toLowerCase())) return false
             if (filtro.autor && (f.autor?.rol ?? 'desconocido') !== filtro.autor) return false
+            if (filtro.creador && f.creado_por !== filtro.creador) return false
             if (filtro.alcance === 'libre' && !(f.comision_fija == null && f.pide_comision)) return false
             if (filtro.alcance === 'sin' && !(f.comision_fija == null && !f.pide_comision)) return false
             if (filtro.alcance.startsWith('c:') && String(f.comision_fija) !== filtro.alcance.slice(2)) return false
@@ -68,12 +69,30 @@ export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
             if (filtro.estado === 'cerrados' && f.activo) return false
             return true
           })
+          const porCreador = new Map<string, { id: string; nombre: string; rol: string; n: number }>()
+          for (const f of todos) {
+            if (!f.creado_por || !f.autor) continue
+            const c = porCreador.get(f.creado_por)
+            if (c) c.n++
+            else porCreador.set(f.creado_por, { id: f.creado_por, nombre: f.autor.nombre, rol: f.autor.rol, n: 1 })
+          }
+          const creadores = [...porCreador.values()].sort((a, b) => a.nombre.localeCompare(b.nombre))
           return (
           <Tarjeta titulo={ve ? 'Todos los formularios' : 'Mis formularios'}>
             <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <Campo etiqueta="Buscar por título" value={filtro.texto} onChange={(e) => cambiar('texto', e.target.value)} placeholder="Ej.: capacitaciones" />
-              {ve && (
-                <Selector etiqueta="Creado por" value={filtro.autor} onChange={(e) => cambiar('autor', e.target.value)}>
+              <Campo filtro etiqueta="Buscar por título" value={filtro.texto} onChange={(e) => cambiar('texto', e.target.value)} placeholder="Ej.: capacitaciones" />
+              {embebido && ve && (
+                <Selector filtro etiqueta="Creador" value={filtro.creador} onChange={(e) => cambiar('creador', e.target.value)}>
+                  <option value="">Cualquier persona</option>
+                  {creadores.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nombre} ({ROL[c.rol as keyof typeof ROL] ?? c.rol}) · {plural(c.n, 'formulario', 'formularios')}
+                    </option>
+                  ))}
+                </Selector>
+              )}
+              {embebido && ve && (
+                <Selector filtro etiqueta="Creado por (rol)" value={filtro.autor} onChange={(e) => cambiar('autor', e.target.value)}>
                   <option value="">Cualquiera</option>
                   {(Object.keys(ROL) as (keyof typeof ROL)[]).map((r) => (
                     <option key={r} value={r}>
@@ -82,7 +101,7 @@ export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
                   ))}
                 </Selector>
               )}
-              <Selector etiqueta="Alcance (comisión)" value={filtro.alcance} onChange={(e) => cambiar('alcance', e.target.value)}>
+              <Selector filtro etiqueta="Alcance (comisión)" value={filtro.alcance} onChange={(e) => cambiar('alcance', e.target.value)}>
                 <option value="">Todos</option>
                 <option value="libre">Cualquier comisión (la elige quien responde)</option>
                 <option value="sin">Sin comisión</option>
@@ -92,7 +111,7 @@ export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
                   </option>
                 ))}
               </Selector>
-              <Selector etiqueta="Dirigido a" value={filtro.dirigido} onChange={(e) => cambiar('dirigido', e.target.value)}>
+              <Selector filtro etiqueta="Dirigido a" value={filtro.dirigido} onChange={(e) => cambiar('dirigido', e.target.value)}>
                 <option value="">Cualquiera</option>
                 <option value="todos">Sin restricción de rol</option>
                 {Object.entries(ROLES_RESPUESTA).map(([k, v]) => (
@@ -101,14 +120,14 @@ export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
                   </option>
                 ))}
               </Selector>
-              <Selector etiqueta="Estado" value={filtro.estado} onChange={(e) => cambiar('estado', e.target.value)}>
+              <Selector filtro etiqueta="Estado" value={filtro.estado} onChange={(e) => cambiar('estado', e.target.value)}>
                 <option value="">Todos</option>
                 <option value="abiertos">Recibiendo respuestas</option>
                 <option value="cerrados">Cerrados</option>
               </Selector>
               {hayFiltro && (
                 <div className="flex items-end">
-                  <Boton variante="fantasma" onClick={() => setFiltro({ texto: '', autor: '', alcance: '', dirigido: '', estado: '' })}>
+                  <Boton variante="fantasma" onClick={() => setFiltro({ texto: '', autor: '', creador: '', alcance: '', dirigido: '', estado: '' })}>
                     Quitar filtros
                   </Boton>
                 </div>

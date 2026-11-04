@@ -103,7 +103,7 @@ function SemaforoPanel() {
             ))}
           </Selector>
           <div id="filtros-monitoreo" className={verFiltros ? 'contents' : 'contents max-sm:hidden'}>
-          <Selector etiqueta="Comisión" value={f.comision} onChange={(e) => setF({ ...f, comision: e.target.value })}>
+          <Selector filtro etiqueta="Comisión" value={f.comision} onChange={(e) => setF({ ...f, comision: e.target.value })}>
             <option value="">Todas</option>
             {comisiones.data?.map((c) => (
               <option key={c.id} value={c.id}>
@@ -111,7 +111,7 @@ function SemaforoPanel() {
               </option>
             ))}
           </Selector>
-          <Selector etiqueta="Cargo" value={f.cargo} onChange={(e) => setF({ ...f, cargo: e.target.value })}>
+          <Selector filtro etiqueta="Cargo" value={f.cargo} onChange={(e) => setF({ ...f, cargo: e.target.value })}>
             <option value="">Todos</option>
             {cargos.data?.map((c) => (
               <option key={c.id} value={c.id}>
@@ -119,12 +119,12 @@ function SemaforoPanel() {
               </option>
             ))}
           </Selector>
-          <Selector etiqueta="Ámbito" value={f.ambito} onChange={(e) => setF({ ...f, ambito: e.target.value as Ambito | '' })}>
+          <Selector filtro etiqueta="Ámbito" value={f.ambito} onChange={(e) => setF({ ...f, ambito: e.target.value as Ambito | '' })}>
             <option value="">Todos</option>
             <option value="mesa">{AMBITO.mesa}</option>
             <option value="eyc">{AMBITO.eyc}</option>
           </Selector>
-          <Selector etiqueta="Continuidad" value={f.estatus} onChange={(e) => setF({ ...f, estatus: e.target.value as Estatus | '' })}>
+          <Selector filtro etiqueta="Continuidad" value={f.estatus} onChange={(e) => setF({ ...f, estatus: e.target.value as Estatus | '' })}>
             <option value="">Todas</option>
             {Object.entries(ESTATUS).map(([v, t]) => (
               <option key={v} value={v}>
@@ -132,7 +132,7 @@ function SemaforoPanel() {
               </option>
             ))}
           </Selector>
-          <Campo etiqueta="Buscar" type="search" value={f.texto} onChange={(e) => setF({ ...f, texto: e.target.value })} placeholder="Nombre" />
+          <Campo filtro etiqueta="Buscar" type="search" value={f.texto} onChange={(e) => setF({ ...f, texto: e.target.value })} placeholder="Nombre" />
           </div>
         </div>
         <button
