@@ -105,52 +105,11 @@ function BotonTema({ conTexto = false }: { conTexto?: boolean }) {
   )
 }
 
-/** Orden del menú que cada persona eligió en la PC (solo se guarda en este navegador). */
-function useOrdenMenu(usuario?: string) {
-  const clave = `eyc.menu.orden.${usuario ?? 'anon'}`
-  const [orden, setOrden] = useState<string[]>(() => {
-    try {
-      const v = JSON.parse(localStorage.getItem(clave) ?? '[]')
-      return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []
-    } catch {
-      return []
-    }
-  })
-  const guardar = (nuevo: string[]) => {
-    setOrden(nuevo)
-    try {
-      if (nuevo.length) localStorage.setItem(clave, JSON.stringify(nuevo))
-      else localStorage.removeItem(clave)
-    } catch {
-      /* sin almacenamiento: el orden vale solo para esta sesión */
-    }
-  }
-  return [orden, guardar] as const
-}
-
 export function Layout() {
   const { perfil } = useSesion()
   const [mas, setMas] = useState(false)
   const { pathname } = useLocation()
-  const [orden, setOrden] = useOrdenMenu(perfil?.id)
-  const [arrastrando, setArrastrando] = useState<string | null>(null)
-  const [sobre, setSobre] = useState<string | null>(null)
-  const base = NAV.filter((n) => perfil?.rol && n.roles.includes(perfil.rol))
-  const posicion = (a: string) => {
-    const k = orden.indexOf(a)
-    return k < 0 ? 1000 + base.findIndex((n) => n.a === a) : k
-  }
-  const items = [...base].sort((x, y) => (x.grupo === y.grupo ? posicion(x.a) - posicion(y.a) : 0))
-  const mover = (origen: string, destino: string) => {
-    if (origen === destino) return
-    const o = base.find((n) => n.a === origen)
-    const d = base.find((n) => n.a === destino)
-    if (!o || !d || o.grupo !== d.grupo) return
-    const lista = items.map((n) => n.a)
-    lista.splice(lista.indexOf(origen), 1)
-    lista.splice(lista.indexOf(destino), 0, origen)
-    setOrden(lista)
-  }
+  const items = NAV.filter((n) => perfil?.rol && n.roles.includes(perfil.rol))
   // En el teléfono caben 4 destinos; el resto va en «Más».
   const principales = items.length > 4 ? items.slice(0, 3) : items
   const resto = items.length > 4 ? items.slice(3) : []
@@ -206,34 +165,8 @@ export function Layout() {
                     {delGrupo.map((i) => {
                       const activo = seccionActiva(i, pathname)
                       return (
-                        <li
-                          key={i.a}
-                          draggable
-                          onDragStart={(e) => {
-                            setArrastrando(i.a)
-                            e.dataTransfer.effectAllowed = 'move'
-                            e.dataTransfer.setData('text/plain', i.a)
-                          }}
-                          onDragOver={(e) => {
-                            if (arrastrando && base.find((n) => n.a === arrastrando)?.grupo === i.grupo) {
-                              e.preventDefault()
-                              setSobre(i.a)
-                            }
-                          }}
-                          onDrop={(e) => {
-                            e.preventDefault()
-                            if (arrastrando) mover(arrastrando, i.a)
-                            setArrastrando(null)
-                            setSobre(null)
-                          }}
-                          onDragEnd={() => {
-                            setArrastrando(null)
-                            setSobre(null)
-                          }}
-                          className={`rounded-2xl ${arrastrando === i.a ? 'opacity-40' : ''} ${sobre === i.a && arrastrando && arrastrando !== i.a ? 'ring-2 ring-cian' : ''}`}
-                        >
+                        <li key={i.a}>
                           <Link
-                            draggable={false}
                             to={i.a}
                             aria-current={activo ? 'page' : undefined}
                             className={`flex min-h-12 items-center gap-3 rounded-2xl px-3 font-bold transition ${
@@ -250,14 +183,6 @@ export function Layout() {
                 </section>
               )
             })}
-            <p className="px-3 text-xs text-white/45">
-              Arrastra las opciones para ordenarlas a tu gusto.
-              {orden.length > 0 && (
-                <button type="button" onClick={() => setOrden([])} className="ml-1 underline underline-offset-2 hover:text-white">
-                  Restablecer
-                </button>
-              )}
-            </p>
           </div>
         </nav>
         <div className="relative rounded-2xl bg-white/10 p-3 ring-1 ring-white/15">
