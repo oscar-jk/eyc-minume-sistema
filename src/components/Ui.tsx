@@ -158,7 +158,7 @@ export function Insignia({ children, tono = 'neutro' }: { children: ReactNode; t
   )
 }
 
-/** Control segmentado tipo píldora; en móvil se desplaza horizontalmente. */
+/** Control segmentado tipo píldora; en móvil se desplaza horizontalmente; en pantallas grandes se acomoda en varias filas. */
 export function Pestanas<T extends string>({
   valor,
   onCambio,
@@ -171,8 +171,8 @@ export function Pestanas<T extends string>({
   etiqueta: string
 }) {
   return (
-    <div className="-mx-4 mb-5 overflow-x-auto px-4 sin-scrollbar sm:mx-0 sm:px-0">
-      <div role="tablist" aria-label={etiqueta} className="inline-flex gap-1 rounded-2xl border border-line bg-surface p-1 shadow-card dark:bg-vidrio">
+    <div className="-mx-4 mb-5 overflow-x-auto px-4 sin-scrollbar sm:mx-0 sm:overflow-visible sm:px-0">
+      <div role="tablist" aria-label={etiqueta} className="inline-flex gap-1 rounded-2xl border border-line bg-surface p-1 shadow-card dark:bg-vidrio sm:flex sm:flex-wrap">
         {opciones.map((o) => {
           const activa = o.valor === valor
           return (
