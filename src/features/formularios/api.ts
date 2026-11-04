@@ -37,6 +37,16 @@ export function useFormulario(id: string | undefined) {
   })
 }
 
+/** Todos los formularios que la cuenta puede ver, con sus preguntas activas (para exportar el banco de preguntas). */
+export async function cargarBancoPreguntas() {
+  const [f, c] = await Promise.all([
+    supabase.from('formularios').select('*').order('creado_en', { ascending: true }),
+    supabase.from('formulario_campos').select('*').eq('activo', true).order('orden').order('creado_en'),
+  ])
+  return { formularios: datos(f), campos: datos(c) }
+}
+export type BancoPreguntas = Awaited<ReturnType<typeof cargarBancoPreguntas>>
+
 export function useCrearFormulario() {
   const qc = useQueryClient()
   return useMutation({

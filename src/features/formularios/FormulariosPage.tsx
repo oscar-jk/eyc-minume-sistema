@@ -11,6 +11,7 @@ import { useComisiones } from '@/features/comisiones/api'
 import { mensajeError } from '@/lib/errores'
 import { ROL, fecha, plural } from '@/lib/formato'
 import { useActivarFormulario, useBorrarFormulario, useCrearFormulario, useDuplicarFormulario, useFormularios } from './api'
+import { exportarBancoPdf } from './bancoPdf'
 import { CompartirFormulario } from './CompartirFormulario'
 import { enlacePublico, ROLES_RESPUESTA } from './tipos'
 
@@ -33,16 +34,32 @@ export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
   const cambiar = (k: keyof typeof filtro, v: string) => setFiltro((f) => ({ ...f, [k]: v }))
   const siglaDe = useMemo(() => new Map((comisiones.data ?? []).map((c) => [c.id, c.sigla ?? c.clave.toUpperCase()])), [comisiones.data])
   const hayFiltro = Object.values(filtro).some(Boolean)
+  const [exportando, setExportando] = useState(false)
+  const exportar = () => {
+    setExportando(true)
+    exportarBancoPdf(comisiones.data ?? [])
+      .then((n) => (n === 0 ? avisar('Todavía no hay formularios para exportar.', 'error') : avisar('Elige «Guardar como PDF» como destino de impresión.')))
+      .catch((e) => avisar(mensajeError(e), 'error'))
+      .finally(() => setExportando(false))
+  }
+  const botonExportar = (
+    <Boton variante={embebido ? 'secundario' : 'claro'} cargando={exportando} onClick={exportar}>
+      Exportar banco de preguntas (PDF)
+    </Boton>
+  )
 
   return (
     <>
       {embebido ? (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <p className="min-w-0 flex-1 basis-[16rem] text-ink-2">Crea formularios con distintos tipos de campos y comparte un enlace: quien responde no necesita cuenta.</p>
-          <Boton onClick={() => setNuevo('')}>Nuevo formulario</Boton>
+          <div className="flex flex-wrap gap-2">
+            {botonExportar}
+            <Boton onClick={() => setNuevo('')}>Nuevo formulario</Boton>
+          </div>
         </div>
       ) : (
-        <Titulo sobre="Recoger opiniones" adorno="bloques" sub="Crea formularios con distintos tipos de campos y comparte un enlace: quien responde no necesita cuenta." accion={<Boton variante="claro" onClick={() => setNuevo('')}>Nuevo formulario</Boton>}>
+        <Titulo sobre="Recoger opiniones" adorno="bloques" sub="Crea formularios con distintos tipos de campos y comparte un enlace: quien responde no necesita cuenta." accion={<div className="flex flex-wrap gap-2">{botonExportar}<Boton variante="claro" onClick={() => setNuevo('')}>Nuevo formulario</Boton></div>}>
           Formula<Acento>rios</Acento>
         </Titulo>
       )}
