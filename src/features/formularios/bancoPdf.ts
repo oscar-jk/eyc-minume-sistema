@@ -1,7 +1,7 @@
 import { cargarBancoPreguntas, type BancoPreguntas } from './api'
 import { opcionesDe, ROLES_RESPUESTA, type TipoCampo } from './tipos'
 
-/** Banco de preguntas para compartir: todos los formularios, dibujados como los ve quien responde, listos para guardar como PDF. */
+/** Banco de preguntas para compartir: un formulario, dibujado como los ve quien responde, listos para guardar como PDF. */
 
 interface Comision {
   id: number
@@ -37,13 +37,6 @@ const CSS = `
 html { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #fff; color-scheme: light; }
 body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; color: #07174a; font-size: 11pt; line-height: 1.35; }
 h1, h2, h3, p { margin: 0; }
-.portada { min-height: 250mm; display: flex; flex-direction: column; justify-content: center; padding: 0 6mm; page-break-after: always; }
-.portada .sobre { color: #0043c5; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; font-size: 10pt; }
-.portada h1 { font-size: 34pt; font-weight: 900; line-height: 1.05; margin: 3mm 0 4mm; color: #002193; }
-.portada .sub { color: #33476a; font-size: 12pt; max-width: 150mm; }
-.portada ol { margin: 10mm 0 0; padding: 0; list-style: none; display: grid; gap: 2mm; max-width: 165mm; }
-.portada li { display: flex; justify-content: space-between; gap: 6mm; border-bottom: 1px solid #cbd8ee; padding: 1.5mm 0; }
-.portada li span:last-child { color: #51668a; white-space: nowrap; }
 .form { page-break-before: always; }
 .form:first-of-type { page-break-before: auto; }
 .cab { background: linear-gradient(120deg, #002193 0%, #0043c5 45%, #0090fb 100%); color: #fff; border-radius: 5mm; padding: 6mm 7mm; margin-bottom: 4mm; }
@@ -150,26 +143,18 @@ function formularioHtml(f: FormularioFila, campos: CampoFila[], comisiones: Map<
   </section>`
 }
 
-/** Arma el documento con todos los formularios de la cuenta y abre el diálogo de impresión («Guardar como PDF»). Devuelve cuántos incluyó. */
-export async function exportarBancoPdf(comisionesLista: Comision[]): Promise<number> {
+/** Arma el documento de UN formulario (sus preguntas como las ve quien responde) y abre el diálogo de impresión («Guardar como PDF»). Devuelve false si no existe. */
+export async function exportarBancoPdf(formularioId: string, comisionesLista: Comision[]): Promise<boolean> {
   const { formularios, campos } = await cargarBancoPreguntas()
-  if (!formularios.length) return 0
+  const f = formularios.find((x) => x.id === formularioId)
+  if (!f) return false
 
   const comisiones = new Map(comisionesLista.map((x) => [x.id, x]))
-  const porForm = new Map<string, CampoFila[]>()
-  for (const x of campos) porForm.set(x.formulario_id, [...(porForm.get(x.formulario_id) ?? []), x])
-  const nPreg = (id: string) => (porForm.get(id) ?? []).filter((x) => x.tipo !== 'seccion').length
-  const hoy = new Date().toLocaleDateString('es-DO', { day: 'numeric', month: 'long', year: 'numeric' })
+  const suyos = campos.filter((x) => x.formulario_id === f.id)
 
-  const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Banco de preguntas · Formularios EyC</title><style>${CSS}</style></head><body>
-    <section class="portada">
-      <div class="sobre">MINUME XVII · Evaluación y Control</div>
-      <h1>Banco de preguntas</h1>
-      <p class="sub">Todas las preguntas de los formularios, tal como las verá quien responde. Documento de lectura: no se puede responder desde aquí.</p>
-      <ol>${formularios.map((x, i) => `<li><span>${i + 1}. ${esc(x.titulo)}</span><span>${nPreg(x.id)} ${nPreg(x.id) === 1 ? 'pregunta' : 'preguntas'}</span></li>`).join('')}</ol>
-      <p class="sub" style="margin-top:10mm;font-size:10pt">Generado el ${esc(hoy)}</p>
-    </section>
-    ${formularios.map((x) => formularioHtml(x, porForm.get(x.id) ?? [], comisiones)).join('')}
+  // El título del documento es el nombre sugerido del archivo PDF.
+  const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Banco de preguntas · ${esc(f.titulo)}</title><style>${CSS}</style></head><body>
+    ${formularioHtml(f, suyos, comisiones)}
   </body></html>`
 
   await new Promise<void>((listo) => {
@@ -191,5 +176,5 @@ export async function exportarBancoPdf(comisionesLista: Comision[]): Promise<num
     marco.srcdoc = html
     document.body.appendChild(marco)
   })
-  return formularios.length
+  return true
 }
