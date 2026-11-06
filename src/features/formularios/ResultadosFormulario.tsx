@@ -9,7 +9,7 @@ import { fechaHora, plural } from '@/lib/formato'
 import { useEnviosFormulario, useFormulario, type ResumenCampo } from './api'
 import { FiltrosRespuestas } from './FiltrosRespuestas'
 import { FILTROS_VACIOS, filtrar, promedios, promediosGenerales, resumir, textoRespuesta as texto, type CampoMin, type Filtros } from './filtrarRespuestas'
-import { PromediosResultados } from './PromediosResultados'
+import { PromedioInsignia, PromediosResultados } from './PromediosResultados'
 import { RespuestaIndividual } from './RespuestaIndividual'
 import { RespuestasPorPersona } from './RespuestasPorPersona'
 import { ROLES_RESPUESTA, TIPOS_CAMPO, RUTA_FORMULARIOS } from './tipos'
@@ -142,6 +142,7 @@ export function ResultadosFormulario() {
   const resumenes = useMemo(() => campos.map((c) => resumir(c, vistos)), [campos, vistos])
   const promPreguntas = useMemo(() => promedios(campos, vistos), [campos, vistos])
   const promGenerales = useMemo(() => promediosGenerales(campos, vistos), [campos, vistos])
+  const promDe = useMemo(() => new Map(promPreguntas.map((p) => [p.campo.id, p])), [promPreguntas])
   const porRol = useMemo(() => {
     const m = new Map<string, number>()
     for (const e of vistos) m.set(e.rol ?? '—', (m.get(e.rol ?? '—') ?? 0) + 1)
@@ -229,9 +230,13 @@ export function ResultadosFormulario() {
 
       {resumenes.map((c) => (
         <Tarjeta key={c.campo_id} titulo={c.etiqueta + (c.activo ? '' : ' (oculta)')}>
-          <p className="mb-3 font-cond text-sm text-ink-3">
-            {TIPOS_CAMPO[c.tipo].nombre} · {plural(c.respuestas, 'respuesta', 'respuestas')}
-          </p>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="font-cond text-sm text-ink-3">
+              {TIPOS_CAMPO[c.tipo].nombre} · {plural(c.respuestas, 'respuesta', 'respuestas')}
+            </p>
+            {/* Escalas y números ya muestran su promedio en grande dentro del resumen. */}
+            {c.tipo !== 'escala' && c.tipo !== 'numero' && promDe.get(c.campo_id) && <PromedioInsignia p={promDe.get(c.campo_id)!} />}
+          </div>
           <Resumen c={c} />
         </Tarjeta>
       ))}

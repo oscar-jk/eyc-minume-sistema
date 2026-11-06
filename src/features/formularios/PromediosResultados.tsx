@@ -3,6 +3,20 @@ import type { Promedio, PromedioGeneral } from './filtrarRespuestas'
 
 const fmt = (n: number) => n.toLocaleString('es-DO', { maximumFractionDigits: 2 })
 
+/** Promedio de una pregunta, en una etiqueta para ponerla dentro de su propia tarjeta. */
+export function PromedioInsignia({ p }: { p: Promedio }) {
+  return (
+    <p className="inline-flex flex-wrap items-baseline gap-x-2 rounded-2xl bg-accent-soft px-3 py-1.5" aria-label={`Promedio ${fmt(p.promedio)}`}>
+      <span className="font-cond text-xs font-bold uppercase tracking-wider text-acento">Promedio</span>
+      <span className="font-cond text-2xl font-extrabold tabular leading-none">{fmt(p.promedio)}</span>
+      <span className="font-cond text-xs text-ink-3">
+        {p.rango ? `de ${p.rango[0]} a ${p.rango[1]} · ` : ''}
+        {p.n === p.de ? `${p.n} respuestas` : `${p.n} de ${p.de} (solo las que son un número)`}
+      </span>
+    </p>
+  )
+}
+
 /** Promedios arriba de los resultados: uno general por escala y uno por pregunta, para no calcularlos a mano. */
 export function PromediosResultados({ generales, porPregunta, comision }: { generales: PromedioGeneral[]; porPregunta: Promedio[]; comision: (id: number) => string }) {
   if (!porPregunta.length) return null
