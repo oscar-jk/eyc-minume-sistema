@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useMomento } from '@/app/fase'
 import { Boton } from '@/components/Boton'
+import { QuitarFiltros } from '@/components/QuitarFiltros'
 import { Campo, Selector } from '@/components/Campo'
 import { Consulta, EstadoVacio } from '@/components/Estados'
 import { Semaforo } from '@/components/Semaforo'
@@ -59,6 +60,11 @@ function Directorio({ onElegir }: { onElegir: (id: string) => void }) {
   const q = useMonitoreo(corte?.id)
   const evals = useEvaluaciones({ ambito: 'eyc' })
   const faseAbierta = m.faseEvaluacionAbierta
+  const activos = (texto.trim() ? 1 : 0) + (corteId !== undefined && corteId !== m.corteActivo?.id ? 1 : 0)
+  const quitarFiltros = () => {
+    setTexto('')
+    setCorteId(undefined)
+  }
 
   // Evaluación directa de cada persona en el corte elegido (si existe).
   const directas = useMemo(() => {
@@ -84,13 +90,14 @@ function Directorio({ onElegir }: { onElegir: (id: string) => void }) {
             ))}
           </Selector>
           <Campo filtro etiqueta="Buscar por nombre" value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Nombre del evaluador" />
+          <QuitarFiltros activos={activos} onQuitar={quitarFiltros} className="sm:col-span-2 sm:justify-self-start" />
         </div>
         <Consulta q={q}>
           {(filas) => {
             const eyc = filas.filter((r) => r.ambito === 'eyc' && r.activa && (!texto || r.nombre?.toLowerCase().includes(texto.toLowerCase())))
             if (!eyc.length)
               return (
-                <EstadoVacio titulo={texto ? 'Sin coincidencias' : 'No hay integrantes de EyC registrados'}>
+                <EstadoVacio titulo={texto ? 'Sin coincidencias' : 'No hay integrantes de EyC registrados'} accion={texto ? <QuitarFiltros activos={activos} onQuitar={quitarFiltros} /> : undefined}>
                   {texto ? 'Prueba con otro nombre.' : 'Regístralos en «Personas» con el ámbito «Miembro de EyC».'}
                 </EstadoVacio>
               )

@@ -12,6 +12,7 @@ import {
 } from "@/components/Elementos";
 import { IcoLuna, IcoSol } from "@/components/Iconos";
 import { Marca } from "@/components/Marca";
+import { Volver } from "@/components/Volver";
 
 /* ───────────── Piezas editoriales del manual (identidad MXVII) ───────────── */
 
@@ -451,6 +452,9 @@ export function ManualPage() {
           aria-hidden
           className="pointer-events-none absolute -bottom-48 -right-40 -z-0 w-[40rem] opacity-45 mix-blend-screen [animation:girar_240s_linear_infinite] sm:w-[56rem]"
         />
+        <div className="relative mx-auto mb-4 max-w-6xl print:hidden">
+          <Volver claro />
+        </div>
         <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-3">
           <p className="flex items-center gap-3 font-black">
             2026 <Destello className="size-5 text-cian" />

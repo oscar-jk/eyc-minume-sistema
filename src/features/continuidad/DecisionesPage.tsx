@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Boton } from '@/components/Boton'
 import { Selector } from '@/components/Campo'
+import { QuitarFiltros } from '@/components/QuitarFiltros'
 import { Consulta, EstadoVacio } from '@/components/Estados'
 import { Semaforo } from '@/components/Semaforo'
 import { Acento, Aviso, Insignia, Titulo } from '@/components/Ui'
@@ -23,6 +24,14 @@ export function DecisionesPage() {
   const [sem, setSem] = useState<'' | TSemaforo>('')
   const [decidir, setDecidir] = useState<Caso | null>(null)
   const q = useCasos()
+
+  // Los valores de fábrica (pendientes, los que me toca decidir) no cuentan como filtro puesto.
+  const activos = [estado !== 'pendientes', alcance !== 'mios', !!sem].filter(Boolean).length
+  const quitarFiltros = () => {
+    setEstado('pendientes')
+    setAlcance('mios')
+    setSem('')
+  }
 
   const puedeDecidir = (c: Caso) => c.pendiente && (c.elevada ? esSG : esSub)
 
@@ -58,11 +67,12 @@ export function DecisionesPage() {
           <option value="verde">Verde — Cumple</option>
           <option value="gris">Gris — No evaluado</option>
         </Selector>
+        <QuitarFiltros activos={activos} onQuitar={quitarFiltros} className="sm:col-span-3 sm:justify-self-start" />
       </div>
       <Consulta q={q} filas={4} vacio={<EstadoVacio titulo="Aún no hay recomendaciones registradas" />}>
         {(casos) => {
           const lista = casos.filter(filtrar)
-          if (!lista.length) return <EstadoVacio titulo={estado === 'pendientes' ? 'No hay casos pendientes' : 'Nada coincide con los filtros'} />
+          if (!lista.length) return <EstadoVacio titulo={estado === 'pendientes' && !activos ? 'No hay casos pendientes' : 'Nada coincide con los filtros'} accion={<QuitarFiltros activos={activos} onQuitar={quitarFiltros} />} />
           return (
             <ul className="flex flex-col gap-3">
               {lista.map((c) => (

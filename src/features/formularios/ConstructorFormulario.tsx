@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { AvisoCambios } from '@/components/AvisoCambios'
 import { useAvisar } from '@/components/Avisos'
 import { Boton } from '@/components/Boton'
@@ -238,11 +238,6 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-5">
-      <nav className="text-sm">
-        <Link to={volver} className="font-bold text-acento">
-          ← Formularios
-        </Link>
-      </nav>
       <header>
         <p className="sobretitulo text-acento">Constructor de formularios</p>
         <h1 className="text-[clamp(1.6rem,5vw,2.3rem)] font-black leading-tight tracking-tight">{titulo || 'Formulario sin título'}</h1>

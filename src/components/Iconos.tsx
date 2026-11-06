@@ -15,6 +15,7 @@ export {
   RiMoonClearLine as IcoLuna,
   RiLogoutBoxRLine as IcoSalir,
   RiArrowRightSLine as IcoFlecha,
+  RiArrowLeftLine as IcoAtras,
   RiArrowRightLine as IcoFlechaDerecha,
   RiArrowDownSLine as IcoAbajo,
   RiBookOpenLine as IcoManual,

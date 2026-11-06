@@ -126,11 +126,6 @@ function Evaluar({
 
   return (
     <div className="mx-auto max-w-3xl">
-      <nav className="mb-2 text-sm">
-        <Link to={perfil?.rol === 'eyc' ? '/comision' : persona.data.ambito === 'eyc' ? '/evaluacion-evaluadores' : '/monitoreo'} className="font-bold text-acento">
-          ← Volver
-        </Link>
-      </nav>
       <header className="mb-4">
         <p className="sobretitulo text-acento">Evaluar · {contexto}</p>
         <h1 className="text-[clamp(1.8rem,6vw,2.6rem)] font-black leading-tight tracking-tight">

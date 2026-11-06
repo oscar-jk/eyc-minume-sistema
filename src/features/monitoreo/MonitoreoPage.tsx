@@ -1,3 +1,4 @@
+import { QuitarFiltros } from '@/components/QuitarFiltros'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMomento } from '@/app/fase'
@@ -76,6 +77,12 @@ function SemaforoPanel() {
   const [verFiltros, setVerFiltros] = useState(false)
   const [soloSem, setSoloSem] = useState<TSemaforo | null>(null)
   const corteAbierto = m.abiertas.some((x) => x.corte_id === corte?.id)
+  const FILTROS_VACIOS = { comision: '', cargo: '', ambito: '' as '' | Ambito, estatus: '' as '' | Estatus, texto: '', inactivas: false }
+  const activos = [f.comision, f.cargo, f.ambito, f.estatus, f.texto.trim(), f.inactivas, soloSem].filter(Boolean).length
+  const quitarFiltros = () => {
+    setF(FILTROS_VACIOS)
+    setSoloSem(null)
+  }
 
   const filtradas = useMemo(
     () =>
@@ -148,6 +155,7 @@ function SemaforoPanel() {
           <input type="checkbox" className="size-5 accent-[var(--accent)]" checked={f.inactivas} onChange={(e) => setF({ ...f, inactivas: e.target.checked })} />
           Incluir personas sustituidas (inactivas)
         </label>
+        <QuitarFiltros activos={activos} onQuitar={quitarFiltros} className="mt-3" />
         {corte && (
           <p className="mt-1 font-cond text-sm text-ink-3">
             Umbrales de {corte.nombre}: verde ≥ {corte.umbral_verde} · amarillo ≥ {corte.umbral_amarillo} · rojo &lt; {corte.umbral_amarillo}
@@ -193,7 +201,7 @@ function SemaforoPanel() {
       <Consulta q={q} filas={6} vacio={<EstadoVacio titulo="Aún no hay personas registradas" />}>
         {() =>
           filtradas.length === 0 ? (
-            <EstadoVacio titulo="Nadie coincide con los filtros" />
+            <EstadoVacio titulo="Nadie coincide con los filtros" accion={<QuitarFiltros activos={activos} onQuitar={quitarFiltros} />} />
           ) : (
             ORDEN.filter((s) => !soloSem || s === soloSem).map((s) => {
               const grupo = filtradas.filter((r) => (r.semaforo ?? 'gris') === s)

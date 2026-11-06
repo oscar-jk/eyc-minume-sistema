@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAvisar } from "@/components/Avisos";
 import { Boton } from "@/components/Boton";
 import { Campo, Selector } from "@/components/Campo";
+import { QuitarFiltros } from "@/components/QuitarFiltros";
 import { Consulta, EstadoVacio } from "@/components/Estados";
 import { Modal } from "@/components/Modal";
 import { Aviso, Insignia, Tabla, Tarjeta } from "@/components/Ui";
@@ -274,6 +275,10 @@ export function CuentasPanel() {
                       Solo las que ya accedieron
                     </option>
                   </Selector>
+                  <QuitarFiltros
+                    activos={filtro === "todas" ? 0 : 1}
+                    onQuitar={() => setFiltro("todas")}
+                  />
                 </div>
                 <Tabla etiqueta="Cuentas del sistema">
                   <thead>

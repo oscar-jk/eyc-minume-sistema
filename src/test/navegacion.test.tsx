@@ -92,6 +92,28 @@ describe('menú lateral por rol', () => {
   })
 })
 
+describe('botón Volver', () => {
+  const volver = () => screen.queryByRole('button', { name: /volver/i })
+
+  it('aparece arriba en las pantallas internas', () => {
+    rol = 'subsecretario'
+    for (const ruta of ['/formularios/abc', '/formularios/abc/resultados', '/personas/xyz', '/comisiones/1', '/evaluar', '/no-existe']) {
+      verLayout(ruta)
+      expect(volver(), ruta).toBeInTheDocument()
+      cleanup()
+    }
+  })
+
+  it('no aparece en el inicio ni en las secciones del menú', () => {
+    rol = 'subsecretario'
+    for (const ruta of ['/', '/monitoreo', '/decisiones', '/comisiones', '/personas', '/evaluacion-evaluadores', '/configuracion', '/formularios', '/manual']) {
+      verLayout(ruta)
+      expect(volver(), ruta).not.toBeInTheDocument()
+      cleanup()
+    }
+  })
+})
+
 describe('Configuración: pestañas por rol', () => {
   const pestañas = () => screen.getAllByRole('tab').map((t) => t.textContent)
   const ver = (ruta = '/configuracion') =>

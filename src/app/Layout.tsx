@@ -6,6 +6,7 @@ import { Cargando } from '@/components/Estados'
 import { Destello } from '@/components/Elementos'
 import { IcoComision, IcoComisiones, IcoConfig, IcoDecisiones, IcoEvaluadores, IcoFormularios, IcoManual, IcoLuna, IcoMas, IcoMonitoreo, IcoPersonas, IcoSalir, IcoSol } from '@/components/Iconos'
 import { Marca } from '@/components/Marca'
+import { Volver } from '@/components/Volver'
 import { modoDemo, NOMBRE_ROL, otrosRoles, rolDemo } from '@/demo/cliente'
 import { Modal } from '@/components/Modal'
 import { useSesion } from '@/features/auth/AuthProvider'
@@ -111,6 +112,9 @@ export function Layout() {
   const { perfil } = useSesion()
   const [mas, setMas] = useState(false)
   const { pathname } = useLocation()
+  /** Es una sección del menú (o el inicio): ahí no hay a dónde volver; en lo demás, sí. */
+  const esSeccion = pathname === '/' || NAV.some((i) => i.a === pathname.replace(/\/$/, ''))
+  const secciones = NAV
   const items = NAV.filter((n) => perfil?.rol && n.roles.includes(perfil.rol))
   // En el teléfono caben 4 destinos; el resto va en «Más».
   const principales = items.length > 4 ? items.slice(0, 3) : items
@@ -220,6 +224,12 @@ export function Layout() {
         </header>
 
         <main id="contenido" className="mx-auto w-full max-w-6xl flex-1 px-4 py-5 pb-28 sm:px-6 sm:py-8 lg:px-10 lg:pb-12">
+          {/* Las pantallas internas (ficha, evaluar, constructor, resultados…) siempre tienen «Volver» arriba. */}
+          {!esSeccion && (
+            <div className="mb-4">
+              <Volver a={secciones.find((i) => seccionActiva(i, pathname))?.a ?? '/'} />
+            </div>
+          )}
           <Suspense fallback={<Cargando />}>
             <Outlet />
           </Suspense>

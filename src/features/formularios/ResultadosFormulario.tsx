@@ -12,7 +12,7 @@ import { FILTROS_VACIOS, filtrar, promedios, promediosGenerales, resumir, textoR
 import { PromedioInsignia, PromediosResultados } from './PromediosResultados'
 import { RespuestaIndividual } from './RespuestaIndividual'
 import { RespuestasPorPersona } from './RespuestasPorPersona'
-import { ROLES_RESPUESTA, TIPOS_CAMPO, RUTA_FORMULARIOS } from './tipos'
+import { ROLES_RESPUESTA, TIPOS_CAMPO } from './tipos'
 
 const num = (v: unknown) => (typeof v === 'number' || typeof v === 'string' ? Number(v) : 0)
 /** Tope de respuestas que se traen para filtrar y resumir (ver useEnviosFormulario). */
@@ -174,11 +174,6 @@ export function ResultadosFormulario() {
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-5">
-      <nav className="text-sm">
-        <Link to={RUTA_FORMULARIOS} className="font-bold text-acento">
-          ← Formularios
-        </Link>
-      </nav>
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="sobretitulo text-acento">Resultados</p>

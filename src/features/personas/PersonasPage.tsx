@@ -4,6 +4,7 @@ import { useMomento } from '@/app/fase'
 import { useAvisar } from '@/components/Avisos'
 import { Boton } from '@/components/Boton'
 import { AreaTexto, Campo, Selector } from '@/components/Campo'
+import { QuitarFiltros } from '@/components/QuitarFiltros'
 import { Consulta, EstadoVacio } from '@/components/Estados'
 import { Modal } from '@/components/Modal'
 import { Acento, Aviso, Insignia, Pestanas, Tabla, Tarjeta, Titulo } from '@/components/Ui'
@@ -85,14 +86,17 @@ function AsignacionesPanel() {
       <Tarjeta
         titulo="Asignaciones vigentes"
         accion={
-          <Selector filtro etiqueta="Comisión" value={comision} onChange={(e) => setComision(e.target.value)} className="min-w-52">
-            <option value="">Todas</option>
-            {comisiones.data?.map((c) => (
-              <option key={c.id} value={c.id}>
-                {siglaDe(c)}
-              </option>
-            ))}
-          </Selector>
+          <div className="flex flex-wrap items-end gap-2">
+            <Selector filtro etiqueta="Comisión" value={comision} onChange={(e) => setComision(e.target.value)} className="min-w-52">
+              <option value="">Todas</option>
+              {comisiones.data?.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {siglaDe(c)}
+                </option>
+              ))}
+            </Selector>
+            <QuitarFiltros activos={comision ? 1 : 0} onQuitar={() => setComision('')} />
+          </div>
         }
       >
         <Consulta q={vigentes} vacio={<EstadoVacio titulo="Nadie asignado todavía">Registra personas en «Alta individual» o «Carga masiva».</EstadoVacio>}>
