@@ -183,6 +183,9 @@ export function ResultadosFormulario() {
           <Link to={`/formularios/${id}`} className="inline-flex min-h-12 items-center rounded-2xl px-4 font-bold text-acento">
             Editar
           </Link>
+          <Boton variante="primario" onClick={() => setAbierta(vistos[0].id)} disabled={!vistos.length}>
+            Ver una por una
+          </Boton>
           <Boton variante="secundario" onClick={descargar} disabled={!vistos.length}>
             {vistos.length === todos.length ? 'Descargar CSV' : `Descargar CSV (${vistos.length})`}
           </Boton>
