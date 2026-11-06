@@ -9,6 +9,7 @@ import { fechaHora, plural } from '@/lib/formato'
 import { useEnviosFormulario, useFormulario, type ResumenCampo } from './api'
 import { FiltrosRespuestas } from './FiltrosRespuestas'
 import { FILTROS_VACIOS, filtrar, resumir, textoRespuesta as texto, type CampoMin, type Filtros } from './filtrarRespuestas'
+import { RespuestaIndividual } from './RespuestaIndividual'
 import { ROLES_RESPUESTA, TIPOS_CAMPO } from './tipos'
 
 const num = (v: unknown) => (typeof v === 'number' || typeof v === 'string' ? Number(v) : 0)
@@ -131,6 +132,8 @@ export function ResultadosFormulario() {
   const comisiones = useComisiones()
   const { perfil } = useSesion()
   const [filtros, setFiltros] = useState<Filtros>(FILTROS_VACIOS)
+  /** Respuesta abierta en el visor individual. */
+  const [abierta, setAbierta] = useState<string | null>(null)
   const campos = useMemo(() => (form.data?.campos ?? []).filter((c) => c.tipo !== 'seccion') as CampoMin[], [form.data])
   const todos = useMemo(() => envios.data ?? [], [envios.data])
   const vistos = useMemo(() => filtrar(todos, filtros, campos), [todos, filtros, campos])
@@ -224,7 +227,16 @@ export function ResultadosFormulario() {
         </Tarjeta>
       ))}
 
-      <Tarjeta titulo="Cada respuesta">
+      <Tarjeta
+        titulo="Cada respuesta"
+        accion={
+          vistos.length > 0 ? (
+            <Boton variante="secundario" onClick={() => setAbierta(vistos[0].id)}>
+              Ver una por una
+            </Boton>
+          ) : undefined
+        }
+      >
         {!todos.length ? (
           <EstadoVacio titulo="Sin respuestas" />
         ) : !vistos.length ? (
@@ -233,6 +245,9 @@ export function ResultadosFormulario() {
           <Tabla etiqueta="Respuestas recibidas">
             <thead>
               <tr>
+                <th>
+                  <span className="sr-only">Abrir</span>
+                </th>
                 <th>Fecha</th>
                 <th>Rol</th>
                 <th>Comisión</th>
@@ -243,8 +258,13 @@ export function ResultadosFormulario() {
               </tr>
             </thead>
             <tbody>
-              {vistos.map((e) => (
+              {vistos.map((e, n) => (
                 <tr key={e.id}>
+                  <td>
+                    <Boton variante="fantasma" onClick={() => setAbierta(e.id)} aria-label={`Ver la respuesta ${n + 1} completa`}>
+                      Ver
+                    </Boton>
+                  </td>
                   <td className="tabular whitespace-nowrap">{fechaHora(e.creado_en)}</td>
                   <td>{ROLES_RESPUESTA[e.rol ?? ''] ?? e.rol}</td>
                   <td>{nombreCom(e.comision_id)}</td>
@@ -258,6 +278,8 @@ export function ResultadosFormulario() {
           </Tabla>
         )}
       </Tarjeta>
+
+      <RespuestaIndividual envios={vistos} idActual={abierta} campos={campos} comision={nombreCom} onCambiar={setAbierta} onCerrar={() => setAbierta(null)} />
     </div>
   )
 }
