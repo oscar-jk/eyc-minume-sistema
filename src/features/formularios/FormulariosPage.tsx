@@ -16,7 +16,7 @@ import { CompartirFormulario } from './CompartirFormulario'
 import { enlacePublico, ROLES_RESPUESTA } from './tipos'
 
 /** Lista de formularios: cada quien ve los suyos; Subsecretaría, Secretaría General y administración ven todos. */
-export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
+export function FormulariosPage() {
   const { perfil } = useSesion()
   const q = useFormularios()
   const crear = useCrearFormulario()
@@ -45,16 +45,9 @@ export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
 
   return (
     <>
-      {embebido ? (
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <p className="min-w-0 flex-1 basis-[16rem] text-ink-2">Crea formularios con distintos tipos de campos y comparte un enlace: quien responde no necesita cuenta.</p>
-          <Boton onClick={() => setNuevo('')}>Nuevo formulario</Boton>
-        </div>
-      ) : (
-        <Titulo sobre="Recoger opiniones" adorno="bloques" sub="Crea formularios con distintos tipos de campos y comparte un enlace: quien responde no necesita cuenta." accion={<Boton variante="claro" onClick={() => setNuevo('')}>Nuevo formulario</Boton>}>
-          Formula<Acento>rios</Acento>
-        </Titulo>
-      )}
+      <Titulo sobre="Recoger opiniones" adorno="bloques" sub="Crea formularios con distintos tipos de campos y comparte un enlace: quien responde no necesita cuenta." accion={<Boton variante="claro" onClick={() => setNuevo('')}>Nuevo formulario</Boton>}>
+        Formula<Acento>rios</Acento>
+      </Titulo>
 
       <Consulta
         q={q}
@@ -90,7 +83,7 @@ export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
           <Tarjeta titulo={ve ? 'Todos los formularios' : 'Mis formularios'}>
             <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <Campo filtro etiqueta="Buscar por título" value={filtro.texto} onChange={(e) => cambiar('texto', e.target.value)} placeholder="Ej.: capacitaciones" />
-              {embebido && ve && (
+              {ve && (
                 <Selector filtro etiqueta="Creador" value={filtro.creador} onChange={(e) => cambiar('creador', e.target.value)}>
                   <option value="">Cualquier persona</option>
                   {creadores.map((c) => (
@@ -100,7 +93,7 @@ export function FormulariosPage({ embebido = false }: { embebido?: boolean }) {
                   ))}
                 </Selector>
               )}
-              {embebido && ve && (
+              {ve && (
                 <Selector filtro etiqueta="Creado por (rol)" value={filtro.autor} onChange={(e) => cambiar('autor', e.target.value)}>
                   <option value="">Cualquiera</option>
                   {(Object.keys(ROL) as (keyof typeof ROL)[]).map((r) => (

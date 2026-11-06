@@ -10,6 +10,8 @@ export interface CampoMin {
   activo: boolean
   opciones: unknown
   con_otro: boolean | null
+  escala_min?: number | null
+  escala_max?: number | null
 }
 
 export interface EnvioMin {
@@ -171,4 +173,81 @@ export function resumir(c: CampoMin, envios: EnvioMin[]): ResumenCampo {
   let otros: string[] | null = null
   if (c.con_otro) otros = valores.flatMap((v) => (Array.isArray(v) ? v : [v])).filter(esOtroTxt).map((x) => (x as string).slice(PREFIJO_OTRO.length))
   return { campo_id: c.id, etiqueta: c.etiqueta, tipo: c.tipo, activo: c.activo, respuestas: valores.length, resumen, otros }
+}
+
+export interface Promedio {
+  campo: CampoMin
+  promedio: number
+  /** Respuestas que entraron en el promedio. */
+  n: number
+  /** De cuántas respuestas a la pregunta (si algunas no eran un número). */
+  de: number
+  min: number
+  max: number
+  /** Rango posible de la pregunta, si se conoce (por ejemplo 1 a 5). */
+  rango: [number, number] | null
+  valores: number[]
+}
+
+const NUM_INICIAL = /^\s*(\d+(?:[.,]\d+)?)/
+const SOLO_NUM = /^\s*(\d+(?:[.,]\d+)?)\s*%?\s*$/
+const aNumero = (t: string) => Number(t.replace(',', '.'))
+
+/**
+ * Promedio de una pregunta, si tiene sentido: escalas y números; opciones que empiezan con un número
+ * («1 Deficiente» … «5 Excelente»); y texto libre cuando casi todos escribieron una cifra.
+ */
+export function promedioDe(c: CampoMin, envios: EnvioMin[]): Promedio | null {
+  const crudos = envios.map((e) => e.respuestas[c.id]).filter((v) => !vacia(v))
+  let valores: number[]
+  let rango: [number, number] | null = null
+  if (c.tipo === 'escala' || c.tipo === 'numero') {
+    valores = crudos.filter((v): v is number => typeof v === 'number')
+    if (c.tipo === 'escala' && c.escala_min != null && c.escala_max != null) rango = [c.escala_min, c.escala_max]
+  } else if (c.tipo === 'radio' || c.tipo === 'lista') {
+    const ops = opcionesDe(c.opciones)
+    const num = new Map(ops.map((o) => [o, NUM_INICIAL.exec(o)?.[1]]))
+    if (ops.length < 2 || [...num.values()].some((v) => v === undefined)) return null
+    const nums = [...num.values()].map((v) => aNumero(v!))
+    rango = [Math.min(...nums), Math.max(...nums)]
+    valores = crudos.flatMap((v) => (typeof v === 'string' && num.get(v) !== undefined ? [aNumero(num.get(v)!)] : []))
+  } else if (c.tipo === 'texto') {
+    valores = crudos.flatMap((v) => (typeof v === 'string' && SOLO_NUM.test(v) ? [aNumero(SOLO_NUM.exec(v)![1])] : []))
+    // Texto libre: solo si la mayoría escribió una cifra.
+    if (valores.length < 3 || valores.length < crudos.length / 2) return null
+  } else return null
+  if (!valores.length) return null
+  return { campo: c, promedio: redondea(valores.reduce((a, b) => a + b, 0) / valores.length), n: valores.length, de: crudos.length, min: Math.min(...valores), max: Math.max(...valores), rango, valores }
+}
+
+/** Promedios de las preguntas que lo admiten, en el orden del formulario. */
+export const promedios = (campos: CampoMin[], envios: EnvioMin[]): Promedio[] => campos.flatMap((c) => promedioDe(c, envios) ?? [])
+
+export interface PromedioGeneral {
+  /** Rango común de las preguntas, por ejemplo «1 a 5». */
+  etiqueta: string
+  preguntas: number
+  promedio: number
+  /** Promedio general de cada comisión (solo si hay más de una). */
+  porComision: { comision: number; promedio: number }[]
+}
+
+/** Promedio general de las preguntas que comparten la misma escala (todas las respuestas juntas). */
+export function promediosGenerales(campos: CampoMin[], envios: EnvioMin[]): PromedioGeneral[] {
+  const grupos = new Map<string, CampoMin[]>()
+  for (const c of campos) {
+    const r = promedioDe(c, envios)?.rango
+    if (!r || c.tipo === 'texto') continue
+    const k = `${r[0]} a ${r[1]}`
+    grupos.set(k, [...(grupos.get(k) ?? []), c])
+  }
+  const media = (v: number[]) => redondea(v.reduce((a, b) => a + b, 0) / v.length)
+  const valoresDe = (cs: CampoMin[], es: EnvioMin[]) => cs.flatMap((c) => promedioDe(c, es)?.valores ?? [])
+  return [...grupos.entries()]
+    .filter(([, cs]) => cs.length >= 2)
+    .map(([etiqueta, cs]) => {
+      const coms = [...new Set(envios.map((e) => e.comision_id).filter((x): x is number => x != null))]
+      const porComision = coms.length > 1 ? coms.flatMap((comision) => { const v = valoresDe(cs, envios.filter((e) => e.comision_id === comision)); return v.length ? [{ comision, promedio: media(v) }] : [] }) : []
+      return { etiqueta, preguntas: cs.length, promedio: media(valoresDe(cs, envios)), porComision }
+    })
 }

@@ -8,11 +8,10 @@ import { Cargando, EstadoError } from '@/components/Estados'
 import { Aviso, Tarjeta } from '@/components/Ui'
 import { siglaDe, useComisiones } from '@/features/comisiones/api'
 import { mensajeError } from '@/lib/errores'
-import { useSesion } from '@/features/auth/AuthProvider'
 import { useFormulario, useGuardarFormulario } from './api'
 import { FormularioRespuesta } from './FormularioRespuesta'
 import { CompartirFormulario } from './CompartirFormulario'
-import { ROLES_RESPUESTA, TIPOS_CAMPO, enlacePublico, opcionesDe, rutaFormularios, type CampoBorrador, type CampoDef, type FormularioPublicoDef, type TipoCampo } from './tipos'
+import { ROLES_RESPUESTA, TIPOS_CAMPO, enlacePublico, opcionesDe, RUTA_FORMULARIOS, type CampoBorrador, type CampoDef, type FormularioPublicoDef, type TipoCampo } from './tipos'
 
 const ESCOGE = (t: TipoCampo) => t === 'radio' || t === 'checkbox' || t === 'lista'
 let contador = 0
@@ -151,8 +150,7 @@ export function ConstructorFormulario() {
 
 function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>['data']> }) {
   const f = datos.formulario
-  const { perfil } = useSesion()
-  const volver = rutaFormularios(perfil?.rol)
+  const volver = RUTA_FORMULARIOS
   const nav = useNavigate()
   const avisar = useAvisar()
   const guardar = useGuardarFormulario()

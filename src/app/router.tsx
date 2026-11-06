@@ -4,7 +4,6 @@ import { createBrowserRouter, Link, Navigate } from 'react-router-dom'
 import { EstadoVacio } from '@/components/Estados'
 import { useSesion } from '@/features/auth/AuthProvider'
 import { LoginPage, NuevaContrasenaPage, RecuperarPage } from '@/features/auth/paginas'
-import { rutaFormularios } from '@/features/formularios/tipos'
 import { Inicio, RequiereRol, RequiereSesion } from './guards'
 import { ErrorPagina } from './ErrorPagina'
 import { Layout } from './Layout'
@@ -30,23 +29,12 @@ const ConfiguracionPage = lazy(() => import('@/features/configuracion/Configurac
 const PRIV = ['subsecretario', 'secretario', 'admin'] as const
 const GESTION = ['subsecretario', 'admin'] as const
 
-/** Lista de formularios: página propia para EyC; el resto la usa dentro de Configuración. */
-function FormulariosRuta() {
-  const { perfil } = useSesion()
-  if (perfil?.rol !== 'eyc') return <Navigate to={rutaFormularios(perfil?.rol)} replace />
-  return (
-    <Suspense fallback={null}>
-      <FormulariosPage />
-    </Suspense>
-  )
-}
-
-/** Configuración: EyC ya no la tiene, su Formularios está en el menú. */
+/** Configuración es de Subsecretaría y administración; los demás roles van a Formularios, que ya no vive dentro de ella. */
 function ConfiguracionRuta() {
   const { perfil } = useSesion()
-  if (perfil?.rol === 'eyc') return <Navigate to="/formularios" replace />
+  if (perfil && !(GESTION as readonly string[]).includes(perfil.rol)) return <Navigate to="/formularios" replace />
   return (
-    <RequiereRol roles={[...PRIV]}>
+    <RequiereRol roles={[...GESTION]}>
       <ConfiguracionPage />
     </RequiereRol>
   )
@@ -89,7 +77,7 @@ export const router = createBrowserRouter([
           { path: 'decisiones', element: <RequiereRol roles={[...PRIV]}><DecisionesPage /></RequiereRol> },
           { path: 'personas', element: <RequiereRol roles={[...GESTION]}><PersonasPage /></RequiereRol> },
           { path: 'personas/:id', element: <FichaPage /> },
-          { path: 'formularios', element: <FormulariosRuta /> },
+          { path: 'formularios', element: <RequiereRol roles={['eyc', ...PRIV]}><Suspense fallback={null}><FormulariosPage /></Suspense></RequiereRol> },
           { path: 'formularios/:id', element: <RequiereRol roles={['eyc', ...PRIV]}><ConstructorFormulario /></RequiereRol> },
           { path: 'formularios/:id/resultados', element: <RequiereRol roles={['eyc', ...PRIV]}><ResultadosFormulario /></RequiereRol> },
           { path: 'configuracion', element: <ConfiguracionRuta /> },

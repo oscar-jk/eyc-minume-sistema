@@ -27,9 +27,10 @@ const NAV: { a: string; texto: string; corto: string; ico: Ico; roles: Rol[]; gr
   { a: '/comisiones', texto: 'Comisiones', corto: 'Comisiones', ico: IcoComisiones, roles: PRIV, grupo: 'Seguimiento y control' },
   { a: '/personas', texto: 'Personas', corto: 'Personas', ico: IcoPersonas, roles: ['subsecretario', 'admin'], grupo: 'Seguimiento y control' },
   { a: '/evaluacion-evaluadores', texto: 'Evaluación de evaluadores', corto: 'Evaluadores', ico: IcoEvaluadores, roles: ['subsecretario', 'admin'], grupo: 'Evaluación' },
-  // EyC tiene Formularios en el menú; los demás roles lo tienen dentro de Configuración (sus rutas cuentan como esa sección).
+  // Formularios es un ítem propio: EyC lo ve con su seguimiento; los demás roles, en Administración justo debajo de Configuración.
   { a: '/formularios', texto: 'Formularios', corto: 'Formularios', ico: IcoFormularios, roles: ['eyc'], grupo: 'Seguimiento y control' },
-  { a: '/configuracion', texto: 'Configuración', corto: 'Ajustes', ico: IcoConfig, roles: PRIV, grupo: 'Administración', tambien: ['/formularios'] },
+  { a: '/configuracion', texto: 'Configuración', corto: 'Ajustes', ico: IcoConfig, roles: ['subsecretario', 'admin'], grupo: 'Administración' },
+  { a: '/formularios', texto: 'Formularios', corto: 'Formularios', ico: IcoFormularios, roles: PRIV, grupo: 'Administración' },
   { a: '/manual', texto: 'Manual de usuario', corto: 'Manual', ico: IcoManual, roles: TODOS, grupo: 'Documentación' },
 ]
 

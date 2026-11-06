@@ -1,5 +1,5 @@
 import { cleanup, render, screen, within } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Rol } from '@/lib/tipos'
 
@@ -8,7 +8,6 @@ vi.mock('@/features/auth/AuthProvider', () => ({ useSesion: () => ({ perfil: { i
 vi.mock('@/features/auth/api', () => ({ salir: vi.fn() }))
 vi.mock('@/app/fase', () => ({ useMomento: () => ({ cargando: true, abiertas: [], fases: [], cortes: [] }) }))
 vi.mock('@/components/CieloEstrellado', () => ({ CieloEstrellado: () => null }))
-vi.mock('@/features/formularios/FormulariosPage', () => ({ FormulariosPage: () => <p>PANEL-FORMULARIOS</p> }))
 vi.mock('@/features/configuracion/Cuentas', () => ({ AuditoriaPanel: () => <p>PANEL-AUDITORIA</p>, CuentasPanel: () => <p>PANEL-CUENTAS</p> }))
 vi.mock('@/features/configuracion/Pesos', () => ({ CortesPanel: () => <p>PANEL-CORTES</p>, PesosPanel: () => <p>PANEL-PESOS</p> }))
 vi.mock('@/features/configuracion/Catalogos', () => ({ CatalogosPanel: () => <p>PANEL-CATALOGOS</p> }))
@@ -36,10 +35,11 @@ describe('menú lateral por rol', () => {
     rol = 'subsecretario'
   })
 
-  it('Formularios ya no es un elemento del menú y Evaluación de evaluadores sí', () => {
+  it('Formularios es un elemento del menú, justo debajo de Configuración', () => {
     verLayout('/monitoreo')
-    expect(enlaces()).not.toContain('Formularios')
-    expect(enlaces()).toEqual(expect.arrayContaining(['Monitoreo', 'Decisiones', 'Comisiones', 'Personas', 'Evaluación de evaluadores', 'Configuración', 'Manual de usuario']))
+    expect(enlaces()).toEqual(expect.arrayContaining(['Monitoreo', 'Decisiones', 'Comisiones', 'Personas', 'Evaluación de evaluadores', 'Configuración', 'Formularios', 'Manual de usuario']))
+    const e = enlaces()
+    expect(e.indexOf('Formularios')).toBe(e.indexOf('Configuración') + 1)
   })
 
   it('agrupa por secciones y marca la sección activa', () => {
@@ -49,15 +49,17 @@ describe('menú lateral por rol', () => {
     expect(lateral().getByRole('link', { name: 'Decisiones' })).not.toHaveAttribute('aria-current')
   })
 
-  it('dentro de /formularios/:id queda activa Configuración', () => {
+  it('dentro de /formularios/:id queda activo Formularios, no Configuración', () => {
     verLayout('/formularios/abc/resultados')
-    expect(lateral().getByRole('link', { name: 'Configuración' })).toHaveAttribute('aria-current', 'page')
+    expect(lateral().getByRole('link', { name: 'Formularios' })).toHaveAttribute('aria-current', 'page')
+    expect(lateral().getByRole('link', { name: 'Configuración' })).not.toHaveAttribute('aria-current')
   })
 
   it('secretario: solo lectura, sin Personas ni Evaluación de evaluadores', () => {
     rol = 'secretario'
     verLayout('/decisiones')
-    expect(enlaces()).toEqual(expect.arrayContaining(['Monitoreo', 'Decisiones', 'Comisiones', 'Configuración', 'Manual de usuario']))
+    expect(enlaces()).toEqual(expect.arrayContaining(['Monitoreo', 'Decisiones', 'Comisiones', 'Formularios', 'Manual de usuario']))
+    expect(enlaces()).not.toContain('Configuración')
     expect(enlaces()).not.toContain('Personas')
     expect(enlaces()).not.toContain('Evaluación de evaluadores')
   })
@@ -74,11 +76,11 @@ describe('menú lateral por rol', () => {
     expect(lateral().getByRole('link', { name: 'Formularios' })).toHaveAttribute('aria-current', 'page')
   })
 
-  it('los demás roles no tienen Formularios en el menú: está dentro de Configuración', () => {
-    for (const r of ['subsecretario', 'secretario', 'admin'] as const) {
+  it('todos los roles tienen Formularios en el menú', () => {
+    for (const r of ['eyc', 'subsecretario', 'secretario', 'admin'] as const) {
       rol = r
       verLayout('/monitoreo')
-      expect(enlaces()).not.toContain('Formularios')
+      expect(enlaces()).toContain('Formularios')
       cleanup()
     }
   })
@@ -95,14 +97,17 @@ describe('Configuración: pestañas por rol', () => {
   const ver = (ruta = '/configuracion') =>
     render(
       <MemoryRouter initialEntries={[ruta]}>
-        <ConfiguracionPage />
+        <Routes>
+          <Route path="/configuracion" element={<ConfiguracionPage />} />
+          <Route path="/formularios" element={<p>PANEL-FORMULARIOS</p>} />
+        </Routes>
       </MemoryRouter>,
     )
 
   it('subsecretario: todas menos Cuentas', () => {
     rol = 'subsecretario'
     ver()
-    expect(pestañas()).toEqual(['Fases y evento', 'Pesos y ponderaciones', 'Cortes y umbrales', 'Criterios de evaluación', 'Comisiones y catálogos', 'Auditoría', 'Formularios'])
+    expect(pestañas()).toEqual(['Fases y evento', 'Pesos y ponderaciones', 'Cortes y umbrales', 'Criterios de evaluación', 'Comisiones y catálogos', 'Auditoría'])
     expect(screen.getByText('PANEL-FASES')).toBeInTheDocument()
   })
 
@@ -110,20 +115,21 @@ describe('Configuración: pestañas por rol', () => {
     rol = 'admin'
     ver()
     expect(pestañas()).toContain('Cuentas y permisos')
-    expect(pestañas()).toContain('Formularios')
+    expect(pestañas()).not.toContain('Formularios')
   })
 
-  it('?tab=formularios abre Formularios', () => {
+  it('?tab=formularios ya no abre una pestaña: manda a Formularios', () => {
     rol = 'subsecretario'
     ver('/configuracion?tab=formularios')
     expect(screen.getByText('PANEL-FORMULARIOS')).toBeInTheDocument()
+    expect(screen.queryAllByRole('tab')).toHaveLength(0)
   })
 
-  it.each(['secretario'] as const)('%s: solo Formularios, aunque pida otra pestaña', (r) => {
+  it.each(['eyc', 'secretario'] as const)('%s: no entra a Configuración', (r) => {
     rol = r
     ver('/configuracion?tab=cuentas')
-    expect(pestañas()).toEqual(['Formularios'])
     expect(screen.getByText('PANEL-FORMULARIOS')).toBeInTheDocument()
+    expect(screen.queryAllByRole('tab')).toHaveLength(0)
     expect(screen.queryByText('PANEL-CUENTAS')).not.toBeInTheDocument()
   })
 

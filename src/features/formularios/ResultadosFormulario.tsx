@@ -8,10 +8,11 @@ import { siglaDe, useComisiones } from '@/features/comisiones/api'
 import { fechaHora, plural } from '@/lib/formato'
 import { useEnviosFormulario, useFormulario, type ResumenCampo } from './api'
 import { FiltrosRespuestas } from './FiltrosRespuestas'
-import { FILTROS_VACIOS, filtrar, resumir, textoRespuesta as texto, type CampoMin, type Filtros } from './filtrarRespuestas'
+import { FILTROS_VACIOS, filtrar, promedios, promediosGenerales, resumir, textoRespuesta as texto, type CampoMin, type Filtros } from './filtrarRespuestas'
+import { PromediosResultados } from './PromediosResultados'
 import { RespuestaIndividual } from './RespuestaIndividual'
 import { RespuestasPorPersona } from './RespuestasPorPersona'
-import { ROLES_RESPUESTA, TIPOS_CAMPO, rutaFormularios } from './tipos'
+import { ROLES_RESPUESTA, TIPOS_CAMPO, RUTA_FORMULARIOS } from './tipos'
 
 const num = (v: unknown) => (typeof v === 'number' || typeof v === 'string' ? Number(v) : 0)
 /** Tope de respuestas que se traen para filtrar y resumir (ver useEnviosFormulario). */
@@ -139,6 +140,8 @@ export function ResultadosFormulario() {
   const todos = useMemo(() => envios.data ?? [], [envios.data])
   const vistos = useMemo(() => filtrar(todos, filtros, campos), [todos, filtros, campos])
   const resumenes = useMemo(() => campos.map((c) => resumir(c, vistos)), [campos, vistos])
+  const promPreguntas = useMemo(() => promedios(campos, vistos), [campos, vistos])
+  const promGenerales = useMemo(() => promediosGenerales(campos, vistos), [campos, vistos])
   const porRol = useMemo(() => {
     const m = new Map<string, number>()
     for (const e of vistos) m.set(e.rol ?? '—', (m.get(e.rol ?? '—') ?? 0) + 1)
@@ -171,7 +174,7 @@ export function ResultadosFormulario() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-5">
       <nav className="text-sm">
-        <Link to={rutaFormularios(perfil?.rol)} className="font-bold text-acento">
+        <Link to={RUTA_FORMULARIOS} className="font-bold text-acento">
           ← Formularios
         </Link>
       </nav>
@@ -221,6 +224,8 @@ export function ResultadosFormulario() {
           {todos.length > 0 && vistos.length === 0 && <p className="text-sm text-ink-3">Ninguna respuesta coincide con esos filtros.</p>}
         </div>
       </Tarjeta>
+
+      <PromediosResultados generales={promGenerales} porPregunta={promPreguntas} comision={nombreCom} />
 
       {resumenes.map((c) => (
         <Tarjeta key={c.campo_id} titulo={c.etiqueta + (c.activo ? '' : ' (oculta)')}>

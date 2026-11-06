@@ -657,7 +657,7 @@ export function ManualPage() {
               <p>
                 En computadora, el menú está en la{" "}
                 <strong>barra lateral izquierda</strong>: Monitoreo, Decisiones,
-                Comisiones, Personas, Evaluación de evaluadores, Configuración (con Formularios) y Manual de
+                Comisiones, Personas, Evaluación de evaluadores, Configuración, Formularios y Manual de
                 usuario (cada rol ve solo lo suyo). En el teléfono aparece una{" "}
                 <strong>barra inferior</strong> con las secciones principales y
                 un botón «Más».
@@ -1068,7 +1068,7 @@ export function ManualPage() {
 
             <Seccion
               titulo="Formularios: recoger opiniones"
-              donde="Configuración › Formularios"
+              donde="Menú lateral › Formularios"
             >
               <p>
                 Cualquier rol puede crear un formulario para recoger feedback de
@@ -1086,7 +1086,7 @@ export function ManualPage() {
               <Pasos
                 items={[
                   <>
-                    Entra a <Ruta>Configuración</Ruta>, pestaña <Ruta>Formularios</Ruta>, y toca{" "}
+                    Entra a <Ruta>Formularios</Ruta> (en el menú lateral) y toca{" "}
                     <B>Nuevo formulario</B>. Ponle un título y toca{" "}
                     <B>Crear y diseñar</B>.
                   </>,

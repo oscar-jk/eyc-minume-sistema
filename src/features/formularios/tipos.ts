@@ -91,8 +91,8 @@ export interface CampoBorrador {
   con_otro: boolean
 }
 
-/** Dónde está la lista de formularios: EyC la tiene en el menú; los demás roles, en Configuración. */
-export const rutaFormularios = (rol?: string | null) => (rol === 'eyc' ? '/formularios' : '/configuracion?tab=formularios')
+/** Dónde está la lista de formularios (ítem propio del menú lateral, para todos los roles). */
+export const RUTA_FORMULARIOS = '/formularios'
 
 /** Enlace público de un formulario: lo abre cualquier persona, sin cuenta. */
 export const enlacePublico = (codigo: string) => `${window.location.origin}/f/${codigo}`
