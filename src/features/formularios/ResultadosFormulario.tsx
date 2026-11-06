@@ -10,7 +10,7 @@ import { useEnviosFormulario, useFormulario, type ResumenCampo } from './api'
 import { FiltrosRespuestas } from './FiltrosRespuestas'
 import { FILTROS_VACIOS, filtrar, resumir, textoRespuesta as texto, type CampoMin, type Filtros } from './filtrarRespuestas'
 import { RespuestaIndividual } from './RespuestaIndividual'
-import { ROLES_RESPUESTA, TIPOS_CAMPO } from './tipos'
+import { ROLES_RESPUESTA, TIPOS_CAMPO, rutaFormularios } from './tipos'
 
 const num = (v: unknown) => (typeof v === 'number' || typeof v === 'string' ? Number(v) : 0)
 /** Tope de respuestas que se traen para filtrar y resumir (ver useEnviosFormulario). */
@@ -170,7 +170,7 @@ export function ResultadosFormulario() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-5">
       <nav className="text-sm">
-        <Link to="/configuracion?tab=formularios" className="font-bold text-acento">
+        <Link to={rutaFormularios(perfil?.rol)} className="font-bold text-acento">
           ← Formularios
         </Link>
       </nav>

@@ -2,7 +2,9 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Link, Navigate } from 'react-router-dom'
 import { EstadoVacio } from '@/components/Estados'
+import { useSesion } from '@/features/auth/AuthProvider'
 import { LoginPage, NuevaContrasenaPage, RecuperarPage } from '@/features/auth/paginas'
+import { rutaFormularios } from '@/features/formularios/tipos'
 import { Inicio, RequiereRol, RequiereSesion } from './guards'
 import { ErrorPagina } from './ErrorPagina'
 import { Layout } from './Layout'
@@ -21,11 +23,34 @@ const PersonasPage = lazy(() => import('@/features/personas/PersonasPage').then(
 const ManualPage = lazy(() => import('@/features/manual/ManualPage').then((m) => ({ default: m.ManualPage })))
 const ConstructorFormulario = lazy(() => import('@/features/formularios/ConstructorFormulario').then((m) => ({ default: m.ConstructorFormulario })))
 const ResultadosFormulario = lazy(() => import('@/features/formularios/ResultadosFormulario').then((m) => ({ default: m.ResultadosFormulario })))
+const FormulariosPage = lazy(() => import('@/features/formularios/FormulariosPage').then((m) => ({ default: m.FormulariosPage })))
 const FormularioPublicoPage = lazy(() => import('@/features/formularios/FormularioPublicoPage').then((m) => ({ default: m.FormularioPublicoPage })))
 const ConfiguracionPage = lazy(() => import('@/features/configuracion/ConfiguracionPage').then((m) => ({ default: m.ConfiguracionPage })))
 
 const PRIV = ['subsecretario', 'secretario', 'admin'] as const
 const GESTION = ['subsecretario', 'admin'] as const
+
+/** Lista de formularios: página propia para EyC; el resto la usa dentro de Configuración. */
+function FormulariosRuta() {
+  const { perfil } = useSesion()
+  if (perfil?.rol !== 'eyc') return <Navigate to={rutaFormularios(perfil?.rol)} replace />
+  return (
+    <Suspense fallback={null}>
+      <FormulariosPage />
+    </Suspense>
+  )
+}
+
+/** Configuración: EyC ya no la tiene, su Formularios está en el menú. */
+function ConfiguracionRuta() {
+  const { perfil } = useSesion()
+  if (perfil?.rol === 'eyc') return <Navigate to="/formularios" replace />
+  return (
+    <RequiereRol roles={[...PRIV]}>
+      <ConfiguracionPage />
+    </RequiereRol>
+  )
+}
 
 function NoEncontrada() {
   return (
@@ -64,10 +89,10 @@ export const router = createBrowserRouter([
           { path: 'decisiones', element: <RequiereRol roles={[...PRIV]}><DecisionesPage /></RequiereRol> },
           { path: 'personas', element: <RequiereRol roles={[...GESTION]}><PersonasPage /></RequiereRol> },
           { path: 'personas/:id', element: <FichaPage /> },
-          { path: 'formularios', element: <Navigate to="/configuracion?tab=formularios" replace /> },
+          { path: 'formularios', element: <FormulariosRuta /> },
           { path: 'formularios/:id', element: <RequiereRol roles={['eyc', ...PRIV]}><ConstructorFormulario /></RequiereRol> },
           { path: 'formularios/:id/resultados', element: <RequiereRol roles={['eyc', ...PRIV]}><ResultadosFormulario /></RequiereRol> },
-          { path: 'configuracion', element: <RequiereRol roles={['eyc', ...PRIV]}><ConfiguracionPage /></RequiereRol> },
+          { path: 'configuracion', element: <ConfiguracionRuta /> },
           { path: '*', element: <NoEncontrada /> },
         ],
       },

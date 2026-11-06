@@ -4,7 +4,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { CieloEstrellado } from '@/components/CieloEstrellado'
 import { Cargando } from '@/components/Estados'
 import { Destello } from '@/components/Elementos'
-import { IcoComision, IcoComisiones, IcoConfig, IcoDecisiones, IcoEvaluadores, IcoManual, IcoLuna, IcoMas, IcoMonitoreo, IcoPersonas, IcoSalir, IcoSol } from '@/components/Iconos'
+import { IcoComision, IcoComisiones, IcoConfig, IcoDecisiones, IcoEvaluadores, IcoFormularios, IcoManual, IcoLuna, IcoMas, IcoMonitoreo, IcoPersonas, IcoSalir, IcoSol } from '@/components/Iconos'
 import { Marca } from '@/components/Marca'
 import { modoDemo, NOMBRE_ROL, otrosRoles, rolDemo } from '@/demo/cliente'
 import { Modal } from '@/components/Modal'
@@ -27,8 +27,9 @@ const NAV: { a: string; texto: string; corto: string; ico: Ico; roles: Rol[]; gr
   { a: '/comisiones', texto: 'Comisiones', corto: 'Comisiones', ico: IcoComisiones, roles: PRIV, grupo: 'Seguimiento y control' },
   { a: '/personas', texto: 'Personas', corto: 'Personas', ico: IcoPersonas, roles: ['subsecretario', 'admin'], grupo: 'Seguimiento y control' },
   { a: '/evaluacion-evaluadores', texto: 'Evaluación de evaluadores', corto: 'Evaluadores', ico: IcoEvaluadores, roles: ['subsecretario', 'admin'], grupo: 'Evaluación' },
-  // Formularios vive dentro de Configuración: sus rutas cuentan como esta sección.
-  { a: '/configuracion', texto: 'Configuración', corto: 'Ajustes', ico: IcoConfig, roles: TODOS, grupo: 'Administración', tambien: ['/formularios'] },
+  // EyC tiene Formularios en el menú; los demás roles lo tienen dentro de Configuración (sus rutas cuentan como esa sección).
+  { a: '/formularios', texto: 'Formularios', corto: 'Formularios', ico: IcoFormularios, roles: ['eyc'], grupo: 'Seguimiento y control' },
+  { a: '/configuracion', texto: 'Configuración', corto: 'Ajustes', ico: IcoConfig, roles: PRIV, grupo: 'Administración', tambien: ['/formularios'] },
   { a: '/manual', texto: 'Manual de usuario', corto: 'Manual', ico: IcoManual, roles: TODOS, grupo: 'Documentación' },
 ]
 

@@ -62,10 +62,25 @@ describe('menú lateral por rol', () => {
     expect(enlaces()).not.toContain('Evaluación de evaluadores')
   })
 
-  it('EyC: su comisión, Configuración (solo Formularios) y el manual', () => {
+  it('EyC: su comisión, Formularios en el menú (sin Configuración) y el manual', () => {
     rol = 'eyc'
     verLayout('/comision')
-    expect(enlaces()).toEqual(['Mi comisión', 'Configuración', 'Manual de usuario'])
+    expect(enlaces()).toEqual(['Mi comisión', 'Formularios', 'Manual de usuario'])
+  })
+
+  it('EyC: dentro de /formularios/:id queda activo Formularios', () => {
+    rol = 'eyc'
+    verLayout('/formularios/abc/resultados')
+    expect(lateral().getByRole('link', { name: 'Formularios' })).toHaveAttribute('aria-current', 'page')
+  })
+
+  it('los demás roles no tienen Formularios en el menú: está dentro de Configuración', () => {
+    for (const r of ['subsecretario', 'secretario', 'admin'] as const) {
+      rol = r
+      verLayout('/monitoreo')
+      expect(enlaces()).not.toContain('Formularios')
+      cleanup()
+    }
   })
 
   it('admin ve todo', () => {
@@ -104,7 +119,7 @@ describe('Configuración: pestañas por rol', () => {
     expect(screen.getByText('PANEL-FORMULARIOS')).toBeInTheDocument()
   })
 
-  it.each(['eyc', 'secretario'] as const)('%s: solo Formularios, aunque pida otra pestaña', (r) => {
+  it.each(['secretario'] as const)('%s: solo Formularios, aunque pida otra pestaña', (r) => {
     rol = r
     ver('/configuracion?tab=cuentas')
     expect(pestañas()).toEqual(['Formularios'])

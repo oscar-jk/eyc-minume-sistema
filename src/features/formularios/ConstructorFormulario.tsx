@@ -8,10 +8,11 @@ import { Cargando, EstadoError } from '@/components/Estados'
 import { Aviso, Tarjeta } from '@/components/Ui'
 import { siglaDe, useComisiones } from '@/features/comisiones/api'
 import { mensajeError } from '@/lib/errores'
+import { useSesion } from '@/features/auth/AuthProvider'
 import { useFormulario, useGuardarFormulario } from './api'
 import { FormularioRespuesta } from './FormularioRespuesta'
 import { CompartirFormulario } from './CompartirFormulario'
-import { ROLES_RESPUESTA, TIPOS_CAMPO, enlacePublico, opcionesDe, type CampoBorrador, type CampoDef, type FormularioPublicoDef, type TipoCampo } from './tipos'
+import { ROLES_RESPUESTA, TIPOS_CAMPO, enlacePublico, opcionesDe, rutaFormularios, type CampoBorrador, type CampoDef, type FormularioPublicoDef, type TipoCampo } from './tipos'
 
 const ESCOGE = (t: TipoCampo) => t === 'radio' || t === 'checkbox' || t === 'lista'
 let contador = 0
@@ -150,6 +151,8 @@ export function ConstructorFormulario() {
 
 function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>['data']> }) {
   const f = datos.formulario
+  const { perfil } = useSesion()
+  const volver = rutaFormularios(perfil?.rol)
   const nav = useNavigate()
   const avisar = useAvisar()
   const guardar = useGuardarFormulario()
@@ -166,8 +169,8 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
   const [compartiendo, setCompartiendo] = useState(false)
   // Se sale cuando ya se dibujó sin «cambios pendientes»; si no, el aviso de salida lo frena.
   useEffect(() => {
-    if (guardado && !sucio) nav('/configuracion?tab=formularios')
-  }, [guardado, sucio, nav])
+    if (guardado && !sucio) nav(volver)
+  }, [guardado, sucio, nav, volver])
   const [campos, setCampos] = useState<CampoBorrador[]>(() =>
     datos.campos
       .filter((c) => c.activo)
@@ -238,7 +241,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-5">
       <nav className="text-sm">
-        <Link to="/configuracion?tab=formularios" className="font-bold text-acento">
+        <Link to={volver} className="font-bold text-acento">
           ← Formularios
         </Link>
       </nav>
@@ -392,7 +395,7 @@ function Editor({ datos }: { datos: NonNullable<ReturnType<typeof useFormulario>
       <div className="sticky bottom-[calc(64px+env(safe-area-inset-bottom))] z-20 -mx-4 flex flex-col gap-2 border-t border-line bg-surface/95 px-4 pb-3 pt-3 shadow-card backdrop-blur-xl sm:mx-0 sm:rounded-2xl sm:border lg:bottom-4 dark:bg-[#0b1a6b]/95">
         {guardar.isError && <Aviso tono="peligro">{mensajeError(guardar.error)}</Aviso>}
         <div className="flex gap-2">
-          <Boton variante="secundario" className="flex-1" onClick={() => nav('/configuracion?tab=formularios')}>
+          <Boton variante="secundario" className="flex-1" onClick={() => nav(volver)}>
             Cancelar
           </Boton>
           <Boton className="flex-1" onClick={alGuardar} cargando={guardar.isPending} disabled={!valido}>
