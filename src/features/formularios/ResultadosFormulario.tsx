@@ -1,15 +1,19 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Boton } from '@/components/Boton'
 import { Cargando, EstadoError, EstadoVacio } from '@/components/Estados'
 import { Insignia, Tabla, Tarjeta } from '@/components/Ui'
+import { useSesion } from '@/features/auth/AuthProvider'
 import { siglaDe, useComisiones } from '@/features/comisiones/api'
 import { fechaHora, plural } from '@/lib/formato'
-import { useEnviosFormulario, useFormulario, useResultados, type ResumenCampo } from './api'
+import { useEnviosFormulario, useFormulario, type ResumenCampo } from './api'
+import { FiltrosRespuestas } from './FiltrosRespuestas'
+import { FILTROS_VACIOS, filtrar, resumir, textoRespuesta as texto, type CampoMin, type Filtros } from './filtrarRespuestas'
 import { ROLES_RESPUESTA, TIPOS_CAMPO } from './tipos'
 
 const num = (v: unknown) => (typeof v === 'number' || typeof v === 'string' ? Number(v) : 0)
-const texto = (v: unknown): string => (v && typeof v === 'object' && !Array.isArray(v) ? String((v as { nombre?: string; otro?: string }).nombre ?? (v as { otro?: string }).otro ?? '') : Array.isArray(v) ? v.join(' · ') : v === true ? 'Sí' : v === false ? 'No' : v == null ? '' : String(v))
+/** Tope de respuestas que se traen para filtrar y resumir (ver useEnviosFormulario). */
+const TOPE_ENVIOS = 2000
 
 function Barras({ datos, total }: { datos: [string, number][]; total: number }) {
   return (
@@ -36,7 +40,7 @@ function Barras({ datos, total }: { datos: [string, number][]; total: number }) 
 
 function Resumen({ c }: { c: ResumenCampo }) {
   const r = c.resumen as Record<string, unknown>
-  if (!c.respuestas) return <p className="text-sm text-ink-3">Sin respuestas todavía.</p>
+  if (!c.respuestas) return <p className="text-sm text-ink-3">Sin respuestas en esta selección.</p>
   switch (c.tipo) {
     case 'radio':
     case 'lista':
@@ -123,20 +127,35 @@ function Resumen({ c }: { c: ResumenCampo }) {
 export function ResultadosFormulario() {
   const { id } = useParams()
   const form = useFormulario(id)
-  const res = useResultados(id)
   const envios = useEnviosFormulario(id)
   const comisiones = useComisiones()
-  const campos = useMemo(() => (form.data?.campos ?? []).filter((c) => c.tipo !== 'seccion'), [form.data])
+  const { perfil } = useSesion()
+  const [filtros, setFiltros] = useState<Filtros>(FILTROS_VACIOS)
+  const campos = useMemo(() => (form.data?.campos ?? []).filter((c) => c.tipo !== 'seccion') as CampoMin[], [form.data])
+  const todos = useMemo(() => envios.data ?? [], [envios.data])
+  const vistos = useMemo(() => filtrar(todos, filtros, campos), [todos, filtros, campos])
+  const resumenes = useMemo(() => campos.map((c) => resumir(c, vistos)), [campos, vistos])
+  const porRol = useMemo(() => {
+    const m = new Map<string, number>()
+    for (const e of vistos) m.set(e.rol ?? '—', (m.get(e.rol ?? '—') ?? 0) + 1)
+    return [...m.entries()]
+  }, [vistos])
+  const porComision = useMemo(() => {
+    const m = new Map<number, number>()
+    for (const e of vistos) if (e.comision_id != null) m.set(e.comision_id, (m.get(e.comision_id) ?? 0) + 1)
+    return [...m.entries()]
+  }, [vistos])
 
-  if (form.isPending || res.isPending) return <Cargando filas={4} />
+  if (form.isPending || envios.isPending) return <Cargando filas={4} />
   if (form.isError) return <EstadoError error={form.error} onReintentar={() => form.refetch()} />
-  if (res.isError) return <EstadoError error={res.error} onReintentar={() => res.refetch()} />
-  const r = res.data
+  if (envios.isError) return <EstadoError error={envios.error} onReintentar={() => envios.refetch()} />
   const nombreCom = (cid: number | null) => (cid == null ? '' : siglaDe(comisiones.data?.find((c) => c.id === cid)))
+  const miComision = perfil?.rol === 'eyc' ? (perfil.comision_id ?? null) : null
 
+  /** Descarga solo lo que se ve con los filtros puestos. */
   const descargar = () => {
     const cab = ['Fecha', 'Rol', 'Comisión', 'Sesión o taller', ...campos.map((c) => c.etiqueta)]
-    const filas = (envios.data ?? []).map((e) => [fechaHora(e.creado_en), ROLES_RESPUESTA[e.rol ?? ''] ?? e.rol ?? '', nombreCom(e.comision_id), e.referencia ?? '', ...campos.map((c) => texto(e.respuestas[c.id]))])
+    const filas = vistos.map((e) => [fechaHora(e.creado_en), ROLES_RESPUESTA[e.rol ?? ''] ?? e.rol ?? '', nombreCom(e.comision_id), e.referencia ?? '', ...campos.map((c) => texto(e.respuestas[c.id]))])
     const csv = [cab, ...filas].map((f) => f.map((x) => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\r\n')
     const a = document.createElement('a')
     a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }))
@@ -161,24 +180,42 @@ export function ResultadosFormulario() {
           <Link to={`/formularios/${id}`} className="inline-flex min-h-12 items-center rounded-2xl px-4 font-bold text-acento">
             Editar
           </Link>
-          <Boton variante="secundario" onClick={descargar} disabled={!envios.data?.length}>
-            Descargar CSV
+          <Boton variante="secundario" onClick={descargar} disabled={!vistos.length}>
+            {vistos.length === todos.length ? 'Descargar CSV' : `Descargar CSV (${vistos.length})`}
           </Boton>
         </div>
       </header>
 
-      <Tarjeta titulo={plural(r.envios, 'respuesta', 'respuestas')}>
+      {todos.length >= TOPE_ENVIOS && (
+        <p className="rounded-2xl bg-amarillo-bg px-4 py-3 text-sm text-amarillo">Se muestran las {TOPE_ENVIOS.toLocaleString('es-DO')} respuestas más recientes; las anteriores no entran en los filtros ni en el resumen.</p>
+      )}
+
+      {todos.length > 0 && (
+        <Tarjeta titulo="Filtrar respuestas">
+          <FiltrosRespuestas filtros={filtros} onCambio={setFiltros} campos={campos} envios={todos} comisiones={comisiones.data ?? []} miComision={miComision} mostrados={vistos.length} />
+        </Tarjeta>
+      )}
+
+      <Tarjeta titulo={plural(vistos.length, 'respuesta', 'respuestas') + (vistos.length !== todos.length ? ` de ${todos.length}` : '')}>
         <div className="flex flex-wrap gap-2">
-          {Object.entries(r.por_rol).map(([k, n]) => (
+          {porRol.map(([k, n]) => (
             <Insignia key={k} tono="acento">
               {ROLES_RESPUESTA[k] ?? k}: {n}
             </Insignia>
           ))}
-          {r.envios === 0 && <p className="text-sm text-ink-3">Todavía nadie ha respondido. Comparte el enlace del formulario.</p>}
+          {porComision.map(([k, n]) => (
+            <button key={k} type="button" onClick={() => setFiltros({ ...filtros, comision: String(k) })} aria-label={`Filtrar por ${nombreCom(k)}`}>
+              <Insignia>
+                {nombreCom(k)}: {n}
+              </Insignia>
+            </button>
+          ))}
+          {todos.length === 0 && <p className="text-sm text-ink-3">Todavía nadie ha respondido. Comparte el enlace del formulario.</p>}
+          {todos.length > 0 && vistos.length === 0 && <p className="text-sm text-ink-3">Ninguna respuesta coincide con esos filtros.</p>}
         </div>
       </Tarjeta>
 
-      {r.campos.map((c) => (
+      {resumenes.map((c) => (
         <Tarjeta key={c.campo_id} titulo={c.etiqueta + (c.activo ? '' : ' (oculta)')}>
           <p className="mb-3 font-cond text-sm text-ink-3">
             {TIPOS_CAMPO[c.tipo].nombre} · {plural(c.respuestas, 'respuesta', 'respuestas')}
@@ -188,10 +225,10 @@ export function ResultadosFormulario() {
       ))}
 
       <Tarjeta titulo="Cada respuesta">
-        {envios.isPending ? (
-          <Cargando filas={3} />
-        ) : !envios.data?.length ? (
+        {!todos.length ? (
           <EstadoVacio titulo="Sin respuestas" />
+        ) : !vistos.length ? (
+          <EstadoVacio titulo="Sin coincidencias">Cambia o quita algún filtro para ver respuestas.</EstadoVacio>
         ) : (
           <Tabla etiqueta="Respuestas recibidas">
             <thead>
@@ -206,7 +243,7 @@ export function ResultadosFormulario() {
               </tr>
             </thead>
             <tbody>
-              {envios.data.map((e) => (
+              {vistos.map((e) => (
                 <tr key={e.id}>
                   <td className="tabular whitespace-nowrap">{fechaHora(e.creado_en)}</td>
                   <td>{ROLES_RESPUESTA[e.rol ?? ''] ?? e.rol}</td>
