@@ -62,6 +62,18 @@ export const textoRespuesta = (v: unknown): string =>
             ? ''
             : String(v)
 
+/** Quién respondió, si el formulario se lo pregunta (un campo de texto con «nombre» o «correo» en la etiqueta). */
+export function identidadDe(e: EnvioMin, campos: CampoMin[]): { nombre: string; correo: string } {
+  const dato = (re: RegExp) => {
+    const c = campos.find((x) => x.tipo === 'texto' && re.test(x.etiqueta))
+    return c ? textoRespuesta(e.respuestas[c.id]).trim() : ''
+  }
+  return { nombre: dato(/nombre/i), correo: dato(/correo|e-?mail/i) }
+}
+
+/** Cuántas preguntas respondió esta llenada. */
+export const respondidas = (e: EnvioMin, campos: CampoMin[]) => campos.filter((c) => !vacia(e.respuestas[c.id])).length
+
 const vacia = (v: unknown) => v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0)
 const esOtroTxt = (x: unknown) => typeof x === 'string' && x.startsWith(PREFIJO_OTRO)
 const minuscula = (s: string) => s.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '')

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Boton } from '@/components/Boton'
 import { Cargando, EstadoError, EstadoVacio } from '@/components/Estados'
-import { Insignia, Tabla, Tarjeta } from '@/components/Ui'
+import { Insignia, Tarjeta } from '@/components/Ui'
 import { useSesion } from '@/features/auth/AuthProvider'
 import { siglaDe, useComisiones } from '@/features/comisiones/api'
 import { fechaHora, plural } from '@/lib/formato'
@@ -10,6 +10,7 @@ import { useEnviosFormulario, useFormulario, type ResumenCampo } from './api'
 import { FiltrosRespuestas } from './FiltrosRespuestas'
 import { FILTROS_VACIOS, filtrar, resumir, textoRespuesta as texto, type CampoMin, type Filtros } from './filtrarRespuestas'
 import { RespuestaIndividual } from './RespuestaIndividual'
+import { RespuestasPorPersona } from './RespuestasPorPersona'
 import { ROLES_RESPUESTA, TIPOS_CAMPO, rutaFormularios } from './tipos'
 
 const num = (v: unknown) => (typeof v === 'number' || typeof v === 'string' ? Number(v) : 0)
@@ -183,8 +184,8 @@ export function ResultadosFormulario() {
           <Link to={`/formularios/${id}`} className="inline-flex min-h-12 items-center rounded-2xl px-4 font-bold text-acento">
             Editar
           </Link>
-          <Boton variante="primario" onClick={() => setAbierta(vistos[0].id)} disabled={!vistos.length}>
-            Ver una por una
+          <Boton variante="primario" onClick={() => document.getElementById('respuestas-por-persona')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} disabled={!vistos.length}>
+            Ir a respuestas por persona
           </Boton>
           <Boton variante="secundario" onClick={descargar} disabled={!vistos.length}>
             {vistos.length === todos.length ? 'Descargar CSV' : `Descargar CSV (${vistos.length})`}
@@ -230,57 +231,26 @@ export function ResultadosFormulario() {
         </Tarjeta>
       ))}
 
-      <Tarjeta
-        titulo="Cada respuesta"
-        accion={
-          vistos.length > 0 ? (
-            <Boton variante="secundario" onClick={() => setAbierta(vistos[0].id)}>
-              Ver una por una
-            </Boton>
-          ) : undefined
-        }
-      >
-        {!todos.length ? (
-          <EstadoVacio titulo="Sin respuestas" />
-        ) : !vistos.length ? (
-          <EstadoVacio titulo="Sin coincidencias">Cambia o quita algún filtro para ver respuestas.</EstadoVacio>
-        ) : (
-          <Tabla etiqueta="Respuestas recibidas">
-            <thead>
-              <tr>
-                <th>
-                  <span className="sr-only">Abrir</span>
-                </th>
-                <th>Fecha</th>
-                <th>Rol</th>
-                <th>Comisión</th>
-                <th>Sesión o taller</th>
-                {campos.map((c) => (
-                  <th key={c.id}>{c.etiqueta}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {vistos.map((e, n) => (
-                <tr key={e.id}>
-                  <td>
-                    <Boton variante="fantasma" onClick={() => setAbierta(e.id)} aria-label={`Ver la respuesta ${n + 1} completa`}>
-                      Ver
-                    </Boton>
-                  </td>
-                  <td className="tabular whitespace-nowrap">{fechaHora(e.creado_en)}</td>
-                  <td>{ROLES_RESPUESTA[e.rol ?? ''] ?? e.rol}</td>
-                  <td>{nombreCom(e.comision_id)}</td>
-                  <td>{e.referencia}</td>
-                  {campos.map((c) => (
-                    <td key={c.id}>{texto(e.respuestas[c.id])}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </Tabla>
-        )}
-      </Tarjeta>
+      <div id="respuestas-por-persona" className="scroll-mt-4">
+        <Tarjeta
+          titulo={`Respuestas por persona${vistos.length ? ` (${vistos.length})` : ''}`}
+          accion={
+            vistos.length > 0 ? (
+              <Boton variante="secundario" onClick={() => setAbierta(vistos[0].id)}>
+                Ver una por una
+              </Boton>
+            ) : undefined
+          }
+        >
+          {!todos.length ? (
+            <EstadoVacio titulo="Sin respuestas" />
+          ) : !vistos.length ? (
+            <EstadoVacio titulo="Sin coincidencias">Cambia o quita algún filtro para ver respuestas.</EstadoVacio>
+          ) : (
+            <RespuestasPorPersona envios={vistos} campos={campos} comision={nombreCom} onAbrir={setAbierta} />
+          )}
+        </Tarjeta>
+      </div>
 
       <RespuestaIndividual envios={vistos} idActual={abierta} campos={campos} comision={nombreCom} onCambiar={setAbierta} onCerrar={() => setAbierta(null)} />
     </div>

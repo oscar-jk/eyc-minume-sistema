@@ -174,25 +174,38 @@ export function useResultados(id: string | undefined) {
   })
 }
 
-/** Respuestas una por una (para la tabla y la descarga). */
+/** Respuestas una por una (para los resúmenes, las tarjetas y la descarga). */
+export async function cargarEnvios(id: string) {
+  const envios = datos(
+    await supabase.from('formulario_envios').select('id, rol, comision_id, referencia, creado_en').eq('formulario_id', id).order('creado_en', { ascending: false }).limit(2000),
+  )
+  const porEnvio = new Map<string, Record<string, unknown>>()
+  // Por tandas, para no pasarse del largo de la dirección. Cada consulta devuelve como máximo 1000 filas
+  // (un formulario de 60 preguntas con 150 envíos son 9000), así que se pide por páginas con orden fijo.
+  const PAGINA = 1000
+  const tanda = async (ids: string[]) => {
+    const filas: { envio_id: string; campo_id: string; valor: unknown }[] = []
+    for (let desde = 0; ; desde += PAGINA) {
+      const p = datos(
+        await supabase.from('formulario_respuestas').select('envio_id, campo_id, valor').in('envio_id', ids).order('envio_id').order('campo_id').range(desde, desde + PAGINA - 1),
+      )
+      filas.push(...p)
+      if (p.length < PAGINA) return filas
+    }
+  }
+  const tandas: string[][] = []
+  for (let i = 0; i < envios.length; i += 100) tandas.push(envios.slice(i, i + 100).map((x) => x.id))
+  for (const filas of await Promise.all(tandas.map(tanda))) {
+    for (const x of filas) porEnvio.set(x.envio_id, { ...(porEnvio.get(x.envio_id) ?? {}), [x.campo_id]: x.valor })
+  }
+  return envios.map((x) => ({ ...x, respuestas: porEnvio.get(x.id) ?? {} }))
+}
+
 export function useEnviosFormulario(id: string | undefined) {
   return useQuery({
     queryKey: ['formularios', 'envios', id],
     enabled: !!id,
-    queryFn: async () => {
-      const envios = datos(
-        await supabase.from('formulario_envios').select('id, rol, comision_id, referencia, creado_en').eq('formulario_id', id!).order('creado_en', { ascending: false }).limit(2000),
-      )
-      const porEnvio = new Map<string, Record<string, unknown>>()
-      // Por tandas, para no pasarse del largo de la dirección.
-      for (let i = 0; i < envios.length; i += 150) {
-        const ids = envios.slice(i, i + 150).map((x) => x.id)
-        for (const x of datos(await supabase.from('formulario_respuestas').select('envio_id, campo_id, valor').in('envio_id', ids))) {
-          porEnvio.set(x.envio_id, { ...(porEnvio.get(x.envio_id) ?? {}), [x.campo_id]: x.valor })
-        }
-      }
-      return envios.map((x) => ({ ...x, respuestas: porEnvio.get(x.id) ?? {} }))
-    },
+    queryFn: () => cargarEnvios(id!),
   })
 }
 

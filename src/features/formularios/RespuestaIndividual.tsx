@@ -3,7 +3,7 @@ import { Boton } from '@/components/Boton'
 import { Modal } from '@/components/Modal'
 import { Insignia } from '@/components/Ui'
 import { fechaHora } from '@/lib/formato'
-import { textoRespuesta, type CampoMin, type EnvioMin } from './filtrarRespuestas'
+import { identidadDe, textoRespuesta, type CampoMin, type EnvioMin } from './filtrarRespuestas'
 import { ROLES_RESPUESTA, TIPOS_CAMPO } from './tipos'
 
 /** Una sola llenada del formulario, completa, con flechas para pasar a la anterior o a la siguiente (dentro de lo filtrado). */
@@ -24,6 +24,7 @@ export function RespuestaIndividual({
 }) {
   const i = idActual ? envios.findIndex((e) => e.id === idActual) : -1
   const e = i >= 0 ? envios[i] : null
+  const quien = e ? identidadDe(e, campos) : { nombre: '', correo: '' }
   const ir = (d: number) => {
     const n = envios[i + d]
     if (n) onCambiar(n.id)
@@ -59,6 +60,12 @@ export function RespuestaIndividual({
     >
       {e && (
         <div className="flex flex-col gap-4">
+          {(quien.nombre || quien.correo) && (
+            <div>
+              {quien.nombre && <p className="break-words text-lg font-extrabold leading-tight">{quien.nombre}</p>}
+              {quien.correo && <p className="break-all text-sm text-ink-3">{quien.correo}</p>}
+            </div>
+          )}
           <div className="flex flex-wrap gap-2">
             <Insignia>{fechaHora(e.creado_en)}</Insignia>
             {e.rol && <Insignia tono="acento">{ROLES_RESPUESTA[e.rol] ?? e.rol}</Insignia>}
